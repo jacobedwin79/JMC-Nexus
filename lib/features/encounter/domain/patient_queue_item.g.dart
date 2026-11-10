@@ -13,6 +13,9 @@ _PatientQueueItem _$PatientQueueItemFromJson(Map<String, dynamic> json) =>
       tokenNumber: (json['tokenNumber'] as num).toInt(),
       patientName: json['patientName'] as String,
       age: (json['age'] as num).toInt(),
+      dateOfBirth: json['dateOfBirth'] == null
+          ? null
+          : DateTime.parse(json['dateOfBirth'] as String),
       gender: json['gender'] as String,
       phone: json['phone'] as String?,
       vitals: json['vitals'] as Map<String, dynamic>? ?? const {},
@@ -37,6 +40,7 @@ _PatientQueueItem _$PatientQueueItemFromJson(Map<String, dynamic> json) =>
           ? null
           : DateTime.parse(json['completionTime'] as String),
       compiledPrescriptionJson: json['compiledPrescriptionJson'] as String?,
+      overrideReason: json['overrideReason'] as String?,
     );
 
 Map<String, dynamic> _$PatientQueueItemToJson(
@@ -47,6 +51,7 @@ Map<String, dynamic> _$PatientQueueItemToJson(
   'tokenNumber': instance.tokenNumber,
   'patientName': instance.patientName,
   'age': instance.age,
+  'dateOfBirth': instance.dateOfBirth?.toIso8601String(),
   'gender': instance.gender,
   'phone': instance.phone,
   'vitals': instance.vitals,
@@ -59,4 +64,5 @@ Map<String, dynamic> _$PatientQueueItemToJson(
   'consultationStartTime': instance.consultationStartTime?.toIso8601String(),
   'completionTime': instance.completionTime?.toIso8601String(),
   'compiledPrescriptionJson': instance.compiledPrescriptionJson,
+  'overrideReason': instance.overrideReason,
 };

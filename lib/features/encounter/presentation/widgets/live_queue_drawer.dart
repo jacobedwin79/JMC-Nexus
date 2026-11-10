@@ -37,9 +37,7 @@ class LiveQueueDrawer extends ConsumerWidget {
         width: 64,
         decoration: const BoxDecoration(
           color: Colors.white,
-          border: Border(
-            right: BorderSide(color: AppTheme.borderLight),
-          ),
+          border: Border(right: BorderSide(color: AppTheme.borderLight)),
         ),
         child: Column(
           children: [
@@ -63,7 +61,9 @@ class LiveQueueDrawer extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: queueState.hasOverdue ? AppTheme.slaOverdue : AppTheme.primaryBlue,
+                  color: queueState.hasOverdue
+                      ? AppTheme.slaOverdue
+                      : AppTheme.primaryBlue,
                 ),
               ),
             ),
@@ -77,19 +77,28 @@ class LiveQueueDrawer extends ConsumerWidget {
                   final isOverdue = patient.isOverdue();
 
                   return InkWell(
-                    onTap: () => ref.read(encounterProvider.notifier).loadPatient(patient),
+                    onTap: () => ref
+                        .read(encounterProvider.notifier)
+                        .loadPatient(patient),
                     child: Container(
-                      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                      margin: const EdgeInsets.symmetric(
+                        vertical: 4,
+                        horizontal: 8,
+                      ),
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
                         color: isSelected
                             ? AppTheme.primaryBlue
-                            : (isOverdue ? AppTheme.slaOverdue.withValues(alpha: 0.1) : Colors.white),
+                            : (isOverdue
+                                  ? AppTheme.slaOverdue.withValues(alpha: 0.1)
+                                  : Colors.white),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: isSelected
                               ? AppTheme.primaryBlue
-                              : (isOverdue ? AppTheme.slaOverdue : AppTheme.borderLight),
+                              : (isOverdue
+                                    ? AppTheme.slaOverdue
+                                    : AppTheme.borderLight),
                           width: isOverdue ? 1.5 : 1,
                         ),
                       ),
@@ -101,7 +110,9 @@ class LiveQueueDrawer extends ConsumerWidget {
                           fontWeight: FontWeight.w800,
                           color: isSelected
                               ? Colors.white
-                              : (isOverdue ? AppTheme.slaOverdue : AppTheme.textPrimary),
+                              : (isOverdue
+                                    ? AppTheme.slaOverdue
+                                    : AppTheme.textPrimary),
                         ),
                       ),
                     ),
@@ -118,9 +129,7 @@ class LiveQueueDrawer extends ConsumerWidget {
       width: 320,
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(
-          right: BorderSide(color: AppTheme.borderLight),
-        ),
+        border: Border(right: BorderSide(color: AppTheme.borderLight)),
       ),
       child: Column(
         children: [
@@ -136,15 +145,25 @@ class LiveQueueDrawer extends ConsumerWidget {
                 Expanded(
                   child: Row(
                     children: [
-                      const Icon(LucideIcons.users, size: 18, color: AppTheme.primaryBlue),
+                      const Icon(
+                        LucideIcons.users,
+                        size: 18,
+                        color: AppTheme.primaryBlue,
+                      ),
                       const SizedBox(width: 8),
                       const Text(
                         'Waiting Queue',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       const SizedBox(width: 6),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.primaryBlue.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(10),
@@ -184,7 +203,11 @@ class LiveQueueDrawer extends ConsumerWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(LucideIcons.alertTriangle, color: AppTheme.slaOverdue, size: 16),
+                  const Icon(
+                    LucideIcons.alertTriangle,
+                    color: AppTheme.slaOverdue,
+                    size: 16,
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
@@ -208,11 +231,19 @@ class LiveQueueDrawer extends ConsumerWidget {
               color: Colors.amber.shade50,
               child: Row(
                 children: [
-                  const Icon(LucideIcons.stethoscope, size: 13, color: Colors.amber),
+                  const Icon(
+                    LucideIcons.stethoscope,
+                    size: 13,
+                    color: Colors.amber,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     'IN CONSULTATION (${queueState.inConsultationPatients.length})',
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.amber.shade900),
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.amber.shade900,
+                    ),
                   ),
                 ],
               ),
@@ -221,54 +252,85 @@ class LiveQueueDrawer extends ConsumerWidget {
               final isSelected = activePatient?.id == patient.id;
               return Container(
                 margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppTheme.primaryBlue.withValues(alpha: 0.08) : Colors.amber.shade50,
+                  color: isSelected
+                      ? AppTheme.primaryBlue.withValues(alpha: 0.08)
+                      : Colors.amber.shade50,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: isSelected ? AppTheme.primaryBlue : Colors.amber.shade300),
+                  border: Border.all(
+                    color: isSelected
+                        ? AppTheme.primaryBlue
+                        : Colors.amber.shade300,
+                  ),
                 ),
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.amber.shade800,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
                         '#${patient.tokenNumber}',
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         patient.patientName,
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     InkWell(
-                      onTap: () => ref.read(encounterProvider.notifier).loadPatient(patient),
+                      onTap: () => ref
+                          .read(encounterProvider.notifier)
+                          .loadPatient(patient),
                       child: Text(
                         isSelected ? 'Active' : 'Resume',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: isSelected ? AppTheme.primaryBlue : Colors.amber.shade900,
+                          color: isSelected
+                              ? AppTheme.primaryBlue
+                              : Colors.amber.shade900,
                         ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     IconButton(
-                      icon: const Icon(LucideIcons.undo2, size: 14, color: Colors.grey),
+                      icon: const Icon(
+                        LucideIcons.undo2,
+                        size: 14,
+                        color: Colors.grey,
+                      ),
                       tooltip: 'Release back to Waiting queue',
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                       onPressed: () async {
-                        await ref.read(appDatabaseProvider).releaseConsultation(patient.id);
+                        await ref
+                            .read(appDatabaseProvider)
+                            .releaseConsultation(patient.id);
                         if (isSelected) {
-                          ref.read(encounterProvider.notifier).clearEncounter(releaseToQueue: false);
+                          ref
+                              .read(encounterProvider.notifier)
+                              .clearEncounter(releaseToQueue: false);
                         }
                       },
                     ),
@@ -286,17 +348,27 @@ class LiveQueueDrawer extends ConsumerWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(LucideIcons.checkCircle2, size: 40, color: Colors.grey.shade300),
+                        Icon(
+                          LucideIcons.checkCircle2,
+                          size: 40,
+                          color: Colors.grey.shade300,
+                        ),
                         const SizedBox(height: 8),
                         const Text(
                           'Waiting queue is empty',
-                          style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppTheme.textSecondary,
+                          ),
                         ),
                       ],
                     ),
                   )
                 : ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
                     itemCount: waitingList.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 6),
                     itemBuilder: (context, index) {
@@ -316,7 +388,9 @@ class LiveQueueDrawer extends ConsumerWidget {
                       }
 
                       return InkWell(
-                        onTap: () => ref.read(encounterProvider.notifier).loadPatient(patient),
+                        onTap: () => ref
+                            .read(encounterProvider.notifier)
+                            .loadPatient(patient),
                         borderRadius: BorderRadius.circular(10),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 150),
@@ -324,7 +398,11 @@ class LiveQueueDrawer extends ConsumerWidget {
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? AppTheme.primaryBlue.withValues(alpha: 0.08)
-                                : (isOverdue ? AppTheme.slaOverdue.withValues(alpha: 0.04) : Colors.white),
+                                : (isOverdue
+                                      ? AppTheme.slaOverdue.withValues(
+                                          alpha: 0.04,
+                                        )
+                                      : Colors.white),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color: cardBorder,
@@ -335,15 +413,23 @@ class LiveQueueDrawer extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Row(
                                     children: [
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 7,
+                                          vertical: 3,
+                                        ),
                                         decoration: BoxDecoration(
-                                          color: isOverdue ? AppTheme.slaOverdue : AppTheme.primaryBlue,
-                                          borderRadius: BorderRadius.circular(6),
+                                          color: isOverdue
+                                              ? AppTheme.slaOverdue
+                                              : AppTheme.primaryBlue,
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
                                         ),
                                         child: Text(
                                           '#${patient.tokenNumber}',
@@ -361,7 +447,9 @@ class LiveQueueDrawer extends ConsumerWidget {
                                           patient.patientName,
                                           style: TextStyle(
                                             fontSize: 13,
-                                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                                            fontWeight: isSelected
+                                                ? FontWeight.w800
+                                                : FontWeight.w600,
                                             color: AppTheme.textPrimary,
                                           ),
                                           maxLines: 1,
@@ -380,8 +468,11 @@ class LiveQueueDrawer extends ConsumerWidget {
                               Row(
                                 children: [
                                   Text(
-                                    '${patient.age}Y/${patient.gender}',
-                                    style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                                    '${patient.compactAgeDisplay}/${patient.gender}',
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: AppTheme.textSecondary,
+                                    ),
                                   ),
                                   if (vitals.bpSys != null) ...[
                                     const SizedBox(width: 8),
@@ -390,7 +481,9 @@ class LiveQueueDrawer extends ConsumerWidget {
                                       style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w600,
-                                        color: vitals.isHypertensive ? AppTheme.slaOverdue : AppTheme.textSecondary,
+                                        color: vitals.isHypertensive
+                                            ? AppTheme.slaOverdue
+                                            : AppTheme.textSecondary,
                                       ),
                                     ),
                                   ],

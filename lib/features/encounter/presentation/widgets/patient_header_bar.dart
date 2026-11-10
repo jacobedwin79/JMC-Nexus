@@ -47,11 +47,17 @@ class PatientHeaderBar extends ConsumerWidget {
                     children: [
                       Row(
                         children: [
-                          const Icon(LucideIcons.history, color: AppTheme.primaryBlue),
+                          const Icon(
+                            LucideIcons.history,
+                            color: AppTheme.primaryBlue,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             'Past Visit History ($patientId)',
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -65,7 +71,9 @@ class PatientHeaderBar extends ConsumerWidget {
                   if (history.isEmpty)
                     const Expanded(
                       child: Center(
-                        child: Text('No previous completed visits found for this patient.'),
+                        child: Text(
+                          'No previous completed visits found for this patient.',
+                        ),
                       ),
                     )
                   else
@@ -76,7 +84,9 @@ class PatientHeaderBar extends ConsumerWidget {
                         itemBuilder: (context, index) {
                           final item = history[index];
                           final completedAt = item.completionTime != null
-                              ? DateFormat('dd MMM yyyy, h:mm a').format(item.completionTime!.toLocal())
+                              ? DateFormat(
+                                  'dd MMM yyyy, h:mm a',
+                                ).format(item.completionTime!.toLocal())
                               : 'Date unknown';
                           return Card(
                             margin: const EdgeInsets.only(bottom: 12),
@@ -86,15 +96,21 @@ class PatientHeaderBar extends ConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         'Visit #Token ${item.tokenNumber}',
-                                        style: const TextStyle(fontWeight: FontWeight.bold),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                       Text(
                                         completedAt,
-                                        style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: AppTheme.textSecondary,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -217,7 +233,10 @@ class PatientHeaderBar extends ConsumerWidget {
               children: [
                 // Token Badge
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.primaryBlue,
                     borderRadius: BorderRadius.circular(10),
@@ -226,11 +245,19 @@ class PatientHeaderBar extends ConsumerWidget {
                     children: [
                       const Text(
                         'TOKEN',
-                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white70),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white70,
+                        ),
                       ),
                       Text(
                         '#${patient.tokenNumber}',
-                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white),
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                        ),
                       ),
                     ],
                   ),
@@ -256,9 +283,12 @@ class PatientHeaderBar extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          if (patient.age < 12)
+                          if (patient.calculatedAge < 12)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.blue.shade50,
                                 borderRadius: BorderRadius.circular(6),
@@ -266,20 +296,33 @@ class PatientHeaderBar extends ConsumerWidget {
                               ),
                               child: const Text(
                                 'Paediatric',
-                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.blue),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                ),
                               ),
                             )
-                          else if (patient.age >= 65)
+                          else if (patient.calculatedAge >= 65)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.purple.shade50,
                                 borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: Colors.purple.shade300),
+                                border: Border.all(
+                                  color: Colors.purple.shade300,
+                                ),
                               ),
                               child: const Text(
                                 'Geriatric',
-                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.purple),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.purple,
+                                ),
                               ),
                             ),
                           const SizedBox(width: 8),
@@ -293,27 +336,49 @@ class PatientHeaderBar extends ConsumerWidget {
                       Row(
                         children: [
                           Text(
-                            '${patient.patientId != null && patient.patientId!.trim().isNotEmpty ? "MRN: ${patient.patientId} • " : ""}${patient.age} Yrs • ${patient.gender == "M" ? "Male" : (patient.gender == "F" ? "Female" : "Other")}${patient.phone != null ? " • ${patient.phone}" : ""}',
-                            style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
+                            '${patient.patientId != null && patient.patientId!.trim().isNotEmpty ? "MRN: ${patient.patientId} • " : ""}${patient.dynamicAgeDisplay} • ${patient.gender == "M" ? "Male" : (patient.gender == "F" ? "Female" : "Other")}${patient.phone != null ? " • ${patient.phone}" : ""}',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppTheme.textSecondary,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                          if (patient.patientId != null && patient.patientId!.trim().isNotEmpty) ...[
+                          if (patient.patientId != null &&
+                              patient.patientId!.trim().isNotEmpty) ...[
                             const SizedBox(width: 8),
                             InkWell(
-                              onTap: () => _showVisitHistorySheet(context, ref, patient.patientId!),
+                              onTap: () => _showVisitHistorySheet(
+                                context,
+                                ref,
+                                patient.patientId!,
+                              ),
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                                  color: AppTheme.primaryBlue.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: const Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(LucideIcons.history, size: 12, color: AppTheme.primaryBlue),
+                                    Icon(
+                                      LucideIcons.history,
+                                      size: 12,
+                                      color: AppTheme.primaryBlue,
+                                    ),
                                     SizedBox(width: 4),
                                     Text(
                                       'Past Rx',
-                                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.primaryBlue),
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppTheme.primaryBlue,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -331,15 +396,36 @@ class PatientHeaderBar extends ConsumerWidget {
                   Row(
                     children: [
                       if (vitals.bpSys != null)
-                        _buildVitalCard('BP', vitals.bpDisplay, vitals.isHypertensiveForAge(patient.age)),
+                        _buildVitalCard(
+                          'BP',
+                          vitals.bpDisplay,
+                          vitals.isHypertensiveForAge(patient.age),
+                        ),
                       if (vitals.pulse != null)
-                        _buildVitalCard('Pulse', vitals.pulseDisplay, vitals.isTachycardicForAge(patient.age) || vitals.isBradycardicForAge(patient.age)),
+                        _buildVitalCard(
+                          'Pulse',
+                          vitals.pulseDisplay,
+                          vitals.isTachycardicForAge(patient.age) ||
+                              vitals.isBradycardicForAge(patient.age),
+                        ),
                       if (vitals.spo2 != null)
-                        _buildVitalCard('SpO2', vitals.spo2Display, vitals.isHypoxemic),
+                        _buildVitalCard(
+                          'SpO2',
+                          vitals.spo2Display,
+                          vitals.isHypoxemic,
+                        ),
                       if (vitals.temp != null)
-                        _buildVitalCard('Temp', vitals.tempDisplay, vitals.isFebrile),
+                        _buildVitalCard(
+                          'Temp',
+                          vitals.tempDisplay,
+                          vitals.isFebrile,
+                        ),
                       if (vitals.rbs != null)
-                        _buildVitalCard('RBS', vitals.rbsDisplay, vitals.isHypoglycemic || vitals.isHyperglycemic),
+                        _buildVitalCard(
+                          'RBS',
+                          vitals.rbsDisplay,
+                          vitals.isHypoglycemic || vitals.isHyperglycemic,
+                        ),
                       if (vitals.weight != null)
                         _buildVitalCard('Weight', vitals.weightDisplay, false),
                     ],
@@ -351,7 +437,10 @@ class PatientHeaderBar extends ConsumerWidget {
 
           // Allergies & Pregnancy Alert Strip
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 14.0,
+              vertical: 6.0,
+            ),
             color: encounter.allergies.isNotEmpty
                 ? AppTheme.emergencyRed.withValues(alpha: 0.1)
                 : Colors.grey.shade50,
@@ -360,7 +449,9 @@ class PatientHeaderBar extends ConsumerWidget {
                 Icon(
                   LucideIcons.shieldAlert,
                   size: 15,
-                  color: encounter.allergies.isNotEmpty ? AppTheme.emergencyRed : Colors.grey.shade600,
+                  color: encounter.allergies.isNotEmpty
+                      ? AppTheme.emergencyRed
+                      : Colors.grey.shade600,
                 ),
                 const SizedBox(width: 6),
                 Expanded(
@@ -371,7 +462,9 @@ class PatientHeaderBar extends ConsumerWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color: encounter.allergies.isNotEmpty ? AppTheme.emergencyRed : Colors.grey.shade700,
+                      color: encounter.allergies.isNotEmpty
+                          ? AppTheme.emergencyRed
+                          : Colors.grey.shade700,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -379,14 +472,21 @@ class PatientHeaderBar extends ConsumerWidget {
                 if (encounter.isPregnant || encounter.lmp != null) ...[
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.purple.shade100,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
                       'Pregnant ${encounter.lmp != null ? "• LMP: ${encounter.lmp}" : ""}',
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.purple.shade800),
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purple.shade800,
+                      ),
                     ),
                   ),
                 ],
@@ -398,16 +498,27 @@ class PatientHeaderBar extends ConsumerWidget {
 
           // Comorbidities Selector Strip
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 14.0,
+              vertical: 10.0,
+            ),
             child: Row(
               children: [
                 const Row(
                   children: [
-                    Icon(LucideIcons.heartPulse, size: 16, color: AppTheme.primaryAccent),
+                    Icon(
+                      LucideIcons.heartPulse,
+                      size: 16,
+                      color: AppTheme.primaryAccent,
+                    ),
                     SizedBox(width: 6),
                     Text(
                       'Comorbidities:',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.textSecondary),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -423,14 +534,18 @@ class PatientHeaderBar extends ConsumerWidget {
                       ),
                       error: (err, _) => Text(
                         'Could not load comorbidities',
-                        style: TextStyle(fontSize: 12, color: AppTheme.slaOverdue),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.slaOverdue,
+                        ),
                       ),
                       data: (comorbidities) {
                         return Row(
                           children: [
                             ...comorbidities.map((c) {
-                              final isSelected =
-                                  encounter.selectedComorbidityIds.contains(c.id);
+                              final isSelected = encounter
+                                  .selectedComorbidityIds
+                                  .contains(c.id);
                               return Padding(
                                 padding: const EdgeInsets.only(right: 6.0),
                                 child: ClinicalChip(
@@ -444,7 +559,8 @@ class PatientHeaderBar extends ConsumerWidget {
                               );
                             }),
                             InkWell(
-                              onTap: () => _showAddCustomComorbidityDialog(context, ref),
+                              onTap: () =>
+                                  _showAddCustomComorbidityDialog(context, ref),
                               borderRadius: BorderRadius.circular(20),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
@@ -454,13 +570,18 @@ class PatientHeaderBar extends ConsumerWidget {
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: AppTheme.primaryAccent),
+                                  border: Border.all(
+                                    color: AppTheme.primaryAccent,
+                                  ),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: const [
-                                    Icon(LucideIcons.plus,
-                                        size: 12, color: AppTheme.primaryAccent),
+                                    Icon(
+                                      LucideIcons.plus,
+                                      size: 12,
+                                      color: AppTheme.primaryAccent,
+                                    ),
                                     SizedBox(width: 4),
                                     Text(
                                       'Custom',
@@ -502,7 +623,11 @@ class PatientHeaderBar extends ConsumerWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(LucideIcons.alertOctagon, color: AppTheme.slaOverdue, size: 18),
+                        const Icon(
+                          LucideIcons.alertOctagon,
+                          color: AppTheme.slaOverdue,
+                          size: 18,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -531,7 +656,9 @@ class PatientHeaderBar extends ConsumerWidget {
       margin: const EdgeInsets.only(left: 6),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isAlert ? AppTheme.slaOverdue.withValues(alpha: 0.1) : AppTheme.surfaceBackground,
+        color: isAlert
+            ? AppTheme.slaOverdue.withValues(alpha: 0.1)
+            : AppTheme.surfaceBackground,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: isAlert ? AppTheme.slaOverdue : AppTheme.borderLight,

@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/database/database_mappers.dart';
 import '../../../core/database/database_provider.dart';
+import '../../../core/utils/age_calculator.dart';
 import '../../encounter/domain/clinical_models.dart';
 import '../../encounter/domain/patient_queue_item.dart';
 
@@ -13,6 +14,7 @@ class ReceptionFormState {
   final String? patientId;
   final String patientName;
   final int? age;
+  final DateTime? dateOfBirth;
   final String gender;
   final String? phone;
   final PatientVitals vitals;
@@ -29,6 +31,7 @@ class ReceptionFormState {
     this.patientId,
     this.patientName = '',
     this.age,
+    this.dateOfBirth,
     this.gender = 'M',
     this.phone,
     this.vitals = const PatientVitals(),
@@ -41,13 +44,42 @@ class ReceptionFormState {
     this.lastGeneratedTokenMessage,
   });
 
-  bool get isValid => patientName.trim().isNotEmpty && age != null && age! > 0;
+  /// Dynamic age display based on Date of Birth
+  String get dynamicAgeDisplay {
+    if (dateOfBirth != null) {
+      return AgeCalculator.formatAge(dateOfBirth!);
+    }
+    if (age != null && age! > 0) {
+      return '$age ${age == 1 ? "year" : "years"}';
+    }
+    return '';
+  }
+
+  /// Calculates numeric age in years
+  int? get effectiveAgeInYears {
+    if (dateOfBirth != null) {
+      return AgeCalculator.calculateYears(dateOfBirth!);
+    }
+    return age;
+  }
+
+  /// Whether patient is paediatric (< 12 years)
+  bool get isPaediatric => (effectiveAgeInYears ?? 100) < 12;
+
+  bool get isValid {
+    final hasName = patientName.trim().isNotEmpty;
+    final hasAgeOrDob = dateOfBirth != null || (age != null && age! > 0);
+    final hasWeightIfPediatric =
+        !isPaediatric || (vitals.weight != null && vitals.weight! > 0);
+    return hasName && hasAgeOrDob && hasWeightIfPediatric;
+  }
 
   ReceptionFormState copyWith({
     int? nextTokenNumber,
     String? patientId,
     String? patientName,
     int? age,
+    DateTime? dateOfBirth,
     String? gender,
     String? phone,
     PatientVitals? vitals,
@@ -63,12 +95,14 @@ class ReceptionFormState {
     bool clearPatientId = false,
     bool clearPhone = false,
     bool clearLmp = false,
+    bool clearDob = false,
   }) {
     return ReceptionFormState(
       nextTokenNumber: nextTokenNumber ?? this.nextTokenNumber,
       patientId: clearPatientId ? null : (patientId ?? this.patientId),
       patientName: patientName ?? this.patientName,
       age: age ?? this.age,
+      dateOfBirth: clearDob ? null : (dateOfBirth ?? this.dateOfBirth),
       gender: gender ?? this.gender,
       phone: clearPhone ? null : (phone ?? this.phone),
       vitals: vitals ?? this.vitals,
@@ -114,8 +148,30 @@ class ReceptionNotifier extends Notifier<ReceptionFormState> {
     }
   }
 
+  void setDateOfBirth(DateTime? dob) {
+    if (dob == null) {
+      state = state.copyWith(clearDob: true, clearError: true);
+    } else {
+      final calculatedYears = AgeCalculator.calculateYears(dob);
+      state = state.copyWith(
+        dateOfBirth: dob,
+        age: calculatedYears,
+        clearError: true,
+      );
+    }
+  }
+
   void setAge(int? age) {
-    state = state.copyWith(age: age, clearError: true);
+    if (age == null) {
+      state = state.copyWith(age: null, clearDob: true, clearError: true);
+    } else {
+      final estimatedDob = AgeCalculator.dobFromAgeInYears(age);
+      state = state.copyWith(
+        age: age,
+        dateOfBirth: estimatedDob,
+        clearError: true,
+      );
+    }
   }
 
   void setGender(String gender) {
@@ -151,7 +207,10 @@ class ReceptionNotifier extends Notifier<ReceptionFormState> {
   }
 
   void setWeight(double? val) {
-    state = state.copyWith(vitals: state.vitals.copyWith(weight: val));
+    state = state.copyWith(
+      vitals: state.vitals.copyWith(weight: val),
+      clearError: true,
+    );
   }
 
   void setRbs(int? val) {
@@ -179,6 +238,7 @@ class ReceptionNotifier extends Notifier<ReceptionFormState> {
         rbs: rbs,
         tempIsCelsius: tempIsCelsius ?? state.vitals.tempIsCelsius,
       ),
+      clearError: true,
     );
   }
 
@@ -226,15 +286,14 @@ class ReceptionNotifier extends Notifier<ReceptionFormState> {
   /// Searches prior visits so a returning patient can be reloaded quickly.
   Future<List<PatientQueueItem>> searchPreviousPatients(String query) async {
     final entries = await _db.searchPreviousPatients(query);
-    // De-duplicate to the most recent visit per persistent patient identity.
     final seen = <String>{};
     final results = <PatientQueueItem>[];
     for (final entry in entries) {
       final key = entry.patientId?.trim().isNotEmpty == true
           ? 'pid:${entry.patientId!.trim().toLowerCase()}'
           : (entry.phone?.trim().isNotEmpty == true
-              ? 'ph:${entry.phone!.trim()}'
-              : 'name:${entry.patientName.trim().toLowerCase()}|${entry.age}|${entry.gender}');
+                ? 'ph:${entry.phone!.trim()}'
+                : 'name:${entry.patientName.trim().toLowerCase()}|${entry.age}|${entry.gender}');
       if (seen.add(key)) {
         results.add(entry.toDomain());
       }
@@ -249,6 +308,7 @@ class ReceptionNotifier extends Notifier<ReceptionFormState> {
       patientId: patient.patientId,
       patientName: patient.patientName,
       age: patient.age,
+      dateOfBirth: patient.dateOfBirth,
       gender: patient.gender,
       phone: patient.phone,
       vitals: PatientVitals.fromJson(patient.vitals),
@@ -259,7 +319,6 @@ class ReceptionNotifier extends Notifier<ReceptionFormState> {
     );
   }
 
-  /// Adds a user-defined comorbidity to the local catalog and selects it.
   Future<ComorbidityModel?> addCustomComorbidity(String name) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return null;
@@ -284,9 +343,24 @@ class ReceptionNotifier extends Notifier<ReceptionFormState> {
   }
 
   Future<int?> registerAndGenerateToken() async {
-    if (!state.isValid) {
+    if (state.patientName.trim().isEmpty) {
+      state = state.copyWith(errorMessage: 'Please enter patient name.');
+      return null;
+    }
+
+    if (state.dateOfBirth == null && (state.age == null || state.age! <= 0)) {
       state = state.copyWith(
-        errorMessage: 'Please enter patient name and a valid age.',
+        errorMessage: 'Please enter a valid Date of Birth or age.',
+      );
+      return null;
+    }
+
+    // Pediatric validation rule: Weight is strictly mandatory if calculated age is under 12 years
+    if (state.isPaediatric &&
+        (state.vitals.weight == null || state.vitals.weight! <= 0)) {
+      state = state.copyWith(
+        errorMessage:
+            'Weight is mandatory for paediatric patients under 12 years of age.',
       );
       return null;
     }
@@ -312,8 +386,12 @@ class ReceptionNotifier extends Notifier<ReceptionFormState> {
 
       final assignedPatientId =
           (state.patientId != null && state.patientId!.trim().isNotEmpty)
-              ? state.patientId!.trim()
-              : 'JMC-P-${_uuid.v4().substring(0, 8).toUpperCase()}';
+          ? state.patientId!.trim()
+          : 'JMC-P-${_uuid.v4().substring(0, 8).toUpperCase()}';
+
+      final effectiveAge = state.effectiveAgeInYears ?? 0;
+      final effectiveDob =
+          state.dateOfBirth ?? AgeCalculator.dobFromAgeInYears(effectiveAge);
 
       await _db.insertPatientQueue(
         PatientQueueTableCompanion.insert(
@@ -321,7 +399,8 @@ class ReceptionNotifier extends Notifier<ReceptionFormState> {
           patientId: drift.Value(assignedPatientId),
           tokenNumber: token,
           patientName: state.patientName.trim(),
-          age: state.age!,
+          age: effectiveAge,
+          dateOfBirth: drift.Value(effectiveDob),
           gender: state.gender,
           phone: drift.Value(state.phone?.trim()),
           vitalsJson: drift.Value(vitalsJson),
@@ -339,7 +418,8 @@ class ReceptionNotifier extends Notifier<ReceptionFormState> {
       // Reset form
       state = ReceptionFormState(
         nextTokenNumber: nextToken,
-        lastGeneratedTokenMessage: 'Token #$token successfully generated for ${state.patientName.trim()}!',
+        lastGeneratedTokenMessage:
+            'Token #$token successfully generated for ${state.patientName.trim()}!',
       );
 
       return token;
@@ -358,6 +438,7 @@ class ReceptionNotifier extends Notifier<ReceptionFormState> {
     required int age,
     required String gender,
     required Duration elapsedWait,
+    DateTime? dateOfBirth,
     String? patientId,
     List<String> comorbs = const [],
     PatientVitals vitals = const PatientVitals(),
@@ -368,6 +449,7 @@ class ReceptionNotifier extends Notifier<ReceptionFormState> {
 
     final vitalsJson = vitals.hasAnyVitals ? jsonEncode(vitals.toJson()) : null;
     final comorbsJson = comorbs.isNotEmpty ? jsonEncode(comorbs) : null;
+    final effectiveDob = dateOfBirth ?? AgeCalculator.dobFromAgeInYears(age);
 
     await _db.insertPatientQueue(
       PatientQueueTableCompanion.insert(
@@ -376,6 +458,7 @@ class ReceptionNotifier extends Notifier<ReceptionFormState> {
         tokenNumber: token,
         patientName: name,
         age: age,
+        dateOfBirth: drift.Value(effectiveDob),
         gender: gender,
         phone: const drift.Value('9876543210'),
         vitalsJson: drift.Value(vitalsJson),
@@ -391,4 +474,6 @@ class ReceptionNotifier extends Notifier<ReceptionFormState> {
 }
 
 final receptionProvider =
-    NotifierProvider<ReceptionNotifier, ReceptionFormState>(ReceptionNotifier.new);
+    NotifierProvider<ReceptionNotifier, ReceptionFormState>(
+      ReceptionNotifier.new,
+    );

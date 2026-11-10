@@ -19,9 +19,12 @@ abstract class EncounterState with _$EncounterState {
     @Default({}) Map<String, ExamSystemState> examStates,
     @Default([]) List<String> selectedDiagnosisIds,
     @Default([]) List<PrescriptionItemModel> activePrescription,
+    @Default([]) List<String> investigations,
     @Default('') String generalAdvice,
     int? followUpDays,
     @Default([]) List<SafetyAlert> safetyAlerts,
+    String? overrideReason,
+    @Default(true) bool printDiagnosis,
     @Default(false) bool isLetterheadMode,
     @Default(false) bool isLoading,
     DateTime? lastDraftSavedAt,
@@ -35,20 +38,25 @@ abstract class EncounterState with _$EncounterState {
   bool get hasCriticalSafetyAlert =>
       safetyAlerts.any((alert) => alert.severity == AlertSeverity.critical);
 
-  bool get isPaediatric => (activePatient?.age ?? 100) < 12;
-  bool get isGeriatric => (activePatient?.age ?? 0) >= 65;
+  bool get isPaediatric => (activePatient?.calculatedAge ?? 100) < 12;
+  bool get isGeriatric => (activePatient?.calculatedAge ?? 0) >= 65;
 
   String get compiledComplaintsSummary {
     if (selectedComplaints.isEmpty) return 'No active complaints';
     return selectedComplaints.values
-        .map((e) => e.compiledProse.isNotEmpty ? e.compiledProse : e.complaintName)
+        .map(
+          (e) => e.compiledProse.isNotEmpty ? e.compiledProse : e.complaintName,
+        )
         .join('; ');
   }
 
   String get compiledExamSummary {
     if (examStates.isEmpty) return 'Systemic examination normal';
     return examStates.values
-        .map((e) => '${e.systemName}: ${e.compiledText.isNotEmpty ? e.compiledText : (e.isNormal ? "Normal" : "Abnormal")}')
+        .map(
+          (e) =>
+              '${e.systemName}: ${e.compiledText.isNotEmpty ? e.compiledText : (e.isNormal ? "Normal" : "Abnormal")}',
+        )
         .join(' | ');
   }
 }

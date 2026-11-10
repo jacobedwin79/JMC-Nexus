@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../sync/server_time_service.dart';
 import '../theme/app_theme.dart';
 
 class WaitTimerBadge extends StatefulWidget {
@@ -42,7 +43,7 @@ class _WaitTimerBadgeState extends State<WaitTimerBadge>
 
   void _updateMinutes() {
     setState(() {
-      final now = DateTime.now();
+      final now = ServerTimeService.now;
       final diff = now.difference(widget.entryTime.toLocal()).inMinutes;
       _minutes = diff < 0 ? 0 : diff;
     });
@@ -108,10 +109,7 @@ class _WaitTimerBadgeState extends State<WaitTimerBadge>
           Container(
             width: 6,
             height: 6,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           const SizedBox(width: 5),
           Text(
@@ -132,10 +130,7 @@ class _WaitTimerBadgeState extends State<WaitTimerBadge>
         animation: _pulseController!,
         builder: (context, child) {
           final scale = 1.0 + (_pulseController!.value * 0.05);
-          return Transform.scale(
-            scale: scale,
-            child: child,
-          );
+          return Transform.scale(scale: scale, child: child);
         },
         child: badge,
       );

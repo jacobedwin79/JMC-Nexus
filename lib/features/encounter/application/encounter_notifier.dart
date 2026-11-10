@@ -6,17 +6,20 @@ import '../../../core/database/database_mappers.dart';
 import '../../../core/database/database_provider.dart';
 import '../domain/clinical_models.dart';
 import '../domain/encounter_state.dart';
+import '../domain/gemini_scribe_models.dart';
 import '../domain/patient_queue_item.dart';
 import 'safety_engine.dart';
 
 class EncounterNotifier extends Notifier<EncounterState> {
   static const _uuid = Uuid();
+  static const String appVersion = '1.0.0';
 
   AppDatabase get _db => ref.read(appDatabaseProvider);
 
   List<ComorbidityModel> _comorbiditiesCatalog = [];
   Map<String, DrugModel> _drugsCatalog = {};
   List<ExamSystemModel> _examSystemsCatalog = [];
+  Map<String, DiagnosisModel> _diagnosesCatalog = {};
 
   @override
   EncounterState build() {
@@ -33,6 +36,9 @@ class EncounterNotifier extends Notifier<EncounterState> {
 
     final examSystems = await _db.getAllExaminationSystems();
     _examSystemsCatalog = examSystems.map((e) => e.toDomain()).toList();
+
+    final diagnoses = await _db.getAllDiagnoses();
+    _diagnosesCatalog = {for (final d in diagnoses) d.id: d.toDomain()};
   }
 
   /// 1. Loads a patient from Queue into the active clinical workspace
@@ -65,33 +71,54 @@ class EncounterNotifier extends Notifier<EncounterState> {
     // Pre-populate patient comorbidity IDs, allergies, LMP & Pregnancy
     final initialComorbs = List<String>.from(patient.initialComorbIds);
     final initialAllergies = List<String>.from(patient.allergies);
-    final isPregnant = patient.isPregnant || initialComorbs.contains('comorb_pregnant');
+    final isPregnant =
+        patient.isPregnant || initialComorbs.contains('comorb_pregnant');
 
     // Attempt to restore autosaved draft if present
     Map<String, SelectedComplaintState> restoredComplaints = {};
     Map<String, ExamSystemState> restoredExams = defaultExamStates;
     List<String> restoredDiagnoses = [];
     List<PrescriptionItemModel> restoredRx = [];
+    List<String> restoredInvestigations = [];
     String restoredAdvice = '';
-    int? restoredFollowUp = 3;
+    int? restoredFollowUp; // Explicitly null by default (no hardcoded default)
+    String? restoredOverrideReason;
+    bool restoredPrintDiagnosis = true;
 
-    if (patient.compiledPrescriptionJson != null && patient.compiledPrescriptionJson!.isNotEmpty) {
+    if (patient.compiledPrescriptionJson != null &&
+        patient.compiledPrescriptionJson!.isNotEmpty) {
       try {
-        final decoded = jsonDecode(patient.compiledPrescriptionJson!) as Map<String, dynamic>;
+        final decoded =
+            jsonDecode(patient.compiledPrescriptionJson!)
+                as Map<String, dynamic>;
         if (decoded['isDraft'] == true) {
           if (decoded['diagnoses'] is List) {
             restoredDiagnoses = (decoded['diagnoses'] as List).cast<String>();
           }
           if (decoded['prescription'] is List) {
             restoredRx = (decoded['prescription'] as List)
-                .map((item) => PrescriptionItemModel.fromJson(item as Map<String, dynamic>))
+                .map(
+                  (item) => PrescriptionItemModel.fromJson(
+                    item as Map<String, dynamic>,
+                  ),
+                )
                 .toList();
+          }
+          if (decoded['investigations'] is List) {
+            restoredInvestigations = (decoded['investigations'] as List)
+                .cast<String>();
           }
           if (decoded['advice'] is String) {
             restoredAdvice = decoded['advice'] as String;
           }
           if (decoded['followUpDays'] is int) {
             restoredFollowUp = decoded['followUpDays'] as int;
+          }
+          if (decoded['overrideReason'] is String) {
+            restoredOverrideReason = decoded['overrideReason'] as String;
+          }
+          if (decoded['printDiagnosis'] is bool) {
+            restoredPrintDiagnosis = decoded['printDiagnosis'] as bool;
           }
         }
       } catch (_) {}
@@ -110,8 +137,11 @@ class EncounterNotifier extends Notifier<EncounterState> {
       examStates: restoredExams,
       selectedDiagnosisIds: restoredDiagnoses,
       activePrescription: restoredRx,
+      investigations: restoredInvestigations,
       generalAdvice: restoredAdvice,
       followUpDays: restoredFollowUp,
+      overrideReason: restoredOverrideReason,
+      printDiagnosis: restoredPrintDiagnosis,
       safetyAlerts: const [],
       isLetterheadMode: false,
       isLoading: false,
@@ -167,13 +197,10 @@ class EncounterNotifier extends Notifier<EncounterState> {
   }
 
   /// Adds a user-defined comorbidity to the local catalog and selects it.
-  /// Custom comorbidities carry no built-in contraindications (empty list),
-  /// so they are purely informational until curated later.
   Future<ComorbidityModel?> addCustomComorbidity(String name) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) return null;
 
-    // Avoid duplicate names (case-insensitive).
     final existing = _comorbiditiesCatalog
         .where((c) => c.name.toLowerCase() == trimmed.toLowerCase())
         .firstOrNull;
@@ -204,7 +231,7 @@ class EncounterNotifier extends Notifier<EncounterState> {
     return model;
   }
 
-  /// Reloads the clinical catalogs (e.g. after a custom comorbidity is added).
+  /// Reloads the clinical catalogs
   Future<void> reloadCatalogs() async {
     await _loadCatalogs();
     _runSafetyCheck();
@@ -212,7 +239,9 @@ class EncounterNotifier extends Notifier<EncounterState> {
 
   /// 3. Toggle Presenting Complaint
   void toggleComplaint(PresentingComplaintModel complaint) {
-    final currentMap = Map<String, SelectedComplaintState>.from(state.selectedComplaints);
+    final currentMap = Map<String, SelectedComplaintState>.from(
+      state.selectedComplaints,
+    );
 
     if (currentMap.containsKey(complaint.id)) {
       currentMap.remove(complaint.id);
@@ -228,6 +257,41 @@ class EncounterNotifier extends Notifier<EncounterState> {
     state = state.copyWith(selectedComplaints: currentMap);
   }
 
+  /// Free-Text Fallback: Adds custom complaint and automatically logs unmapped term
+  Future<void> addCustomComplaint(String customName) async {
+    final trimmed = customName.trim();
+    if (trimmed.isEmpty) return;
+
+    final id = 'complaint_custom_${_uuid.v4().substring(0, 8)}';
+    final currentMap = Map<String, SelectedComplaintState>.from(
+      state.selectedComplaints,
+    );
+
+    currentMap[id] = SelectedComplaintState(
+      complaintId: id,
+      complaintName: trimmed,
+      selectedOptions: const {},
+      compiledProse: trimmed,
+    );
+
+    state = state.copyWith(selectedComplaints: currentMap);
+
+    // Automatically log unmapped text so catalog grows organically
+    await _db.logUnmappedTerm(
+      id: _uuid.v4(),
+      category: 'complaint',
+      term: trimmed,
+      encounterId: state.activePatient?.id,
+    );
+  }
+
+  void removeComplaint(String complaintId) {
+    final currentMap = Map<String, SelectedComplaintState>.from(
+      state.selectedComplaints,
+    )..remove(complaintId);
+    state = state.copyWith(selectedComplaints: currentMap);
+  }
+
   /// 4. Sub-Question Option Selection with auto-advancing prose compilation
   void selectSubQuestionOption({
     required String complaintId,
@@ -236,12 +300,18 @@ class EncounterNotifier extends Notifier<EncounterState> {
     required String sentenceTemplate,
     required bool isMultiSelect,
   }) {
-    final currentComplaints = Map<String, SelectedComplaintState>.from(state.selectedComplaints);
+    final currentComplaints = Map<String, SelectedComplaintState>.from(
+      state.selectedComplaints,
+    );
     final complaintState = currentComplaints[complaintId];
     if (complaintState == null) return;
 
-    final currentOptionsMap = Map<String, List<String>>.from(complaintState.selectedOptions);
-    List<String> currentSelected = List<String>.from(currentOptionsMap[subQuestionId] ?? []);
+    final currentOptionsMap = Map<String, List<String>>.from(
+      complaintState.selectedOptions,
+    );
+    List<String> currentSelected = List<String>.from(
+      currentOptionsMap[subQuestionId] ?? [],
+    );
 
     if (isMultiSelect) {
       if (currentSelected.contains(option)) {
@@ -250,7 +320,6 @@ class EncounterNotifier extends Notifier<EncounterState> {
         currentSelected.add(option);
       }
     } else {
-      // Single select: toggle or select
       if (currentSelected.contains(option)) {
         currentSelected.clear();
       } else {
@@ -264,8 +333,10 @@ class EncounterNotifier extends Notifier<EncounterState> {
       currentOptionsMap[subQuestionId] = currentSelected;
     }
 
-    // Compile clinical prose for this complaint
-    final prose = _compileComplaintProse(complaintState.complaintName, currentOptionsMap);
+    final prose = _compileComplaintProse(
+      complaintState.complaintName,
+      currentOptionsMap,
+    );
 
     currentComplaints[complaintId] = complaintState.copyWith(
       selectedOptions: currentOptionsMap,
@@ -275,7 +346,10 @@ class EncounterNotifier extends Notifier<EncounterState> {
     state = state.copyWith(selectedComplaints: currentComplaints);
   }
 
-  String _compileComplaintProse(String complaintName, Map<String, List<String>> optionsMap) {
+  String _compileComplaintProse(
+    String complaintName,
+    Map<String, List<String>> optionsMap,
+  ) {
     if (optionsMap.isEmpty) return complaintName;
 
     final phrases = <String>[];
@@ -295,7 +369,8 @@ class EncounterNotifier extends Notifier<EncounterState> {
     final current = currentMap[systemId];
     if (current == null) return;
 
-    final defaultText = _examSystemsCatalog
+    final defaultText =
+        _examSystemsCatalog
             .where((s) => s.id == systemId)
             .map((s) => s.defaultNormalText)
             .firstOrNull ??
@@ -306,7 +381,9 @@ class EncounterNotifier extends Notifier<EncounterState> {
     currentMap[systemId] = current.copyWith(
       isNormal: willBeNormal,
       selectedAbnormals: willBeNormal ? const [] : current.selectedAbnormals,
-      compiledText: willBeNormal ? defaultText : (current.selectedAbnormals.join(', ')),
+      compiledText: willBeNormal
+          ? defaultText
+          : (current.selectedAbnormals.join(', ')),
     );
 
     state = state.copyWith(examStates: currentMap);
@@ -325,7 +402,8 @@ class EncounterNotifier extends Notifier<EncounterState> {
     }
 
     final isNormal = abnormals.isEmpty;
-    final defaultText = _examSystemsCatalog
+    final defaultText =
+        _examSystemsCatalog
             .where((s) => s.id == systemId)
             .map((s) => s.defaultNormalText)
             .firstOrNull ??
@@ -340,6 +418,21 @@ class EncounterNotifier extends Notifier<EncounterState> {
     state = state.copyWith(examStates: currentMap);
   }
 
+  /// Free-Text Fallback: Adds custom abnormal exam finding and logs unmapped term
+  Future<void> addCustomExamFinding(String systemId, String finding) async {
+    final trimmed = finding.trim();
+    if (trimmed.isEmpty) return;
+
+    toggleExamAbnormalFinding(systemId, trimmed);
+
+    await _db.logUnmappedTerm(
+      id: _uuid.v4(),
+      category: 'examination',
+      term: trimmed,
+      encounterId: state.activePatient?.id,
+    );
+  }
+
   /// 6. Diagnosis Selection & Automatic Protocol Regimen Loading
   Future<void> selectDiagnosis(String diagnosisId) async {
     final currentDiagnoses = List<String>.from(state.selectedDiagnosisIds);
@@ -347,9 +440,10 @@ class EncounterNotifier extends Notifier<EncounterState> {
       currentDiagnoses.add(diagnosisId);
     }
 
-    // Load matching protocol from SQLite
     final protocolEntry = await _db.getProtocolForDiagnosis(diagnosisId);
-    final currentRx = List<PrescriptionItemModel>.from(state.activePrescription);
+    final currentRx = List<PrescriptionItemModel>.from(
+      state.activePrescription,
+    );
     String generalAdvice = state.generalAdvice;
 
     if (protocolEntry != null) {
@@ -358,7 +452,6 @@ class EncounterNotifier extends Notifier<EncounterState> {
       for (final item in domainProtocol.protocolItems) {
         final drug = _drugsCatalog[item.drugId];
         if (drug != null) {
-          // Avoid duplicate drugs
           final alreadyAdded = currentRx.any((rx) => rx.drugId == drug.id);
           if (!alreadyAdded) {
             currentRx.add(
@@ -371,7 +464,8 @@ class EncounterNotifier extends Notifier<EncounterState> {
                 route: drug.defaultRoute,
                 frequency: item.frequencyOverride ?? drug.defaultFrequency,
                 duration: item.durationOverride ?? drug.defaultDuration,
-                instructions: item.instructionsOverride ?? drug.defaultInstructions,
+                instructions:
+                    item.instructionsOverride ?? drug.defaultInstructions,
               ),
             );
           }
@@ -396,8 +490,38 @@ class EncounterNotifier extends Notifier<EncounterState> {
     _runSafetyCheck();
   }
 
+  /// Free-Text Fallback: Adds custom diagnosis and logs unmapped term
+  Future<void> addCustomDiagnosis(String customName) async {
+    final trimmed = customName.trim();
+    if (trimmed.isEmpty) return;
+
+    final id = 'diag_custom_${_uuid.v4().substring(0, 8)}';
+    final model = DiagnosisModel(
+      id: id,
+      name: trimmed,
+      linkedComplaintIds: const [],
+    );
+
+    _diagnosesCatalog[id] = model;
+
+    final currentDiagnoses = List<String>.from(state.selectedDiagnosisIds);
+    if (!currentDiagnoses.contains(id)) {
+      currentDiagnoses.add(id);
+    }
+
+    state = state.copyWith(selectedDiagnosisIds: currentDiagnoses);
+
+    await _db.logUnmappedTerm(
+      id: _uuid.v4(),
+      category: 'diagnosis',
+      term: trimmed,
+      encounterId: state.activePatient?.id,
+    );
+  }
+
   void removeDiagnosis(String diagnosisId) {
-    final current = List<String>.from(state.selectedDiagnosisIds)..remove(diagnosisId);
+    final current = List<String>.from(state.selectedDiagnosisIds)
+      ..remove(diagnosisId);
     state = state.copyWith(selectedDiagnosisIds: current);
   }
 
@@ -427,6 +551,73 @@ class EncounterNotifier extends Notifier<EncounterState> {
     }
   }
 
+  /// "Repeat Last Rx" for returning patients:
+  /// Loads medication regimen from patient's previous completed visit.
+  Future<bool> repeatLastPrescription() async {
+    final patientId = state.activePatient?.patientId;
+    if (patientId == null || patientId.trim().isEmpty) return false;
+
+    final visits = await _db.getVisitHistoryForPatient(patientId);
+    if (visits.isEmpty) return false;
+
+    // Latest completed visit
+    final latestVisit = visits.first;
+    final jsonStr =
+        latestVisit.encounterSnapshotJson ??
+        latestVisit.compiledPrescriptionJson;
+    if (jsonStr == null || jsonStr.isEmpty) return false;
+
+    try {
+      final decoded = jsonDecode(jsonStr) as Map<String, dynamic>;
+      final rxList = decoded['prescription'];
+      if (rxList is List && rxList.isNotEmpty) {
+        final repeatedItems = rxList
+            .map(
+              (item) =>
+                  PrescriptionItemModel.fromJson(item as Map<String, dynamic>),
+            )
+            .toList();
+
+        state = state.copyWith(activePrescription: repeatedItems);
+        _runSafetyCheck();
+        return true;
+      }
+    } catch (_) {}
+
+    return false;
+  }
+
+  /// 8. Dedicated Investigations Module
+  void toggleInvestigation(String investigation) {
+    final current = List<String>.from(state.investigations);
+    final trimmed = investigation.trim();
+    if (trimmed.isEmpty) return;
+
+    if (current.contains(trimmed)) {
+      current.remove(trimmed);
+    } else {
+      current.add(trimmed);
+    }
+    state = state.copyWith(investigations: current);
+  }
+
+  void addCustomInvestigation(String investigation) {
+    final trimmed = investigation.trim();
+    if (trimmed.isEmpty) return;
+
+    final current = List<String>.from(state.investigations);
+    if (!current.contains(trimmed)) {
+      current.add(trimmed);
+      state = state.copyWith(investigations: current);
+    }
+  }
+
+  void removeInvestigation(String investigation) {
+    final current = List<String>.from(state.investigations)
+      ..remove(investigation);
+    state = state.copyWith(investigations: current);
+  }
+
   void setGeneralAdvice(String advice) {
     state = state.copyWith(generalAdvice: advice);
   }
@@ -435,8 +626,127 @@ class EncounterNotifier extends Notifier<EncounterState> {
     state = state.copyWith(followUpDays: days);
   }
 
+  void setOverrideReason(String reason) {
+    state = state.copyWith(overrideReason: reason.trim());
+  }
+
+  void setPrintDiagnosis(bool printDiagnosis) {
+    state = state.copyWith(printDiagnosis: printDiagnosis);
+  }
+
   void toggleLetterheadMode() {
     state = state.copyWith(isLetterheadMode: !state.isLetterheadMode);
+  }
+
+  /// Merges incremental updates from Gemini AI Voice Scribe into the current encounter.
+  Future<void> applyAiScribeUpdate(GeminiScribeResult result) async {
+    // 1. Merge complaints
+    final updatedComplaints =
+        Map<String, SelectedComplaintState>.from(state.selectedComplaints);
+    for (final c in result.complaints) {
+      if (c.complaintId.isNotEmpty) {
+        final existing = updatedComplaints[c.complaintId];
+        updatedComplaints[c.complaintId] = SelectedComplaintState(
+          complaintId: c.complaintId,
+          complaintName: c.complaintName.isNotEmpty
+              ? c.complaintName
+              : (existing?.complaintName ?? c.complaintId),
+          selectedOptions: existing?.selectedOptions ?? const {},
+          compiledProse: c.compiledProse.isNotEmpty
+              ? c.compiledProse
+              : (existing?.compiledProse ?? ''),
+        );
+      }
+    }
+
+    // 2. Merge exam states
+    final updatedExams = Map<String, ExamSystemState>.from(state.examStates);
+    for (final e in result.exams) {
+      if (e.systemId.isNotEmpty) {
+        final existing = updatedExams[e.systemId];
+        updatedExams[e.systemId] = ExamSystemState(
+          systemId: e.systemId,
+          systemName: existing?.systemName ??
+              e.systemId.replaceAll('sys_', '').toUpperCase(),
+          isNormal: e.isNormal,
+          selectedAbnormals: e.abnormalFindings.isNotEmpty
+              ? e.abnormalFindings
+              : (existing?.selectedAbnormals ?? const []),
+          compiledText: e.compiledText.isNotEmpty
+              ? e.compiledText
+              : (existing?.compiledText ?? ''),
+        );
+      }
+    }
+
+    // 3. Merge diagnoses
+    final updatedDiagnoses = List<String>.from(state.selectedDiagnosisIds);
+    for (final d in result.diagnoses) {
+      if (d.diagnosisId.isNotEmpty && !updatedDiagnoses.contains(d.diagnosisId)) {
+        updatedDiagnoses.add(d.diagnosisId);
+        if (!_diagnosesCatalog.containsKey(d.diagnosisId)) {
+          _diagnosesCatalog[d.diagnosisId] = DiagnosisModel(
+            id: d.diagnosisId,
+            name: d.diagnosisName.isNotEmpty ? d.diagnosisName : d.diagnosisId,
+            icd10Code: d.icd10Code,
+            linkedComplaintIds: const [],
+          );
+        }
+      }
+    }
+
+    // 4. Merge prescriptions
+    final updatedRx =
+        List<PrescriptionItemModel>.from(state.activePrescription);
+    for (final rx in result.prescriptions) {
+      final existingIdx = updatedRx.indexWhere(
+        (p) =>
+            p.drugId == rx.drugId ||
+            (rx.brandName.isNotEmpty &&
+                p.brandName.toLowerCase() == rx.brandName.toLowerCase()),
+      );
+      if (existingIdx != -1) {
+        updatedRx[existingIdx] = rx;
+      } else {
+        updatedRx.add(rx);
+      }
+    }
+
+    // 5. Merge investigations
+    final updatedInvs = List<String>.from(state.investigations);
+    for (final inv in result.investigations) {
+      final trimmed = inv.trim();
+      if (trimmed.isNotEmpty && !updatedInvs.contains(trimmed)) {
+        updatedInvs.add(trimmed);
+      }
+    }
+
+    // 6. Advice & follow-up
+    String updatedAdvice = state.generalAdvice;
+    if (result.generalAdvice != null &&
+        result.generalAdvice!.trim().isNotEmpty) {
+      final newAdvice = result.generalAdvice!.trim();
+      if (updatedAdvice.isEmpty) {
+        updatedAdvice = newAdvice;
+      } else if (!updatedAdvice.contains(newAdvice)) {
+        updatedAdvice = '$updatedAdvice\n$newAdvice';
+      }
+    }
+
+    int? updatedFollowUp = result.followUpDays ?? state.followUpDays;
+
+    state = state.copyWith(
+      selectedComplaints: updatedComplaints,
+      examStates: updatedExams,
+      selectedDiagnosisIds: updatedDiagnoses,
+      activePrescription: updatedRx,
+      investigations: updatedInvs,
+      generalAdvice: updatedAdvice,
+      followUpDays: updatedFollowUp,
+    );
+
+    _runSafetyCheck();
+    await autosaveDraft();
   }
 
   Future<void> autosaveDraft() async {
@@ -447,9 +757,14 @@ class EncounterNotifier extends Notifier<EncounterState> {
       final draftSnapshot = jsonEncode({
         'isDraft': true,
         'diagnoses': state.selectedDiagnosisIds,
-        'prescription': state.activePrescription.map((p) => p.toJson()).toList(),
+        'prescription': state.activePrescription
+            .map((p) => p.toJson())
+            .toList(),
+        'investigations': state.investigations,
         'advice': state.generalAdvice,
         'followUpDays': state.followUpDays,
+        'overrideReason': state.overrideReason,
+        'printDiagnosis': state.printDiagnosis,
         'savedAt': DateTime.now().toIso8601String(),
       });
 
@@ -468,30 +783,101 @@ class EncounterNotifier extends Notifier<EncounterState> {
     state = const EncounterState();
   }
 
-  /// Completes consultation, stamps completion time, saves compiled prescription snapshot
-  Future<void> completeEncounter() async {
+  /// Completes consultation with safety validations and stores denormalized snapshot
+  Future<void> completeEncounter({String? explicitOverrideReason}) async {
     final patient = state.activePatient;
     if (patient == null) return;
 
+    final effectiveOverrideReason =
+        (explicitOverrideReason?.trim().isNotEmpty == true)
+        ? explicitOverrideReason!.trim()
+        : state.overrideReason?.trim();
+
+    // 1. Mandatory Hard-Block for Critical Safety Alerts
+    if (state.hasCriticalSafetyAlert &&
+        (effectiveOverrideReason == null || effectiveOverrideReason.isEmpty)) {
+      throw StateError(
+        'Cannot complete encounter: Critical safety alerts require a clinical override justification.',
+      );
+    }
+
+    // 2. Mandatory Follow-up Selection
+    if (state.followUpDays == null) {
+      throw StateError(
+        'Cannot complete encounter: Follow-up duration selection is mandatory.',
+      );
+    }
+
     final now = DateTime.now();
-    final compiledSnapshot = jsonEncode({
-      'complaints': state.selectedComplaints.values.map((c) => c.compiledProse).toList(),
-      'examination': state.examStates.values
-          .map((e) => {'system': e.systemName, 'findings': e.compiledText})
+
+    // 3. Denormalized Encounter Snapshotting
+    // Captures diagnosis names, drug versions, triggered safety alerts, override reasons,
+    // investigations, and app version to guarantee immutability against future catalog edits.
+    final denormalizedDiagnoses = state.selectedDiagnosisIds.map((id) {
+      final model = _diagnosesCatalog[id];
+      return {
+        'id': id,
+        'name': model?.name ?? id.replaceAll('diag_', '').toUpperCase(),
+        'icd10Code': model?.icd10Code,
+      };
+    }).toList();
+
+    final denormalizedPrescription = state.activePrescription
+        .map((p) => p.toJson())
+        .toList();
+
+    final denormalizedSnapshot = jsonEncode({
+      'appVersion': appVersion,
+      'completedAt': now.toIso8601String(),
+      'consultationStartTime': patient.consultationStartTime?.toIso8601String(),
+      'patientId': patient.patientId,
+      'tokenNumber': patient.tokenNumber,
+      'patientName': patient.patientName,
+      'ageDisplay': patient.dynamicAgeDisplay,
+      'gender': patient.gender,
+      'complaints': state.selectedComplaints.values
+          .map(
+            (c) => {
+              'complaintId': c.complaintId,
+              'complaintName': c.complaintName,
+              'compiledProse': c.compiledProse,
+            },
+          )
           .toList(),
-      'diagnoses': state.selectedDiagnosisIds,
-      'prescription': state.activePrescription.map((p) => p.toJson()).toList(),
+      'examination': state.examStates.values
+          .map(
+            (e) => {
+              'systemId': e.systemId,
+              'systemName': e.systemName,
+              'isNormal': e.isNormal,
+              'findings': e.compiledText,
+            },
+          )
+          .toList(),
+      'diagnoses': denormalizedDiagnoses,
+      'prescription': denormalizedPrescription,
+      'investigations': state.investigations,
       'advice': state.generalAdvice,
       'followUpDays': state.followUpDays,
-      'completedAt': now.toIso8601String(),
+      'safetyAlerts': state.safetyAlerts.map((a) => a.toJson()).toList(),
+      'overrideReason': effectiveOverrideReason,
+      'printDiagnosis': state.printDiagnosis,
     });
 
+    // Update DB with completion status and denormalized snapshots
     await _db.updatePatientQueueStatus(
       id: patient.id,
       status: QueueStatus.completed.dbValue,
       completionTime: now,
-      compiledPrescriptionJson: compiledSnapshot,
+      compiledPrescriptionJson: denormalizedSnapshot,
+      encounterSnapshotJson: denormalizedSnapshot,
+      overrideReason: effectiveOverrideReason,
     );
+
+    // Record drug usage frequencies so top 20 medications stay up to date
+    for (final item in state.activePrescription) {
+      await _db.recordDrugUsage(item.drugId);
+    }
 
     await clearEncounter(releaseToQueue: false);
   }
@@ -503,7 +889,8 @@ class EncounterNotifier extends Notifier<EncounterState> {
       activePrescription: state.activePrescription,
       comorbiditiesCatalog: _comorbiditiesCatalog,
       allergies: state.allergies,
-      patientAge: state.activePatient?.age,
+      patientAge:
+          state.activePatient?.calculatedAge ?? state.activePatient?.age,
       patientWeight: vitals.weight,
       isPregnant: state.isPregnant,
     );
@@ -511,6 +898,6 @@ class EncounterNotifier extends Notifier<EncounterState> {
   }
 }
 
-final encounterProvider =
-    NotifierProvider<EncounterNotifier, EncounterState>(EncounterNotifier.new);
-
+final encounterProvider = NotifierProvider<EncounterNotifier, EncounterState>(
+  EncounterNotifier.new,
+);

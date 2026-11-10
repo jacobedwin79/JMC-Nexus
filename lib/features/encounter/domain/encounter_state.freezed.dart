@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$EncounterState {
 
- PatientQueueItem? get activePatient; List<String> get selectedComorbidityIds; List<String> get allergies; String? get lmp; bool get isPregnant; Map<String, SelectedComplaintState> get selectedComplaints; Map<String, ExamSystemState> get examStates; List<String> get selectedDiagnosisIds; List<PrescriptionItemModel> get activePrescription; String get generalAdvice; int? get followUpDays; List<SafetyAlert> get safetyAlerts; bool get isLetterheadMode; bool get isLoading; DateTime? get lastDraftSavedAt; String? get errorMessage;
+ PatientQueueItem? get activePatient; List<String> get selectedComorbidityIds; List<String> get allergies; String? get lmp; bool get isPregnant; Map<String, SelectedComplaintState> get selectedComplaints; Map<String, ExamSystemState> get examStates; List<String> get selectedDiagnosisIds; List<PrescriptionItemModel> get activePrescription; List<String> get investigations; String get generalAdvice; int? get followUpDays; List<SafetyAlert> get safetyAlerts; String? get overrideReason; bool get printDiagnosis; bool get isLetterheadMode; bool get isLoading; DateTime? get lastDraftSavedAt; String? get errorMessage;
 /// Create a copy of EncounterState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $EncounterStateCopyWith<EncounterState> get copyWith => _$EncounterStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is EncounterState&&(identical(other.activePatient, activePatient) || other.activePatient == activePatient)&&const DeepCollectionEquality().equals(other.selectedComorbidityIds, selectedComorbidityIds)&&const DeepCollectionEquality().equals(other.allergies, allergies)&&(identical(other.lmp, lmp) || other.lmp == lmp)&&(identical(other.isPregnant, isPregnant) || other.isPregnant == isPregnant)&&const DeepCollectionEquality().equals(other.selectedComplaints, selectedComplaints)&&const DeepCollectionEquality().equals(other.examStates, examStates)&&const DeepCollectionEquality().equals(other.selectedDiagnosisIds, selectedDiagnosisIds)&&const DeepCollectionEquality().equals(other.activePrescription, activePrescription)&&(identical(other.generalAdvice, generalAdvice) || other.generalAdvice == generalAdvice)&&(identical(other.followUpDays, followUpDays) || other.followUpDays == followUpDays)&&const DeepCollectionEquality().equals(other.safetyAlerts, safetyAlerts)&&(identical(other.isLetterheadMode, isLetterheadMode) || other.isLetterheadMode == isLetterheadMode)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.lastDraftSavedAt, lastDraftSavedAt) || other.lastDraftSavedAt == lastDraftSavedAt)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EncounterState&&(identical(other.activePatient, activePatient) || other.activePatient == activePatient)&&const DeepCollectionEquality().equals(other.selectedComorbidityIds, selectedComorbidityIds)&&const DeepCollectionEquality().equals(other.allergies, allergies)&&(identical(other.lmp, lmp) || other.lmp == lmp)&&(identical(other.isPregnant, isPregnant) || other.isPregnant == isPregnant)&&const DeepCollectionEquality().equals(other.selectedComplaints, selectedComplaints)&&const DeepCollectionEquality().equals(other.examStates, examStates)&&const DeepCollectionEquality().equals(other.selectedDiagnosisIds, selectedDiagnosisIds)&&const DeepCollectionEquality().equals(other.activePrescription, activePrescription)&&const DeepCollectionEquality().equals(other.investigations, investigations)&&(identical(other.generalAdvice, generalAdvice) || other.generalAdvice == generalAdvice)&&(identical(other.followUpDays, followUpDays) || other.followUpDays == followUpDays)&&const DeepCollectionEquality().equals(other.safetyAlerts, safetyAlerts)&&(identical(other.overrideReason, overrideReason) || other.overrideReason == overrideReason)&&(identical(other.printDiagnosis, printDiagnosis) || other.printDiagnosis == printDiagnosis)&&(identical(other.isLetterheadMode, isLetterheadMode) || other.isLetterheadMode == isLetterheadMode)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.lastDraftSavedAt, lastDraftSavedAt) || other.lastDraftSavedAt == lastDraftSavedAt)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,activePatient,const DeepCollectionEquality().hash(selectedComorbidityIds),const DeepCollectionEquality().hash(allergies),lmp,isPregnant,const DeepCollectionEquality().hash(selectedComplaints),const DeepCollectionEquality().hash(examStates),const DeepCollectionEquality().hash(selectedDiagnosisIds),const DeepCollectionEquality().hash(activePrescription),generalAdvice,followUpDays,const DeepCollectionEquality().hash(safetyAlerts),isLetterheadMode,isLoading,lastDraftSavedAt,errorMessage);
+int get hashCode => Object.hashAll([runtimeType,activePatient,const DeepCollectionEquality().hash(selectedComorbidityIds),const DeepCollectionEquality().hash(allergies),lmp,isPregnant,const DeepCollectionEquality().hash(selectedComplaints),const DeepCollectionEquality().hash(examStates),const DeepCollectionEquality().hash(selectedDiagnosisIds),const DeepCollectionEquality().hash(activePrescription),const DeepCollectionEquality().hash(investigations),generalAdvice,followUpDays,const DeepCollectionEquality().hash(safetyAlerts),overrideReason,printDiagnosis,isLetterheadMode,isLoading,lastDraftSavedAt,errorMessage]);
 
 @override
 String toString() {
-  return 'EncounterState(activePatient: $activePatient, selectedComorbidityIds: $selectedComorbidityIds, allergies: $allergies, lmp: $lmp, isPregnant: $isPregnant, selectedComplaints: $selectedComplaints, examStates: $examStates, selectedDiagnosisIds: $selectedDiagnosisIds, activePrescription: $activePrescription, generalAdvice: $generalAdvice, followUpDays: $followUpDays, safetyAlerts: $safetyAlerts, isLetterheadMode: $isLetterheadMode, isLoading: $isLoading, lastDraftSavedAt: $lastDraftSavedAt, errorMessage: $errorMessage)';
+  return 'EncounterState(activePatient: $activePatient, selectedComorbidityIds: $selectedComorbidityIds, allergies: $allergies, lmp: $lmp, isPregnant: $isPregnant, selectedComplaints: $selectedComplaints, examStates: $examStates, selectedDiagnosisIds: $selectedDiagnosisIds, activePrescription: $activePrescription, investigations: $investigations, generalAdvice: $generalAdvice, followUpDays: $followUpDays, safetyAlerts: $safetyAlerts, overrideReason: $overrideReason, printDiagnosis: $printDiagnosis, isLetterheadMode: $isLetterheadMode, isLoading: $isLoading, lastDraftSavedAt: $lastDraftSavedAt, errorMessage: $errorMessage)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $EncounterStateCopyWith<$Res>  {
   factory $EncounterStateCopyWith(EncounterState value, $Res Function(EncounterState) _then) = _$EncounterStateCopyWithImpl;
 @useResult
 $Res call({
- PatientQueueItem? activePatient, List<String> selectedComorbidityIds, List<String> allergies, String? lmp, bool isPregnant, Map<String, SelectedComplaintState> selectedComplaints, Map<String, ExamSystemState> examStates, List<String> selectedDiagnosisIds, List<PrescriptionItemModel> activePrescription, String generalAdvice, int? followUpDays, List<SafetyAlert> safetyAlerts, bool isLetterheadMode, bool isLoading, DateTime? lastDraftSavedAt, String? errorMessage
+ PatientQueueItem? activePatient, List<String> selectedComorbidityIds, List<String> allergies, String? lmp, bool isPregnant, Map<String, SelectedComplaintState> selectedComplaints, Map<String, ExamSystemState> examStates, List<String> selectedDiagnosisIds, List<PrescriptionItemModel> activePrescription, List<String> investigations, String generalAdvice, int? followUpDays, List<SafetyAlert> safetyAlerts, String? overrideReason, bool printDiagnosis, bool isLetterheadMode, bool isLoading, DateTime? lastDraftSavedAt, String? errorMessage
 });
 
 
@@ -65,7 +65,7 @@ class _$EncounterStateCopyWithImpl<$Res>
 
 /// Create a copy of EncounterState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? activePatient = freezed,Object? selectedComorbidityIds = null,Object? allergies = null,Object? lmp = freezed,Object? isPregnant = null,Object? selectedComplaints = null,Object? examStates = null,Object? selectedDiagnosisIds = null,Object? activePrescription = null,Object? generalAdvice = null,Object? followUpDays = freezed,Object? safetyAlerts = null,Object? isLetterheadMode = null,Object? isLoading = null,Object? lastDraftSavedAt = freezed,Object? errorMessage = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? activePatient = freezed,Object? selectedComorbidityIds = null,Object? allergies = null,Object? lmp = freezed,Object? isPregnant = null,Object? selectedComplaints = null,Object? examStates = null,Object? selectedDiagnosisIds = null,Object? activePrescription = null,Object? investigations = null,Object? generalAdvice = null,Object? followUpDays = freezed,Object? safetyAlerts = null,Object? overrideReason = freezed,Object? printDiagnosis = null,Object? isLetterheadMode = null,Object? isLoading = null,Object? lastDraftSavedAt = freezed,Object? errorMessage = freezed,}) {
   return _then(_self.copyWith(
 activePatient: freezed == activePatient ? _self.activePatient : activePatient // ignore: cast_nullable_to_non_nullable
 as PatientQueueItem?,selectedComorbidityIds: null == selectedComorbidityIds ? _self.selectedComorbidityIds : selectedComorbidityIds // ignore: cast_nullable_to_non_nullable
@@ -76,10 +76,13 @@ as bool,selectedComplaints: null == selectedComplaints ? _self.selectedComplaint
 as Map<String, SelectedComplaintState>,examStates: null == examStates ? _self.examStates : examStates // ignore: cast_nullable_to_non_nullable
 as Map<String, ExamSystemState>,selectedDiagnosisIds: null == selectedDiagnosisIds ? _self.selectedDiagnosisIds : selectedDiagnosisIds // ignore: cast_nullable_to_non_nullable
 as List<String>,activePrescription: null == activePrescription ? _self.activePrescription : activePrescription // ignore: cast_nullable_to_non_nullable
-as List<PrescriptionItemModel>,generalAdvice: null == generalAdvice ? _self.generalAdvice : generalAdvice // ignore: cast_nullable_to_non_nullable
+as List<PrescriptionItemModel>,investigations: null == investigations ? _self.investigations : investigations // ignore: cast_nullable_to_non_nullable
+as List<String>,generalAdvice: null == generalAdvice ? _self.generalAdvice : generalAdvice // ignore: cast_nullable_to_non_nullable
 as String,followUpDays: freezed == followUpDays ? _self.followUpDays : followUpDays // ignore: cast_nullable_to_non_nullable
 as int?,safetyAlerts: null == safetyAlerts ? _self.safetyAlerts : safetyAlerts // ignore: cast_nullable_to_non_nullable
-as List<SafetyAlert>,isLetterheadMode: null == isLetterheadMode ? _self.isLetterheadMode : isLetterheadMode // ignore: cast_nullable_to_non_nullable
+as List<SafetyAlert>,overrideReason: freezed == overrideReason ? _self.overrideReason : overrideReason // ignore: cast_nullable_to_non_nullable
+as String?,printDiagnosis: null == printDiagnosis ? _self.printDiagnosis : printDiagnosis // ignore: cast_nullable_to_non_nullable
+as bool,isLetterheadMode: null == isLetterheadMode ? _self.isLetterheadMode : isLetterheadMode // ignore: cast_nullable_to_non_nullable
 as bool,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,lastDraftSavedAt: freezed == lastDraftSavedAt ? _self.lastDraftSavedAt : lastDraftSavedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
@@ -180,10 +183,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PatientQueueItem? activePatient,  List<String> selectedComorbidityIds,  List<String> allergies,  String? lmp,  bool isPregnant,  Map<String, SelectedComplaintState> selectedComplaints,  Map<String, ExamSystemState> examStates,  List<String> selectedDiagnosisIds,  List<PrescriptionItemModel> activePrescription,  String generalAdvice,  int? followUpDays,  List<SafetyAlert> safetyAlerts,  bool isLetterheadMode,  bool isLoading,  DateTime? lastDraftSavedAt,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PatientQueueItem? activePatient,  List<String> selectedComorbidityIds,  List<String> allergies,  String? lmp,  bool isPregnant,  Map<String, SelectedComplaintState> selectedComplaints,  Map<String, ExamSystemState> examStates,  List<String> selectedDiagnosisIds,  List<PrescriptionItemModel> activePrescription,  List<String> investigations,  String generalAdvice,  int? followUpDays,  List<SafetyAlert> safetyAlerts,  String? overrideReason,  bool printDiagnosis,  bool isLetterheadMode,  bool isLoading,  DateTime? lastDraftSavedAt,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _EncounterState() when $default != null:
-return $default(_that.activePatient,_that.selectedComorbidityIds,_that.allergies,_that.lmp,_that.isPregnant,_that.selectedComplaints,_that.examStates,_that.selectedDiagnosisIds,_that.activePrescription,_that.generalAdvice,_that.followUpDays,_that.safetyAlerts,_that.isLetterheadMode,_that.isLoading,_that.lastDraftSavedAt,_that.errorMessage);case _:
+return $default(_that.activePatient,_that.selectedComorbidityIds,_that.allergies,_that.lmp,_that.isPregnant,_that.selectedComplaints,_that.examStates,_that.selectedDiagnosisIds,_that.activePrescription,_that.investigations,_that.generalAdvice,_that.followUpDays,_that.safetyAlerts,_that.overrideReason,_that.printDiagnosis,_that.isLetterheadMode,_that.isLoading,_that.lastDraftSavedAt,_that.errorMessage);case _:
   return orElse();
 
 }
@@ -201,10 +204,10 @@ return $default(_that.activePatient,_that.selectedComorbidityIds,_that.allergies
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PatientQueueItem? activePatient,  List<String> selectedComorbidityIds,  List<String> allergies,  String? lmp,  bool isPregnant,  Map<String, SelectedComplaintState> selectedComplaints,  Map<String, ExamSystemState> examStates,  List<String> selectedDiagnosisIds,  List<PrescriptionItemModel> activePrescription,  String generalAdvice,  int? followUpDays,  List<SafetyAlert> safetyAlerts,  bool isLetterheadMode,  bool isLoading,  DateTime? lastDraftSavedAt,  String? errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PatientQueueItem? activePatient,  List<String> selectedComorbidityIds,  List<String> allergies,  String? lmp,  bool isPregnant,  Map<String, SelectedComplaintState> selectedComplaints,  Map<String, ExamSystemState> examStates,  List<String> selectedDiagnosisIds,  List<PrescriptionItemModel> activePrescription,  List<String> investigations,  String generalAdvice,  int? followUpDays,  List<SafetyAlert> safetyAlerts,  String? overrideReason,  bool printDiagnosis,  bool isLetterheadMode,  bool isLoading,  DateTime? lastDraftSavedAt,  String? errorMessage)  $default,) {final _that = this;
 switch (_that) {
 case _EncounterState():
-return $default(_that.activePatient,_that.selectedComorbidityIds,_that.allergies,_that.lmp,_that.isPregnant,_that.selectedComplaints,_that.examStates,_that.selectedDiagnosisIds,_that.activePrescription,_that.generalAdvice,_that.followUpDays,_that.safetyAlerts,_that.isLetterheadMode,_that.isLoading,_that.lastDraftSavedAt,_that.errorMessage);case _:
+return $default(_that.activePatient,_that.selectedComorbidityIds,_that.allergies,_that.lmp,_that.isPregnant,_that.selectedComplaints,_that.examStates,_that.selectedDiagnosisIds,_that.activePrescription,_that.investigations,_that.generalAdvice,_that.followUpDays,_that.safetyAlerts,_that.overrideReason,_that.printDiagnosis,_that.isLetterheadMode,_that.isLoading,_that.lastDraftSavedAt,_that.errorMessage);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -221,10 +224,10 @@ return $default(_that.activePatient,_that.selectedComorbidityIds,_that.allergies
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PatientQueueItem? activePatient,  List<String> selectedComorbidityIds,  List<String> allergies,  String? lmp,  bool isPregnant,  Map<String, SelectedComplaintState> selectedComplaints,  Map<String, ExamSystemState> examStates,  List<String> selectedDiagnosisIds,  List<PrescriptionItemModel> activePrescription,  String generalAdvice,  int? followUpDays,  List<SafetyAlert> safetyAlerts,  bool isLetterheadMode,  bool isLoading,  DateTime? lastDraftSavedAt,  String? errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PatientQueueItem? activePatient,  List<String> selectedComorbidityIds,  List<String> allergies,  String? lmp,  bool isPregnant,  Map<String, SelectedComplaintState> selectedComplaints,  Map<String, ExamSystemState> examStates,  List<String> selectedDiagnosisIds,  List<PrescriptionItemModel> activePrescription,  List<String> investigations,  String generalAdvice,  int? followUpDays,  List<SafetyAlert> safetyAlerts,  String? overrideReason,  bool printDiagnosis,  bool isLetterheadMode,  bool isLoading,  DateTime? lastDraftSavedAt,  String? errorMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _EncounterState() when $default != null:
-return $default(_that.activePatient,_that.selectedComorbidityIds,_that.allergies,_that.lmp,_that.isPregnant,_that.selectedComplaints,_that.examStates,_that.selectedDiagnosisIds,_that.activePrescription,_that.generalAdvice,_that.followUpDays,_that.safetyAlerts,_that.isLetterheadMode,_that.isLoading,_that.lastDraftSavedAt,_that.errorMessage);case _:
+return $default(_that.activePatient,_that.selectedComorbidityIds,_that.allergies,_that.lmp,_that.isPregnant,_that.selectedComplaints,_that.examStates,_that.selectedDiagnosisIds,_that.activePrescription,_that.investigations,_that.generalAdvice,_that.followUpDays,_that.safetyAlerts,_that.overrideReason,_that.printDiagnosis,_that.isLetterheadMode,_that.isLoading,_that.lastDraftSavedAt,_that.errorMessage);case _:
   return null;
 
 }
@@ -236,7 +239,7 @@ return $default(_that.activePatient,_that.selectedComorbidityIds,_that.allergies
 @JsonSerializable()
 
 class _EncounterState extends EncounterState {
-  const _EncounterState({this.activePatient, final  List<String> selectedComorbidityIds = const [], final  List<String> allergies = const [], this.lmp, this.isPregnant = false, final  Map<String, SelectedComplaintState> selectedComplaints = const {}, final  Map<String, ExamSystemState> examStates = const {}, final  List<String> selectedDiagnosisIds = const [], final  List<PrescriptionItemModel> activePrescription = const [], this.generalAdvice = '', this.followUpDays, final  List<SafetyAlert> safetyAlerts = const [], this.isLetterheadMode = false, this.isLoading = false, this.lastDraftSavedAt, this.errorMessage}): _selectedComorbidityIds = selectedComorbidityIds,_allergies = allergies,_selectedComplaints = selectedComplaints,_examStates = examStates,_selectedDiagnosisIds = selectedDiagnosisIds,_activePrescription = activePrescription,_safetyAlerts = safetyAlerts,super._();
+  const _EncounterState({this.activePatient, final  List<String> selectedComorbidityIds = const [], final  List<String> allergies = const [], this.lmp, this.isPregnant = false, final  Map<String, SelectedComplaintState> selectedComplaints = const {}, final  Map<String, ExamSystemState> examStates = const {}, final  List<String> selectedDiagnosisIds = const [], final  List<PrescriptionItemModel> activePrescription = const [], final  List<String> investigations = const [], this.generalAdvice = '', this.followUpDays, final  List<SafetyAlert> safetyAlerts = const [], this.overrideReason, this.printDiagnosis = true, this.isLetterheadMode = false, this.isLoading = false, this.lastDraftSavedAt, this.errorMessage}): _selectedComorbidityIds = selectedComorbidityIds,_allergies = allergies,_selectedComplaints = selectedComplaints,_examStates = examStates,_selectedDiagnosisIds = selectedDiagnosisIds,_activePrescription = activePrescription,_investigations = investigations,_safetyAlerts = safetyAlerts,super._();
   factory _EncounterState.fromJson(Map<String, dynamic> json) => _$EncounterStateFromJson(json);
 
 @override final  PatientQueueItem? activePatient;
@@ -284,6 +287,13 @@ class _EncounterState extends EncounterState {
   return EqualUnmodifiableListView(_activePrescription);
 }
 
+ final  List<String> _investigations;
+@override@JsonKey() List<String> get investigations {
+  if (_investigations is EqualUnmodifiableListView) return _investigations;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_investigations);
+}
+
 @override@JsonKey() final  String generalAdvice;
 @override final  int? followUpDays;
  final  List<SafetyAlert> _safetyAlerts;
@@ -293,6 +303,8 @@ class _EncounterState extends EncounterState {
   return EqualUnmodifiableListView(_safetyAlerts);
 }
 
+@override final  String? overrideReason;
+@override@JsonKey() final  bool printDiagnosis;
 @override@JsonKey() final  bool isLetterheadMode;
 @override@JsonKey() final  bool isLoading;
 @override final  DateTime? lastDraftSavedAt;
@@ -311,16 +323,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EncounterState&&(identical(other.activePatient, activePatient) || other.activePatient == activePatient)&&const DeepCollectionEquality().equals(other._selectedComorbidityIds, _selectedComorbidityIds)&&const DeepCollectionEquality().equals(other._allergies, _allergies)&&(identical(other.lmp, lmp) || other.lmp == lmp)&&(identical(other.isPregnant, isPregnant) || other.isPregnant == isPregnant)&&const DeepCollectionEquality().equals(other._selectedComplaints, _selectedComplaints)&&const DeepCollectionEquality().equals(other._examStates, _examStates)&&const DeepCollectionEquality().equals(other._selectedDiagnosisIds, _selectedDiagnosisIds)&&const DeepCollectionEquality().equals(other._activePrescription, _activePrescription)&&(identical(other.generalAdvice, generalAdvice) || other.generalAdvice == generalAdvice)&&(identical(other.followUpDays, followUpDays) || other.followUpDays == followUpDays)&&const DeepCollectionEquality().equals(other._safetyAlerts, _safetyAlerts)&&(identical(other.isLetterheadMode, isLetterheadMode) || other.isLetterheadMode == isLetterheadMode)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.lastDraftSavedAt, lastDraftSavedAt) || other.lastDraftSavedAt == lastDraftSavedAt)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EncounterState&&(identical(other.activePatient, activePatient) || other.activePatient == activePatient)&&const DeepCollectionEquality().equals(other._selectedComorbidityIds, _selectedComorbidityIds)&&const DeepCollectionEquality().equals(other._allergies, _allergies)&&(identical(other.lmp, lmp) || other.lmp == lmp)&&(identical(other.isPregnant, isPregnant) || other.isPregnant == isPregnant)&&const DeepCollectionEquality().equals(other._selectedComplaints, _selectedComplaints)&&const DeepCollectionEquality().equals(other._examStates, _examStates)&&const DeepCollectionEquality().equals(other._selectedDiagnosisIds, _selectedDiagnosisIds)&&const DeepCollectionEquality().equals(other._activePrescription, _activePrescription)&&const DeepCollectionEquality().equals(other._investigations, _investigations)&&(identical(other.generalAdvice, generalAdvice) || other.generalAdvice == generalAdvice)&&(identical(other.followUpDays, followUpDays) || other.followUpDays == followUpDays)&&const DeepCollectionEquality().equals(other._safetyAlerts, _safetyAlerts)&&(identical(other.overrideReason, overrideReason) || other.overrideReason == overrideReason)&&(identical(other.printDiagnosis, printDiagnosis) || other.printDiagnosis == printDiagnosis)&&(identical(other.isLetterheadMode, isLetterheadMode) || other.isLetterheadMode == isLetterheadMode)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.lastDraftSavedAt, lastDraftSavedAt) || other.lastDraftSavedAt == lastDraftSavedAt)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,activePatient,const DeepCollectionEquality().hash(_selectedComorbidityIds),const DeepCollectionEquality().hash(_allergies),lmp,isPregnant,const DeepCollectionEquality().hash(_selectedComplaints),const DeepCollectionEquality().hash(_examStates),const DeepCollectionEquality().hash(_selectedDiagnosisIds),const DeepCollectionEquality().hash(_activePrescription),generalAdvice,followUpDays,const DeepCollectionEquality().hash(_safetyAlerts),isLetterheadMode,isLoading,lastDraftSavedAt,errorMessage);
+int get hashCode => Object.hashAll([runtimeType,activePatient,const DeepCollectionEquality().hash(_selectedComorbidityIds),const DeepCollectionEquality().hash(_allergies),lmp,isPregnant,const DeepCollectionEquality().hash(_selectedComplaints),const DeepCollectionEquality().hash(_examStates),const DeepCollectionEquality().hash(_selectedDiagnosisIds),const DeepCollectionEquality().hash(_activePrescription),const DeepCollectionEquality().hash(_investigations),generalAdvice,followUpDays,const DeepCollectionEquality().hash(_safetyAlerts),overrideReason,printDiagnosis,isLetterheadMode,isLoading,lastDraftSavedAt,errorMessage]);
 
 @override
 String toString() {
-  return 'EncounterState(activePatient: $activePatient, selectedComorbidityIds: $selectedComorbidityIds, allergies: $allergies, lmp: $lmp, isPregnant: $isPregnant, selectedComplaints: $selectedComplaints, examStates: $examStates, selectedDiagnosisIds: $selectedDiagnosisIds, activePrescription: $activePrescription, generalAdvice: $generalAdvice, followUpDays: $followUpDays, safetyAlerts: $safetyAlerts, isLetterheadMode: $isLetterheadMode, isLoading: $isLoading, lastDraftSavedAt: $lastDraftSavedAt, errorMessage: $errorMessage)';
+  return 'EncounterState(activePatient: $activePatient, selectedComorbidityIds: $selectedComorbidityIds, allergies: $allergies, lmp: $lmp, isPregnant: $isPregnant, selectedComplaints: $selectedComplaints, examStates: $examStates, selectedDiagnosisIds: $selectedDiagnosisIds, activePrescription: $activePrescription, investigations: $investigations, generalAdvice: $generalAdvice, followUpDays: $followUpDays, safetyAlerts: $safetyAlerts, overrideReason: $overrideReason, printDiagnosis: $printDiagnosis, isLetterheadMode: $isLetterheadMode, isLoading: $isLoading, lastDraftSavedAt: $lastDraftSavedAt, errorMessage: $errorMessage)';
 }
 
 
@@ -331,7 +343,7 @@ abstract mixin class _$EncounterStateCopyWith<$Res> implements $EncounterStateCo
   factory _$EncounterStateCopyWith(_EncounterState value, $Res Function(_EncounterState) _then) = __$EncounterStateCopyWithImpl;
 @override @useResult
 $Res call({
- PatientQueueItem? activePatient, List<String> selectedComorbidityIds, List<String> allergies, String? lmp, bool isPregnant, Map<String, SelectedComplaintState> selectedComplaints, Map<String, ExamSystemState> examStates, List<String> selectedDiagnosisIds, List<PrescriptionItemModel> activePrescription, String generalAdvice, int? followUpDays, List<SafetyAlert> safetyAlerts, bool isLetterheadMode, bool isLoading, DateTime? lastDraftSavedAt, String? errorMessage
+ PatientQueueItem? activePatient, List<String> selectedComorbidityIds, List<String> allergies, String? lmp, bool isPregnant, Map<String, SelectedComplaintState> selectedComplaints, Map<String, ExamSystemState> examStates, List<String> selectedDiagnosisIds, List<PrescriptionItemModel> activePrescription, List<String> investigations, String generalAdvice, int? followUpDays, List<SafetyAlert> safetyAlerts, String? overrideReason, bool printDiagnosis, bool isLetterheadMode, bool isLoading, DateTime? lastDraftSavedAt, String? errorMessage
 });
 
 
@@ -348,7 +360,7 @@ class __$EncounterStateCopyWithImpl<$Res>
 
 /// Create a copy of EncounterState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? activePatient = freezed,Object? selectedComorbidityIds = null,Object? allergies = null,Object? lmp = freezed,Object? isPregnant = null,Object? selectedComplaints = null,Object? examStates = null,Object? selectedDiagnosisIds = null,Object? activePrescription = null,Object? generalAdvice = null,Object? followUpDays = freezed,Object? safetyAlerts = null,Object? isLetterheadMode = null,Object? isLoading = null,Object? lastDraftSavedAt = freezed,Object? errorMessage = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? activePatient = freezed,Object? selectedComorbidityIds = null,Object? allergies = null,Object? lmp = freezed,Object? isPregnant = null,Object? selectedComplaints = null,Object? examStates = null,Object? selectedDiagnosisIds = null,Object? activePrescription = null,Object? investigations = null,Object? generalAdvice = null,Object? followUpDays = freezed,Object? safetyAlerts = null,Object? overrideReason = freezed,Object? printDiagnosis = null,Object? isLetterheadMode = null,Object? isLoading = null,Object? lastDraftSavedAt = freezed,Object? errorMessage = freezed,}) {
   return _then(_EncounterState(
 activePatient: freezed == activePatient ? _self.activePatient : activePatient // ignore: cast_nullable_to_non_nullable
 as PatientQueueItem?,selectedComorbidityIds: null == selectedComorbidityIds ? _self._selectedComorbidityIds : selectedComorbidityIds // ignore: cast_nullable_to_non_nullable
@@ -359,10 +371,13 @@ as bool,selectedComplaints: null == selectedComplaints ? _self._selectedComplain
 as Map<String, SelectedComplaintState>,examStates: null == examStates ? _self._examStates : examStates // ignore: cast_nullable_to_non_nullable
 as Map<String, ExamSystemState>,selectedDiagnosisIds: null == selectedDiagnosisIds ? _self._selectedDiagnosisIds : selectedDiagnosisIds // ignore: cast_nullable_to_non_nullable
 as List<String>,activePrescription: null == activePrescription ? _self._activePrescription : activePrescription // ignore: cast_nullable_to_non_nullable
-as List<PrescriptionItemModel>,generalAdvice: null == generalAdvice ? _self.generalAdvice : generalAdvice // ignore: cast_nullable_to_non_nullable
+as List<PrescriptionItemModel>,investigations: null == investigations ? _self._investigations : investigations // ignore: cast_nullable_to_non_nullable
+as List<String>,generalAdvice: null == generalAdvice ? _self.generalAdvice : generalAdvice // ignore: cast_nullable_to_non_nullable
 as String,followUpDays: freezed == followUpDays ? _self.followUpDays : followUpDays // ignore: cast_nullable_to_non_nullable
 as int?,safetyAlerts: null == safetyAlerts ? _self._safetyAlerts : safetyAlerts // ignore: cast_nullable_to_non_nullable
-as List<SafetyAlert>,isLetterheadMode: null == isLetterheadMode ? _self.isLetterheadMode : isLetterheadMode // ignore: cast_nullable_to_non_nullable
+as List<SafetyAlert>,overrideReason: freezed == overrideReason ? _self.overrideReason : overrideReason // ignore: cast_nullable_to_non_nullable
+as String?,printDiagnosis: null == printDiagnosis ? _self.printDiagnosis : printDiagnosis // ignore: cast_nullable_to_non_nullable
+as bool,isLetterheadMode: null == isLetterheadMode ? _self.isLetterheadMode : isLetterheadMode // ignore: cast_nullable_to_non_nullable
 as bool,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,lastDraftSavedAt: freezed == lastDraftSavedAt ? _self.lastDraftSavedAt : lastDraftSavedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable

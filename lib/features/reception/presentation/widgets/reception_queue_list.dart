@@ -64,11 +64,16 @@ class _ReceptionQueueListState extends ConsumerState<ReceptionQueueList> {
             ),
             child: Row(
               children: [
-                const Icon(LucideIcons.alertOctagon, color: AppTheme.slaOverdue, size: 20),
+                const Icon(
+                  LucideIcons.alertOctagon,
+                  color: AppTheme.slaOverdue,
+                  size: 20,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    queueState.overdueBannerText ?? 'Patients waiting > 45 mins!',
+                    queueState.overdueBannerText ??
+                        'Patients waiting > 45 mins!',
                     style: const TextStyle(
                       color: AppTheme.slaOverdue,
                       fontWeight: FontWeight.w800,
@@ -88,13 +93,33 @@ class _ReceptionQueueListState extends ConsumerState<ReceptionQueueList> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _buildFilterTab(0, 'Waiting', waiting.length, AppTheme.slaNormal),
+                _buildFilterTab(
+                  0,
+                  'Waiting',
+                  waiting.length,
+                  AppTheme.slaNormal,
+                ),
                 const SizedBox(width: 8),
-                _buildFilterTab(1, 'In Cabin', inCabin.length, AppTheme.primaryAccent),
+                _buildFilterTab(
+                  1,
+                  'In Cabin',
+                  inCabin.length,
+                  AppTheme.primaryAccent,
+                ),
                 const SizedBox(width: 8),
-                _buildFilterTab(2, 'Completed', completed.length, AppTheme.textSecondary),
+                _buildFilterTab(
+                  2,
+                  'Completed',
+                  completed.length,
+                  AppTheme.textSecondary,
+                ),
                 const SizedBox(width: 8),
-                _buildFilterTab(3, 'All Today', all.length, AppTheme.textPrimary),
+                _buildFilterTab(
+                  3,
+                  'All Today',
+                  all.length,
+                  AppTheme.textPrimary,
+                ),
               ],
             ),
           ),
@@ -109,7 +134,11 @@ class _ReceptionQueueListState extends ConsumerState<ReceptionQueueList> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(LucideIcons.users, size: 48, color: Colors.grey.shade300),
+                      Icon(
+                        LucideIcons.users,
+                        size: 48,
+                        color: Colors.grey.shade300,
+                      ),
                       const SizedBox(height: 12),
                       Text(
                         _selectedFilterIndex == 0
@@ -138,7 +167,12 @@ class _ReceptionQueueListState extends ConsumerState<ReceptionQueueList> {
     );
   }
 
-  Widget _buildFilterTab(int index, String label, int count, Color indicatorColor) {
+  Widget _buildFilterTab(
+    int index,
+    String label,
+    int count,
+    Color indicatorColor,
+  ) {
     final isSelected = _selectedFilterIndex == index;
     return InkWell(
       onTap: () => setState(() => _selectedFilterIndex = index),
@@ -205,7 +239,9 @@ class _ReceptionQueueListState extends ConsumerState<ReceptionQueueList> {
     final vitals = PatientVitals.fromJson(patient.vitals);
 
     return InkWell(
-      onTap: widget.onSelectPatient != null ? () => widget.onSelectPatient!(patient) : null,
+      onTap: widget.onSelectPatient != null
+          ? () => widget.onSelectPatient!(patient)
+          : null,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(14),
@@ -287,7 +323,8 @@ class _ReceptionQueueListState extends ConsumerState<ReceptionQueueList> {
                       // Live wait timer badge
                       WaitTimerBadge(
                         entryTime: patient.entryTime,
-                        isCompleted: patient.queueStatus == QueueStatus.completed,
+                        isCompleted:
+                            patient.queueStatus == QueueStatus.completed,
                       ),
                     ],
                   ),
@@ -297,7 +334,7 @@ class _ReceptionQueueListState extends ConsumerState<ReceptionQueueList> {
                   Row(
                     children: [
                       Text(
-                        '${patient.age}Y • ${patient.gender == "M" ? "Male" : (patient.gender == "F" ? "Female" : "Other")}',
+                        '${patient.dynamicAgeDisplay} • ${patient.gender == "M" ? "Male" : (patient.gender == "F" ? "Female" : "Other")}',
                         style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
@@ -312,7 +349,8 @@ class _ReceptionQueueListState extends ConsumerState<ReceptionQueueList> {
                           color: AppTheme.textMuted,
                         ),
                       ),
-                      if (patient.patientId != null && patient.patientId!.isNotEmpty) ...[
+                      if (patient.patientId != null &&
+                          patient.patientId!.isNotEmpty) ...[
                         const SizedBox(width: 8),
                         Text(
                           '•  ID: ${patient.patientId}',
@@ -323,7 +361,8 @@ class _ReceptionQueueListState extends ConsumerState<ReceptionQueueList> {
                           ),
                         ),
                       ],
-                      if (patient.phone != null && patient.phone!.isNotEmpty) ...[
+                      if (patient.phone != null &&
+                          patient.phone!.isNotEmpty) ...[
                         const SizedBox(width: 8),
                         Text(
                           '•  ${patient.phone}',
@@ -344,11 +383,20 @@ class _ReceptionQueueListState extends ConsumerState<ReceptionQueueList> {
                       runSpacing: 4,
                       children: [
                         if (vitals.bpSys != null)
-                          _buildVitalPill('BP: ${vitals.bpDisplay}', vitals.isHypertensive),
+                          _buildVitalPill(
+                            'BP: ${vitals.bpDisplay}',
+                            vitals.isHypertensive,
+                          ),
                         if (vitals.pulse != null)
-                          _buildVitalPill('HR: ${vitals.pulse} bpm', vitals.isTachycardic),
+                          _buildVitalPill(
+                            'HR: ${vitals.pulse} bpm',
+                            vitals.isTachycardic,
+                          ),
                         if (vitals.spo2 != null)
-                          _buildVitalPill('SpO2: ${vitals.spo2}%', vitals.isHypoxemic),
+                          _buildVitalPill(
+                            'SpO2: ${vitals.spo2}%',
+                            vitals.isHypoxemic,
+                          ),
                         if (vitals.temp != null)
                           _buildVitalPill('${vitals.temp}°F', vitals.isFebrile),
                       ],
@@ -386,4 +434,3 @@ class _ReceptionQueueListState extends ConsumerState<ReceptionQueueList> {
     );
   }
 }
-

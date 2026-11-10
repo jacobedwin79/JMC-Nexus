@@ -10,7 +10,8 @@ class PrescriptionSection extends ConsumerStatefulWidget {
   const PrescriptionSection({super.key});
 
   @override
-  ConsumerState<PrescriptionSection> createState() => _PrescriptionSectionState();
+  ConsumerState<PrescriptionSection> createState() =>
+      _PrescriptionSectionState();
 }
 
 class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
@@ -53,7 +54,10 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                     children: [
                       const Text(
                         'Select Drug from Formulary',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       IconButton(
                         icon: const Icon(LucideIcons.x),
@@ -81,11 +85,21 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                       itemBuilder: (context, idx) {
                         final drug = filtered[idx];
                         return ListTile(
-                          title: Text(drug.brandName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Text('${drug.genericName} • ${drug.drugClass}'),
-                          trailing: const Icon(LucideIcons.plusCircle, color: AppTheme.primaryBlue),
+                          title: Text(
+                            drug.brandName,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text(
+                            '${drug.genericName} • ${drug.drugClass}',
+                          ),
+                          trailing: const Icon(
+                            LucideIcons.plusCircle,
+                            color: AppTheme.primaryBlue,
+                          ),
                           onTap: () {
-                            ref.read(encounterProvider.notifier).addPrescriptionItem(
+                            ref
+                                .read(encounterProvider.notifier)
+                                .addPrescriptionItem(
                                   PrescriptionItemModel(
                                     drugId: drug.id,
                                     genericName: drug.genericName,
@@ -118,6 +132,7 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
     final encounter = ref.watch(encounterProvider);
     final activeRx = encounter.activePrescription;
     final allDrugsAsync = ref.watch(drugsCatalogProvider);
+    final topMedicationsAsync = ref.watch(topMedicationsProvider);
 
     // Keep advice controller synced
     if (_adviceController.text != encounter.generalAdvice) {
@@ -140,7 +155,11 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
             children: [
               Row(
                 children: [
-                  const Icon(LucideIcons.pill, size: 18, color: AppTheme.primaryBlue),
+                  const Icon(
+                    LucideIcons.pill,
+                    size: 18,
+                    color: AppTheme.primaryBlue,
+                  ),
                   const SizedBox(width: 8),
                   const Text(
                     'Prescription Builder (Rx)',
@@ -148,7 +167,10 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                   ),
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: AppTheme.primaryBlue.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
@@ -164,26 +186,170 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                   ),
                 ],
               ),
-              allDrugsAsync.maybeWhen(
-                data: (drugs) => ElevatedButton.icon(
-                  onPressed: () => _showAddDrugDialog(context, drugs),
-                  icon: const Icon(LucideIcons.plus, size: 14),
-                  label: const Text('Add Drug', style: TextStyle(fontSize: 12)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryBlue,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    elevation: 0,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              Row(
+                children: [
+                  if (encounter.activePatient?.patientId != null &&
+                      encounter.activePatient!.patientId!.isNotEmpty) ...[
+                    OutlinedButton.icon(
+                      onPressed: () async {
+                        final success = await ref
+                            .read(encounterProvider.notifier)
+                            .repeatLastPrescription();
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                success
+                                    ? 'Re-prescribed previous visit medications.'
+                                    : 'No previous prescription found for this patient.',
+                              ),
+                              backgroundColor: success
+                                  ? AppTheme.primaryBlue
+                                  : AppTheme.slaWarning,
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      },
+                      icon: const Icon(LucideIcons.repeat, size: 14),
+                      label: const Text(
+                        'Repeat Last Rx',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        side: const BorderSide(color: AppTheme.primaryBlue),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  allDrugsAsync.maybeWhen(
+                    data: (drugs) => ElevatedButton.icon(
+                      onPressed: () => _showAddDrugDialog(context, drugs),
+                      icon: const Icon(LucideIcons.plus, size: 14),
+                      label: const Text(
+                        'Add Drug',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryBlue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        elevation: 0,
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                    orElse: () => const SizedBox.shrink(),
                   ),
-                ),
-                orElse: () => const SizedBox.shrink(),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
+
+          // Top 20 Most Frequent Medications (1-Tap Add)
+          topMedicationsAsync.maybeWhen(
+            data: (topDrugs) {
+              if (topDrugs.isEmpty) return const SizedBox.shrink();
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(LucideIcons.sparkles, size: 13, color: Colors.amber),
+                      SizedBox(width: 5),
+                      Text(
+                        'Top Formulary Medications (1-Tap Add):',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: topDrugs.map((drug) {
+                        final isPrescribed = activeRx.any(
+                          (rx) => rx.drugId == drug.id,
+                        );
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 6.0),
+                          child: ActionChip(
+                            avatar: isPrescribed
+                                ? const Icon(
+                                    LucideIcons.check,
+                                    size: 12,
+                                    color: Colors.white,
+                                  )
+                                : const Icon(
+                                    LucideIcons.plus,
+                                    size: 12,
+                                    color: AppTheme.primaryBlue,
+                                  ),
+                            label: Text(
+                              drug.brandName,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: isPrescribed
+                                    ? Colors.white
+                                    : AppTheme.textPrimary,
+                              ),
+                            ),
+                            backgroundColor: isPrescribed
+                                ? AppTheme.primaryBlue
+                                : Colors.grey.shade100,
+                            side: BorderSide(
+                              color: isPrescribed
+                                  ? AppTheme.primaryBlue
+                                  : AppTheme.borderLight,
+                            ),
+                            onPressed: () {
+                              if (!isPrescribed) {
+                                ref
+                                    .read(encounterProvider.notifier)
+                                    .addPrescriptionItem(
+                                      PrescriptionItemModel(
+                                        drugId: drug.id,
+                                        genericName: drug.genericName,
+                                        brandName: drug.brandName,
+                                        drugClass: drug.drugClass,
+                                        dose: drug.defaultDose,
+                                        route: drug.defaultRoute,
+                                        frequency: drug.defaultFrequency,
+                                        duration: drug.defaultDuration,
+                                        instructions: drug.defaultInstructions,
+                                      ),
+                                    );
+                              }
+                            },
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              );
+            },
+            orElse: () => const SizedBox.shrink(),
+          ),
 
           // Prescription items list
           if (activeRx.isEmpty)
@@ -192,12 +358,19 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
               alignment: Alignment.center,
               child: Column(
                 children: [
-                  Icon(LucideIcons.filePlus, size: 36, color: Colors.grey.shade300),
+                  Icon(
+                    LucideIcons.filePlus,
+                    size: 36,
+                    color: Colors.grey.shade300,
+                  ),
                   const SizedBox(height: 8),
                   const Text(
                     'No medications prescribed yet.\nTap a Diagnosis above to auto-load protocol medications.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -210,7 +383,9 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
               separatorBuilder: (_, __) => const SizedBox(height: 8),
               itemBuilder: (context, idx) {
                 final rx = activeRx[idx];
-                final hasConflict = encounter.safetyAlerts.any((a) => a.drugClass == rx.drugClass);
+                final hasConflict = encounter.safetyAlerts.any(
+                  (a) => a.drugClass == rx.drugClass,
+                );
 
                 return Container(
                   padding: const EdgeInsets.all(12),
@@ -220,7 +395,9 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                         : AppTheme.surfaceBackground,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: hasConflict ? AppTheme.slaOverdue : AppTheme.borderLight,
+                      color: hasConflict
+                          ? AppTheme.slaOverdue
+                          : AppTheme.borderLight,
                       width: hasConflict ? 1.5 : 1.0,
                     ),
                   ),
@@ -235,19 +412,30 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                               children: [
                                 Text(
                                   rx.brandName,
-                                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                  ),
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   '(${rx.genericName})',
-                                  style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppTheme.textSecondary,
+                                  ),
                                 ),
                                 const SizedBox(width: 8),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: hasConflict
-                                        ? AppTheme.slaOverdue.withValues(alpha: 0.15)
+                                        ? AppTheme.slaOverdue.withValues(
+                                            alpha: 0.15,
+                                          )
                                         : Colors.grey.shade200,
                                     borderRadius: BorderRadius.circular(4),
                                   ),
@@ -256,7 +444,9 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                                     style: TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
-                                      color: hasConflict ? AppTheme.slaOverdue : AppTheme.textSecondary,
+                                      color: hasConflict
+                                          ? AppTheme.slaOverdue
+                                          : AppTheme.textSecondary,
                                     ),
                                   ),
                                 ),
@@ -264,10 +454,16 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(LucideIcons.trash2, size: 16, color: AppTheme.slaOverdue),
+                            icon: const Icon(
+                              LucideIcons.trash2,
+                              size: 16,
+                              color: AppTheme.slaOverdue,
+                            ),
                             tooltip: 'Remove',
                             onPressed: () {
-                              ref.read(encounterProvider.notifier).removePrescriptionItem(rx.drugId);
+                              ref
+                                  .read(encounterProvider.notifier)
+                                  .removePrescriptionItem(rx.drugId);
                             },
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
@@ -280,7 +476,10 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(6),
@@ -288,7 +487,10 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                             ),
                             child: Text(
                               'Dose: ${rx.dose}',
-                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -296,22 +498,32 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                           // Frequency selector chips
                           Row(
                             children: _frequencies.map((freq) {
-                              final isSelected = rx.frequency.toUpperCase() == freq;
+                              final isSelected =
+                                  rx.frequency.toUpperCase() == freq;
                               return InkWell(
                                 onTap: () {
-                                  ref.read(encounterProvider.notifier).updatePrescriptionItem(
+                                  ref
+                                      .read(encounterProvider.notifier)
+                                      .updatePrescriptionItem(
                                         rx.copyWith(frequency: freq),
                                       );
                                 },
                                 borderRadius: BorderRadius.circular(4),
                                 child: Container(
                                   margin: const EdgeInsets.only(right: 4),
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 3,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: isSelected ? AppTheme.primaryBlue : Colors.white,
+                                    color: isSelected
+                                        ? AppTheme.primaryBlue
+                                        : Colors.white,
                                     borderRadius: BorderRadius.circular(4),
                                     border: Border.all(
-                                      color: isSelected ? AppTheme.primaryBlue : AppTheme.borderLight,
+                                      color: isSelected
+                                          ? AppTheme.primaryBlue
+                                          : AppTheme.borderLight,
                                     ),
                                   ),
                                   child: Text(
@@ -319,7 +531,9 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.bold,
-                                      color: isSelected ? Colors.white : AppTheme.textSecondary,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : AppTheme.textSecondary,
                                     ),
                                   ),
                                 ),
@@ -330,10 +544,14 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                           const SizedBox(width: 8),
                           // Duration editor (tap to edit)
                           InkWell(
-                            onTap: () => _showEditDurationDialog(context, ref, rx),
+                            onTap: () =>
+                                _showEditDurationDialog(context, ref, rx),
                             borderRadius: BorderRadius.circular(6),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(6),
@@ -344,7 +562,10 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                                 children: [
                                   Text(
                                     rx.duration,
-                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                   const SizedBox(width: 4),
                                   Icon(
@@ -362,7 +583,11 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
 
                       Text(
                         'Instructions: ${rx.instructions}',
-                        style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary, fontStyle: FontStyle.italic),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppTheme.textSecondary,
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
                     ],
                   ),
@@ -386,7 +611,9 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Voice Dictation ready. Connect Gemini API key in settings for real-time clinical speech parsing.'),
+                      content: Text(
+                        'Voice Dictation ready. Connect Gemini API key in settings for real-time clinical speech parsing.',
+                      ),
                       backgroundColor: AppTheme.primaryBlue,
                       duration: Duration(seconds: 2),
                     ),
@@ -394,7 +621,10 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                 },
                 borderRadius: BorderRadius.circular(6),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.primaryBlue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
@@ -402,11 +632,19 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(LucideIcons.mic, size: 13, color: AppTheme.primaryBlue),
+                      Icon(
+                        LucideIcons.mic,
+                        size: 13,
+                        color: AppTheme.primaryBlue,
+                      ),
                       SizedBox(width: 4),
                       Text(
                         'Voice Dictate (AI)',
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryBlue),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primaryBlue,
+                        ),
                       ),
                     ],
                   ),
@@ -425,7 +663,9 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                 _buildAdviceChip('ഭക്ഷണത്തിന് ശേഷം മരുന്ന് (Take after food)'),
                 _buildAdviceChip('എണ്ണയും എരിവും ഒഴിവാക്കുക (Avoid oil/spice)'),
                 _buildAdviceChip('3 ദിവസത്തിന് ശേഷം കാണിക്കുക (Review in 3d)'),
-                _buildAdviceChip('പനി കൂടിയാൽ ഉടൻ വരിക (Emergency if fever spikes)'),
+                _buildAdviceChip(
+                  'പനി കൂടിയാൽ ഉടൻ വരിക (Emergency if fever spikes)',
+                ),
               ],
             ),
           ),
@@ -443,44 +683,90 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
           ),
           const SizedBox(height: 14),
 
-          // Follow-up Days Selector
+          // Mandatory Follow-up Days Selector
           Row(
             children: [
               const Text(
-                'Follow-up in:',
+                'Follow-up in: *',
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(width: 10),
-              ..._followUpOptions.map((days) {
-                final isSelected = encounter.followUpDays == days;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 6.0),
-                  child: InkWell(
-                    onTap: () {
-                      ref.read(encounterProvider.notifier).setFollowUpDays(isSelected ? null : days);
-                    },
-                    borderRadius: BorderRadius.circular(6),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: isSelected ? AppTheme.primaryBlue : AppTheme.surfaceBackground,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: isSelected ? AppTheme.primaryBlue : AppTheme.borderLight,
-                        ),
-                      ),
-                      child: Text(
-                        '$days Days',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                          color: isSelected ? Colors.white : AppTheme.textPrimary,
-                        ),
-                      ),
+              const SizedBox(width: 8),
+              if (encounter.followUpDays == null)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppTheme.slaOverdue.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: AppTheme.slaOverdue),
+                  ),
+                  child: const Text(
+                    'Selection Mandatory',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.slaOverdue,
                     ),
                   ),
-                );
-              }),
+                ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: _followUpOptions.map((days) {
+                      final isSelected = encounter.followUpDays == days;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 6.0),
+                        child: InkWell(
+                          onTap: () {
+                            ref
+                                .read(encounterProvider.notifier)
+                                .setFollowUpDays(isSelected ? null : days);
+                          },
+                          borderRadius: BorderRadius.circular(6),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AppTheme.primaryBlue
+                                  : AppTheme.surfaceBackground,
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: isSelected
+                                    ? AppTheme.primaryBlue
+                                    : (encounter.followUpDays == null
+                                          ? AppTheme.slaOverdue.withValues(
+                                              alpha: 0.5,
+                                            )
+                                          : AppTheme.borderLight),
+                                width: isSelected ? 1.5 : 1.0,
+                              ),
+                            ),
+                            child: Text(
+                              '$days Days',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.w500,
+                                color: isSelected
+                                    ? Colors.white
+                                    : AppTheme.textPrimary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
             ],
           ),
         ],
@@ -535,7 +821,10 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                 children: [
                   Text(
                     'Edit Duration: ${rx.brandName}',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
@@ -544,7 +833,10 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                     autofocus: true,
                     keyboardType: TextInputType.number,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w600,
+                    ),
                     decoration: const InputDecoration(
                       hintText: '1',
                       border: OutlineInputBorder(),
@@ -583,10 +875,14 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               decoration: BoxDecoration(
-                                color: isSelected ? AppTheme.primaryBlue : AppTheme.surfaceBackground,
+                                color: isSelected
+                                    ? AppTheme.primaryBlue
+                                    : AppTheme.surfaceBackground,
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: isSelected ? AppTheme.primaryBlue : AppTheme.borderLight,
+                                  color: isSelected
+                                      ? AppTheme.primaryBlue
+                                      : AppTheme.borderLight,
                                   width: 1.5,
                                 ),
                               ),
@@ -596,7 +892,9 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: isSelected ? Colors.white : AppTheme.textPrimary,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : AppTheme.textPrimary,
                                 ),
                               ),
                             ),
@@ -627,8 +925,11 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                   // Confirm button
                   ElevatedButton(
                     onPressed: () {
-                      final durationText = '$number ${selectedUnit.label.toLowerCase()}';
-                      ref.read(encounterProvider.notifier).updatePrescriptionItem(
+                      final durationText =
+                          '$number ${selectedUnit.label.toLowerCase()}';
+                      ref
+                          .read(encounterProvider.notifier)
+                          .updatePrescriptionItem(
                             rx.copyWith(duration: durationText),
                           );
                       Navigator.pop(context);
@@ -637,11 +938,16 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                       backgroundColor: AppTheme.primaryBlue,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                     child: const Text(
                       'Confirm',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -666,7 +972,9 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
         side: BorderSide(color: Colors.teal.shade200),
         onPressed: () {
           final current = _adviceController.text.trim();
-          final updated = current.isEmpty ? adviceText : '$current; $adviceText';
+          final updated = current.isEmpty
+              ? adviceText
+              : '$current; $adviceText';
           _adviceController.text = updated;
           ref.read(encounterProvider.notifier).setGeneralAdvice(updated);
         },
@@ -689,4 +997,3 @@ const List<DurationUnit> _durationUnits = [
   DurationUnit(label: 'Weeks', factor: 7),
   DurationUnit(label: 'Months', factor: 30),
 ];
-

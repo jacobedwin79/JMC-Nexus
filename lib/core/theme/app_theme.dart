@@ -5,10 +5,14 @@ class AppTheme {
   static const Color slaNormal = Color(0xFF10B981); // Green (<30m)
   static const Color slaWarning = Color(0xFFF59E0B); // Amber (30-45m)
   static const Color slaOverdue = Color(0xFFEF4444); // High-contrast Red (>45m)
-  static const Color emergencyRed = Color(0xFFEF4444); // High-contrast Alert/Allergy Red
+  static const Color emergencyRed = Color(
+    0xFFEF4444,
+  ); // High-contrast Alert/Allergy Red
 
   // Primary Clinical Palette
-  static const Color primaryBlue = Color(0xFF0F766E); // Medical Deep Teal / Ocean
+  static const Color primaryBlue = Color(
+    0xFF0F766E,
+  ); // Medical Deep Teal / Ocean
   static const Color primaryAccent = Color(0xFF0284C7);
   static const Color surfaceBackground = Color(0xFFF8FAFC);
   static const Color cardBackground = Colors.white;
@@ -51,7 +55,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: borderLight),
@@ -66,12 +73,9 @@ class AppTheme {
         ),
       ),
       chipTheme: ChipThemeData(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       ),
     );
   }
 }
-

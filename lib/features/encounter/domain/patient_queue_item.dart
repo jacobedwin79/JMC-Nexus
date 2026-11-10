@@ -1,4 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../core/sync/server_time_service.dart';
+import '../../../core/utils/age_calculator.dart';
 
 part 'patient_queue_item.freezed.dart';
 part 'patient_queue_item.g.dart';
@@ -51,6 +53,7 @@ abstract class PatientQueueItem with _$PatientQueueItem {
     required int tokenNumber,
     required String patientName,
     required int age,
+    DateTime? dateOfBirth,
     required String gender,
     String? phone,
     @Default({}) Map<String, dynamic> vitals,
@@ -63,6 +66,7 @@ abstract class PatientQueueItem with _$PatientQueueItem {
     DateTime? consultationStartTime,
     DateTime? completionTime,
     String? compiledPrescriptionJson,
+    String? overrideReason,
   }) = _PatientQueueItem;
 
   factory PatientQueueItem.fromJson(Map<String, dynamic> json) =>
@@ -70,8 +74,36 @@ abstract class PatientQueueItem with _$PatientQueueItem {
 
   QueueStatus get queueStatus => QueueStatus.fromDb(status);
 
+  /// Dynamically formatted age string:
+  /// - Days for neonates (< 30 days)
+  /// - Weeks/Months for infants (< 1 year)
+  /// - Years for older children and adults
+  String get dynamicAgeDisplay {
+    if (dateOfBirth != null) {
+      return AgeCalculator.formatAge(dateOfBirth!);
+    }
+    return '$age ${age == 1 ? "year" : "years"}';
+  }
+
+  /// Compact age tag (e.g. "12d", "5m", "42y")
+  String get compactAgeDisplay {
+    if (dateOfBirth != null) {
+      return AgeCalculator.formatAgeCompact(dateOfBirth!);
+    }
+    return '${age}y';
+  }
+
+  /// Numeric age in years for clinical thresholds & stratification
+  int get calculatedAge {
+    if (dateOfBirth != null) {
+      return AgeCalculator.calculateYears(dateOfBirth!);
+    }
+    return age;
+  }
+
+  /// SLA Wait time calculation synchronized via ServerTimeService to prevent terminal clock skewing
   int waitMinutes([DateTime? referenceTime]) {
-    final now = referenceTime ?? DateTime.now();
+    final now = referenceTime ?? ServerTimeService.now;
     final diff = now.difference(entryTime.toLocal()).inMinutes;
     return diff < 0 ? 0 : diff;
   }
@@ -81,6 +113,7 @@ abstract class PatientQueueItem with _$PatientQueueItem {
     final mins = waitMinutes(referenceTime);
     return mins >= 30 && mins < 45;
   }
+
   bool isNormal([DateTime? referenceTime]) => waitMinutes(referenceTime) < 30;
 
   String get waitTimeDisplay {

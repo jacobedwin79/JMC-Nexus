@@ -19,8 +19,9 @@ class QueueMonitorState {
   List<PatientQueueItem> get waitingPatients =>
       allPatients.where((p) => p.queueStatus == QueueStatus.waiting).toList();
 
-  List<PatientQueueItem> get inConsultationPatients =>
-      allPatients.where((p) => p.queueStatus == QueueStatus.inConsultation).toList();
+  List<PatientQueueItem> get inConsultationPatients => allPatients
+      .where((p) => p.queueStatus == QueueStatus.inConsultation)
+      .toList();
 
   List<PatientQueueItem> get completedPatients =>
       allPatients.where((p) => p.queueStatus == QueueStatus.completed).toList();
@@ -36,7 +37,9 @@ class QueueMonitorState {
 
   String? get overdueBannerText {
     if (overduePatients.isEmpty) return null;
-    final tokenList = overduePatients.map((p) => '#${p.tokenNumber}').join(', ');
+    final tokenList = overduePatients
+        .map((p) => '#${p.tokenNumber}')
+        .join(', ');
     final count = overduePatients.length;
     return '⚠️ $count ${count == 1 ? "Patient" : "Patients"} waiting > 45 mins (Tokens $tokenList)';
   }
@@ -112,4 +115,6 @@ class QueueMonitorNotifier extends Notifier<QueueMonitorState> {
 }
 
 final queueMonitorProvider =
-    NotifierProvider<QueueMonitorNotifier, QueueMonitorState>(QueueMonitorNotifier.new);
+    NotifierProvider<QueueMonitorNotifier, QueueMonitorState>(
+      QueueMonitorNotifier.new,
+    );

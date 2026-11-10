@@ -7,13 +7,15 @@ import '../../features/encounter/domain/clinical_models.dart';
 import '../../features/encounter/domain/encounter_state.dart';
 
 class A4LaserPrintService {
-  static const double letterheadTopMarginMm = 45.0; // 45mm blank margin for physical letterheads
+  static const double letterheadTopMarginMm =
+      45.0; // 45mm blank margin for physical letterheads
   static const double standardMarginMm = 10.0;
 
   /// Generates the crisp vector A4 PDF bytes
   static Future<Uint8List> buildA4Prescription(EncounterState encounter) async {
     final pdf = pw.Document(
-      title: 'Prescription - ${encounter.activePatient?.patientName ?? "Patient"}',
+      title:
+          'Prescription - ${encounter.activePatient?.patientName ?? "Patient"}',
       author: 'JMC Nexus Health System',
     );
 
@@ -30,13 +32,15 @@ class A4LaserPrintService {
     final patient = encounter.activePatient;
     final patientIdLabel =
         (patient?.patientId != null && patient!.patientId!.trim().isNotEmpty)
-            ? ' [ID: ${patient.patientId}]'
-            : '';
+        ? ' [ID: ${patient.patientId}]'
+        : '';
     final now = DateTime.now();
     final dateFormat = DateFormat('dd MMM yyyy');
     final timeFormat = DateFormat('h:mm a');
 
-    final vitals = patient != null ? PatientVitals.fromJson(patient.vitals) : const PatientVitals();
+    final vitals = patient != null
+        ? PatientVitals.fromJson(patient.vitals)
+        : const PatientVitals();
 
     pw.Font? malayalamFont;
     pw.Font? malayalamBoldFont;
@@ -70,7 +74,10 @@ class A4LaserPrintService {
                   padding: const pw.EdgeInsets.only(bottom: 8),
                   decoration: const pw.BoxDecoration(
                     border: pw.Border(
-                      bottom: pw.BorderSide(color: PdfColors.blueGrey800, width: 1.5),
+                      bottom: pw.BorderSide(
+                        color: PdfColors.blueGrey800,
+                        width: 1.5,
+                      ),
                     ),
                   ),
                   child: pw.Row(
@@ -90,11 +97,17 @@ class A4LaserPrintService {
                           pw.SizedBox(height: 2),
                           pw.Text(
                             'Comprehensive Outpatient & Emergency Clinical Center',
-                            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+                            style: const pw.TextStyle(
+                              fontSize: 9,
+                              color: PdfColors.grey700,
+                            ),
                           ),
                           pw.Text(
                             'Phone: +91 98765 43210 | Email: care@jmchealth.org',
-                            style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
+                            style: const pw.TextStyle(
+                              fontSize: 8,
+                              color: PdfColors.grey600,
+                            ),
                           ),
                         ],
                       ),
@@ -111,7 +124,10 @@ class A4LaserPrintService {
                           ),
                           pw.Text(
                             'MBBS, MD (General Medicine)',
-                            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey800),
+                            style: const pw.TextStyle(
+                              fontSize: 9,
+                              color: PdfColors.grey800,
+                            ),
                           ),
                           pw.Text(
                             'Reg. No: KMC-49281',
@@ -131,10 +147,15 @@ class A4LaserPrintService {
 
               // 2. Patient Demographics & Token Strip
               pw.Container(
-                padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 6,
+                ),
                 decoration: pw.BoxDecoration(
                   color: PdfColors.grey100,
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+                  borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(4),
+                  ),
                   border: pw.Border.all(color: PdfColors.grey300, width: 0.8),
                 ),
                 child: pw.Row(
@@ -142,11 +163,18 @@ class A4LaserPrintService {
                   children: [
                     pw.Text(
                       'TOKEN: #${patient?.tokenNumber ?? "--"}',
-                      style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900),
+                      style: pw.TextStyle(
+                        fontSize: 11,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.blue900,
+                      ),
                     ),
                     pw.Text(
-                      'Patient: ${patient?.patientName ?? "Unknown"}$patientIdLabel (${patient?.age ?? "--"}Y / ${patient?.gender ?? "--"})',
-                      style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+                      'Patient: ${patient?.patientName ?? "Unknown"}$patientIdLabel (${patient?.dynamicAgeDisplay ?? "--"} / ${patient?.gender ?? "--"})',
+                      style: pw.TextStyle(
+                        fontSize: 10,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
                     ),
                     pw.Text(
                       'Date: ${dateFormat.format(now)}',
@@ -172,7 +200,10 @@ class A4LaserPrintService {
                       padding: const pw.EdgeInsets.only(right: 10),
                       decoration: const pw.BoxDecoration(
                         border: pw.Border(
-                          right: pw.BorderSide(color: PdfColors.grey300, width: 0.8),
+                          right: pw.BorderSide(
+                            color: PdfColors.grey300,
+                            width: 0.8,
+                          ),
                         ),
                       ),
                       child: pw.Column(
@@ -186,8 +217,13 @@ class A4LaserPrintService {
                               margin: const pw.EdgeInsets.only(bottom: 8),
                               decoration: pw.BoxDecoration(
                                 color: PdfColors.grey50,
-                                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(3)),
-                                border: pw.Border.all(color: PdfColors.grey300, width: 0.5),
+                                borderRadius: const pw.BorderRadius.all(
+                                  pw.Radius.circular(3),
+                                ),
+                                border: pw.Border.all(
+                                  color: PdfColors.grey300,
+                                  width: 0.5,
+                                ),
                               ),
                               child: pw.Column(
                                 crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -195,13 +231,25 @@ class A4LaserPrintService {
                                   if (vitals.bpSys != null)
                                     _buildPdfVitalRow('BP', vitals.bpDisplay),
                                   if (vitals.pulse != null)
-                                    _buildPdfVitalRow('Pulse', vitals.pulseDisplay),
+                                    _buildPdfVitalRow(
+                                      'Pulse',
+                                      vitals.pulseDisplay,
+                                    ),
                                   if (vitals.spo2 != null)
-                                    _buildPdfVitalRow('SpO2', vitals.spo2Display),
+                                    _buildPdfVitalRow(
+                                      'SpO2',
+                                      vitals.spo2Display,
+                                    ),
                                   if (vitals.temp != null)
-                                    _buildPdfVitalRow('Temp', vitals.tempDisplay),
+                                    _buildPdfVitalRow(
+                                      'Temp',
+                                      vitals.tempDisplay,
+                                    ),
                                   if (vitals.weight != null)
-                                    _buildPdfVitalRow('Weight', vitals.weightDisplay),
+                                    _buildPdfVitalRow(
+                                      'Weight',
+                                      vitals.weightDisplay,
+                                    ),
                                 ],
                               ),
                             ),
@@ -214,9 +262,16 @@ class A4LaserPrintService {
                               padding: const pw.EdgeInsets.only(bottom: 8),
                               child: pw.Text(
                                 encounter.selectedComorbidityIds
-                                    .map((id) => id.replaceAll('comorb_', '').toUpperCase())
+                                    .map(
+                                      (id) => id
+                                          .replaceAll('comorb_', '')
+                                          .toUpperCase(),
+                                    )
                                     .join(', '),
-                                style: pw.TextStyle(fontSize: 8.5, fontWeight: pw.FontWeight.bold),
+                                style: pw.TextStyle(
+                                  fontSize: 8.5,
+                                  fontWeight: pw.FontWeight.bold,
+                                ),
                               ),
                             ),
                           ],
@@ -226,10 +281,17 @@ class A4LaserPrintService {
                           pw.Padding(
                             padding: const pw.EdgeInsets.only(bottom: 8),
                             child: pw.Container(
-                              padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+                              padding: const pw.EdgeInsets.symmetric(
+                                horizontal: 4,
+                                vertical: 3,
+                              ),
                               decoration: pw.BoxDecoration(
-                                color: encounter.allergies.isNotEmpty ? PdfColors.red50 : PdfColors.grey100,
-                                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(3)),
+                                color: encounter.allergies.isNotEmpty
+                                    ? PdfColors.red50
+                                    : PdfColors.grey100,
+                                borderRadius: const pw.BorderRadius.all(
+                                  pw.Radius.circular(3),
+                                ),
                               ),
                               child: pw.Text(
                                 encounter.allergies.isNotEmpty
@@ -237,8 +299,12 @@ class A4LaserPrintService {
                                     : 'NKDA (Nil Known Drug Allergies)',
                                 style: pw.TextStyle(
                                   fontSize: 8,
-                                  fontWeight: encounter.allergies.isNotEmpty ? pw.FontWeight.bold : pw.FontWeight.normal,
-                                  color: encounter.allergies.isNotEmpty ? PdfColors.red900 : PdfColors.grey700,
+                                  fontWeight: encounter.allergies.isNotEmpty
+                                      ? pw.FontWeight.bold
+                                      : pw.FontWeight.normal,
+                                  color: encounter.allergies.isNotEmpty
+                                      ? PdfColors.red900
+                                      : PdfColors.grey700,
                                 ),
                               ),
                             ),
@@ -268,11 +334,16 @@ class A4LaserPrintService {
                                       children: [
                                         pw.TextSpan(
                                           text: '${exam.systemName}: ',
-                                          style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
+                                          style: pw.TextStyle(
+                                            fontSize: 8,
+                                            fontWeight: pw.FontWeight.bold,
+                                          ),
                                         ),
                                         pw.TextSpan(
                                           text: exam.compiledText,
-                                          style: const pw.TextStyle(fontSize: 8),
+                                          style: const pw.TextStyle(
+                                            fontSize: 8,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -282,20 +353,62 @@ class A4LaserPrintService {
                             ),
                           ),
 
-                          // Final Diagnoses
-                          _buildPdfSectionHeader('Diagnosis'),
-                          pw.Padding(
-                            padding: const pw.EdgeInsets.only(bottom: 8),
-                            child: pw.Column(
-                              crossAxisAlignment: pw.CrossAxisAlignment.start,
-                              children: encounter.selectedDiagnosisIds.map((d) {
-                                return pw.Text(
-                                  '- ${d.replaceAll("diag_", "").toUpperCase()}',
-                                  style: pw.TextStyle(fontSize: 8.5, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900),
-                                );
-                              }).toList(),
+                          // Final Diagnoses (Respects Privacy Toggle)
+                          if (encounter.printDiagnosis) ...[
+                            _buildPdfSectionHeader('Diagnosis'),
+                            pw.Padding(
+                              padding: const pw.EdgeInsets.only(bottom: 8),
+                              child: pw.Column(
+                                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                children: encounter.selectedDiagnosisIds.map((
+                                  d,
+                                ) {
+                                  return pw.Text(
+                                    '- ${d.replaceAll("diag_", "").toUpperCase()}',
+                                    style: pw.TextStyle(
+                                      fontSize: 8.5,
+                                      fontWeight: pw.FontWeight.bold,
+                                      color: PdfColors.blue900,
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
                             ),
-                          ),
+                          ] else ...[
+                            _buildPdfSectionHeader('Diagnosis'),
+                            pw.Padding(
+                              padding: const pw.EdgeInsets.only(bottom: 8),
+                              child: pw.Text(
+                                '(Withheld on request - Confidential)',
+                                style: pw.TextStyle(
+                                  fontSize: 7.5,
+                                  fontStyle: pw.FontStyle.italic,
+                                  color: PdfColors.grey600,
+                                ),
+                              ),
+                            ),
+                          ],
+
+                          // Ordered Investigations Section
+                          if (encounter.investigations.isNotEmpty) ...[
+                            _buildPdfSectionHeader('Investigations / Orders'),
+                            pw.Padding(
+                              padding: const pw.EdgeInsets.only(bottom: 8),
+                              child: pw.Column(
+                                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                children: encounter.investigations.map((inv) {
+                                  return pw.Text(
+                                    '• $inv',
+                                    style: pw.TextStyle(
+                                      fontSize: 8,
+                                      fontWeight: pw.FontWeight.bold,
+                                      color: PdfColors.blueGrey800,
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -309,7 +422,8 @@ class A4LaserPrintService {
                           children: [
                             // Large Rx Symbol
                             pw.Row(
-                              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment:
+                                  pw.MainAxisAlignment.spaceBetween,
                               children: [
                                 pw.Text(
                                   'Rx',
@@ -321,7 +435,10 @@ class A4LaserPrintService {
                                 ),
                                 pw.Text(
                                   '${encounter.activePrescription.length} Medications',
-                                  style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
+                                  style: const pw.TextStyle(
+                                    fontSize: 9,
+                                    color: PdfColors.grey600,
+                                  ),
                                 ),
                               ],
                             ),
@@ -329,19 +446,26 @@ class A4LaserPrintService {
 
                             // Structured Medications Table
                             pw.Table(
-                              border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+                              border: pw.TableBorder.all(
+                                color: PdfColors.grey300,
+                                width: 0.5,
+                              ),
                               columnWidths: {
                                 0: const pw.FlexColumnWidth(0.5), // #
                                 1: const pw.FlexColumnWidth(3.0), // Medicine
                                 2: const pw.FlexColumnWidth(1.2), // Dose
                                 3: const pw.FlexColumnWidth(1.2), // Frequency
                                 4: const pw.FlexColumnWidth(1.2), // Duration
-                                5: const pw.FlexColumnWidth(2.5), // Instructions
+                                5: const pw.FlexColumnWidth(
+                                  2.5,
+                                ), // Instructions
                               },
                               children: [
                                 // Table Header
                                 pw.TableRow(
-                                  decoration: const pw.BoxDecoration(color: PdfColors.grey200),
+                                  decoration: const pw.BoxDecoration(
+                                    color: PdfColors.grey200,
+                                  ),
                                   children: [
                                     _buildTableHeader('#'),
                                     _buildTableHeader('Medicine Name'),
@@ -352,52 +476,84 @@ class A4LaserPrintService {
                                   ],
                                 ),
                                 // Table Rows
-                                ...List.generate(encounter.activePrescription.length, (idx) {
-                                  final rx = encounter.activePrescription[idx];
-                                  final isEven = idx % 2 == 0;
-                                  return pw.TableRow(
-                                    decoration: pw.BoxDecoration(
-                                      color: isEven ? PdfColors.white : PdfColors.grey50,
-                                    ),
-                                    children: [
-                                      _buildTableCell('${idx + 1}', isBold: true, align: pw.TextAlign.center),
-                                      pw.Padding(
-                                        padding: const pw.EdgeInsets.all(4),
-                                        child: pw.Column(
-                                          crossAxisAlignment: pw.CrossAxisAlignment.start,
-                                          children: [
-                                            pw.Text(
-                                              rx.brandName,
-                                              style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
-                                            ),
-                                            pw.Text(
-                                              rx.genericName,
-                                              style: const pw.TextStyle(fontSize: 7.5, color: PdfColors.grey700),
-                                            ),
-                                          ],
-                                        ),
+                                ...List.generate(
+                                  encounter.activePrescription.length,
+                                  (idx) {
+                                    final rx =
+                                        encounter.activePrescription[idx];
+                                    final isEven = idx % 2 == 0;
+                                    return pw.TableRow(
+                                      decoration: pw.BoxDecoration(
+                                        color: isEven
+                                            ? PdfColors.white
+                                            : PdfColors.grey50,
                                       ),
-                                      _buildTableCell(rx.dose),
-                                      _buildTableCell(rx.frequency, isBold: true, align: pw.TextAlign.center),
-                                      _buildTableCell(rx.duration, align: pw.TextAlign.center),
-                                      _buildTableCell(rx.instructions),
-                                    ],
-                                  );
-                                }),
+                                      children: [
+                                        _buildTableCell(
+                                          '${idx + 1}',
+                                          isBold: true,
+                                          align: pw.TextAlign.center,
+                                        ),
+                                        pw.Padding(
+                                          padding: const pw.EdgeInsets.all(4),
+                                          child: pw.Column(
+                                            crossAxisAlignment:
+                                                pw.CrossAxisAlignment.start,
+                                            children: [
+                                              pw.Text(
+                                                rx.brandName,
+                                                style: pw.TextStyle(
+                                                  fontSize: 9,
+                                                  fontWeight:
+                                                      pw.FontWeight.bold,
+                                                ),
+                                              ),
+                                              pw.Text(
+                                                rx.genericName,
+                                                style: const pw.TextStyle(
+                                                  fontSize: 7.5,
+                                                  color: PdfColors.grey700,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        _buildTableCell(rx.dose),
+                                        _buildTableCell(
+                                          rx.frequency,
+                                          isBold: true,
+                                          align: pw.TextAlign.center,
+                                        ),
+                                        _buildTableCell(
+                                          rx.duration,
+                                          align: pw.TextAlign.center,
+                                        ),
+                                        _buildTableCell(rx.instructions),
+                                      ],
+                                    );
+                                  },
+                                ),
                               ],
                             ),
                             pw.SizedBox(height: 12),
 
                             // General Advice & Dietary Guidelines
                             if (encounter.generalAdvice.isNotEmpty) ...[
-                              _buildPdfSectionHeader('General Advice & Dietary Instructions'),
+                              _buildPdfSectionHeader(
+                                'General Advice & Dietary Instructions',
+                              ),
                               pw.Container(
                                 width: double.infinity,
                                 padding: const pw.EdgeInsets.all(6),
                                 decoration: pw.BoxDecoration(
                                   color: PdfColors.grey50,
-                                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(3)),
-                                  border: pw.Border.all(color: PdfColors.grey300, width: 0.5),
+                                  borderRadius: const pw.BorderRadius.all(
+                                    pw.Radius.circular(3),
+                                  ),
+                                  border: pw.Border.all(
+                                    color: PdfColors.grey300,
+                                    width: 0.5,
+                                  ),
                                 ),
                                 child: pw.Text(
                                   encounter.generalAdvice,
@@ -410,15 +566,27 @@ class A4LaserPrintService {
                             // Follow-up Notice
                             if (encounter.followUpDays != null) ...[
                               pw.Container(
-                                padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                padding: const pw.EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
                                 decoration: pw.BoxDecoration(
                                   color: PdfColors.blue50,
-                                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(3)),
-                                  border: pw.Border.all(color: PdfColors.blue200, width: 0.5),
+                                  borderRadius: const pw.BorderRadius.all(
+                                    pw.Radius.circular(3),
+                                  ),
+                                  border: pw.Border.all(
+                                    color: PdfColors.blue200,
+                                    width: 0.5,
+                                  ),
                                 ),
                                 child: pw.Text(
                                   'Follow-up / Review: In ${encounter.followUpDays} days or SOS if symptoms aggravate.',
-                                  style: pw.TextStyle(fontSize: 8.5, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900),
+                                  style: pw.TextStyle(
+                                    fontSize: 8.5,
+                                    fontWeight: pw.FontWeight.bold,
+                                    color: PdfColors.blue900,
+                                  ),
                                 ),
                               ),
                             ],
@@ -434,14 +602,19 @@ class A4LaserPrintService {
               pw.Container(
                 padding: const pw.EdgeInsets.only(top: 8),
                 decoration: const pw.BoxDecoration(
-                  border: pw.Border(top: pw.BorderSide(color: PdfColors.grey300, width: 0.8)),
+                  border: pw.Border(
+                    top: pw.BorderSide(color: PdfColors.grey300, width: 0.8),
+                  ),
                 ),
                 child: pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Text(
                       'Generated via JMC Nexus | Valid Medical Electronic Prescription',
-                      style: const pw.TextStyle(fontSize: 7.5, color: PdfColors.grey600),
+                      style: const pw.TextStyle(
+                        fontSize: 7.5,
+                        color: PdfColors.grey600,
+                      ),
                     ),
                     pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.end,
@@ -449,13 +622,21 @@ class A4LaserPrintService {
                         pw.Container(
                           width: 120,
                           decoration: const pw.BoxDecoration(
-                            border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey700, width: 0.8)),
+                            border: pw.Border(
+                              bottom: pw.BorderSide(
+                                color: PdfColors.grey700,
+                                width: 0.8,
+                              ),
+                            ),
                           ),
                         ),
                         pw.SizedBox(height: 2),
                         pw.Text(
                           'Doctor\'s Signature / Stamp',
-                          style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700),
+                          style: const pw.TextStyle(
+                            fontSize: 8,
+                            color: PdfColors.grey700,
+                          ),
                         ),
                       ],
                     ),
@@ -502,8 +683,14 @@ class A4LaserPrintService {
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Text(label, style: const pw.TextStyle(fontSize: 7.5, color: PdfColors.grey700)),
-          pw.Text(value, style: pw.TextStyle(fontSize: 7.5, fontWeight: pw.FontWeight.bold)),
+          pw.Text(
+            label,
+            style: const pw.TextStyle(fontSize: 7.5, color: PdfColors.grey700),
+          ),
+          pw.Text(
+            value,
+            style: pw.TextStyle(fontSize: 7.5, fontWeight: pw.FontWeight.bold),
+          ),
         ],
       ),
     );
@@ -514,7 +701,11 @@ class A4LaserPrintService {
       padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 3),
       child: pw.Text(
         text,
-        style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold, color: PdfColors.grey900),
+        style: pw.TextStyle(
+          fontSize: 8,
+          fontWeight: pw.FontWeight.bold,
+          color: PdfColors.grey900,
+        ),
         textAlign: pw.TextAlign.left,
       ),
     );

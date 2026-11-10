@@ -32,6 +32,7 @@ extension PatientQueueEntryMapper on PatientQueueEntry {
       tokenNumber: tokenNumber,
       patientName: patientName,
       age: age,
+      dateOfBirth: dateOfBirth,
       gender: gender,
       phone: phone,
       vitals: vitalsMap,
@@ -44,6 +45,7 @@ extension PatientQueueEntryMapper on PatientQueueEntry {
       consultationStartTime: consultationStartTime,
       completionTime: completionTime,
       compiledPrescriptionJson: compiledPrescriptionJson,
+      overrideReason: overrideReason,
     );
   }
 }
@@ -64,7 +66,9 @@ extension ComorbidityEntryMapper on ComorbidityEntry {
 }
 
 extension PresentingComplaintEntryMapper on PresentingComplaintEntry {
-  PresentingComplaintModel toDomain([List<ComplaintSubQuestionModel> subQuestions = const []]) {
+  PresentingComplaintModel toDomain([
+    List<ComplaintSubQuestionModel> subQuestions = const [],
+  ]) {
     return PresentingComplaintModel(
       id: id,
       name: name,
@@ -112,16 +116,16 @@ extension ExaminationSystemEntryMapper on ExaminationSystemEntry {
 
 extension DiagnosisEntryMapper on DiagnosisEntry {
   DiagnosisModel toDomain() {
-    List<String> complaints = [];
+    List<String> linked = [];
     try {
-      complaints = (jsonDecode(linkedComplaintIds) as List).cast<String>();
+      linked = (jsonDecode(linkedComplaintIds) as List).cast<String>();
     } catch (_) {}
 
     return DiagnosisModel(
       id: id,
       name: name,
       icd10Code: icd10Code,
-      linkedComplaintIds: complaints,
+      linkedComplaintIds: linked,
     );
   }
 }
@@ -146,16 +150,12 @@ extension PrescriptionProtocolEntryMapper on PrescriptionProtocolEntry {
   PrescriptionProtocolModel toDomain() {
     List<ProtocolItemEntry> items = [];
     try {
-      final decoded = jsonDecode(protocolItemsJson) as List;
-      for (final item in decoded) {
-        items.add(ProtocolItemEntry(
-          drugId: item['drugId'] as String,
-          doseOverride: item['doseOverride'] as String?,
-          frequencyOverride: item['frequencyOverride'] as String?,
-          durationOverride: item['durationOverride'] as String?,
-          instructionsOverride: item['instructionsOverride'] as String?,
-        ));
-      }
+      final list = jsonDecode(protocolItemsJson) as List;
+      items = list
+          .map(
+            (item) => ProtocolItemEntry.fromJson(item as Map<String, dynamic>),
+          )
+          .toList();
     } catch (_) {}
 
     return PrescriptionProtocolModel(
@@ -166,4 +166,3 @@ extension PrescriptionProtocolEntryMapper on PrescriptionProtocolEntry {
     );
   }
 }
-

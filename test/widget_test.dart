@@ -16,9 +16,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          appDatabaseProvider.overrideWithValue(testDb),
-        ],
+        overrides: [appDatabaseProvider.overrideWithValue(testDb)],
         child: const JmcNexusApp(),
       ),
     );

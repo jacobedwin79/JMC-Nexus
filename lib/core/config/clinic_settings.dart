@@ -11,10 +11,12 @@ class ClinicSettings {
   final double letterheadTopMarginMm;
   final String supabaseUrl;
   final String supabaseAnonKey;
+  final String geminiApiKey;
 
   const ClinicSettings({
     this.clinicName = 'JMC CLINICAL HEALTHCARE & OPD',
-    this.clinicSubtitle = 'Comprehensive Outpatient & Emergency Clinical Center',
+    this.clinicSubtitle =
+        'Comprehensive Outpatient & Emergency Clinical Center',
     this.clinicContact = 'Phone: +91 98765 43210 | Email: care@jmchealth.org',
     this.doctorName = 'Dr. Rajesh Varma, MD',
     this.doctorQualifications = 'MBBS, MD (General Medicine)',
@@ -22,10 +24,13 @@ class ClinicSettings {
     this.letterheadTopMarginMm = 45.0,
     this.supabaseUrl = '',
     this.supabaseAnonKey = '',
+    this.geminiApiKey = '',
   });
 
   bool get hasSupabaseCredentials =>
       supabaseUrl.trim().isNotEmpty && supabaseAnonKey.trim().isNotEmpty;
+
+  bool get hasGeminiApiKey => geminiApiKey.trim().isNotEmpty;
 
   ClinicSettings copyWith({
     String? clinicName,
@@ -37,6 +42,7 @@ class ClinicSettings {
     double? letterheadTopMarginMm,
     String? supabaseUrl,
     String? supabaseAnonKey,
+    String? geminiApiKey,
   }) {
     return ClinicSettings(
       clinicName: clinicName ?? this.clinicName,
@@ -45,9 +51,11 @@ class ClinicSettings {
       doctorName: doctorName ?? this.doctorName,
       doctorQualifications: doctorQualifications ?? this.doctorQualifications,
       registrationNumber: registrationNumber ?? this.registrationNumber,
-      letterheadTopMarginMm: letterheadTopMarginMm ?? this.letterheadTopMarginMm,
+      letterheadTopMarginMm:
+          letterheadTopMarginMm ?? this.letterheadTopMarginMm,
       supabaseUrl: supabaseUrl ?? this.supabaseUrl,
       supabaseAnonKey: supabaseAnonKey ?? this.supabaseAnonKey,
+      geminiApiKey: geminiApiKey ?? this.geminiApiKey,
     );
   }
 }
@@ -64,6 +72,7 @@ class ClinicSettingsNotifier extends Notifier<ClinicSettings> {
   static const _kLetterheadMargin = 'letterhead_margin';
   static const _kSupabaseUrl = 'supabase_url';
   static const _kSupabaseKey = 'supabase_key';
+  static const _kGeminiKey = 'gemini_api_key';
 
   @override
   ClinicSettings build() {
@@ -77,15 +86,22 @@ class ClinicSettingsNotifier extends Notifier<ClinicSettings> {
 
   ClinicSettings _fromPrefs(SharedPreferences prefs) {
     return ClinicSettings(
-      clinicName: prefs.getString(_kClinicName) ?? 'JMC CLINICAL HEALTHCARE & OPD',
-      clinicSubtitle: prefs.getString(_kClinicSubtitle) ?? 'Comprehensive Outpatient & Emergency Clinical Center',
-      clinicContact: prefs.getString(_kClinicContact) ?? 'Phone: +91 98765 43210 | Email: care@jmchealth.org',
+      clinicName:
+          prefs.getString(_kClinicName) ?? 'JMC CLINICAL HEALTHCARE & OPD',
+      clinicSubtitle:
+          prefs.getString(_kClinicSubtitle) ??
+          'Comprehensive Outpatient & Emergency Clinical Center',
+      clinicContact:
+          prefs.getString(_kClinicContact) ??
+          'Phone: +91 98765 43210 | Email: care@jmchealth.org',
       doctorName: prefs.getString(_kDoctorName) ?? 'Dr. Rajesh Varma, MD',
-      doctorQualifications: prefs.getString(_kDoctorQuals) ?? 'MBBS, MD (General Medicine)',
+      doctorQualifications:
+          prefs.getString(_kDoctorQuals) ?? 'MBBS, MD (General Medicine)',
       registrationNumber: prefs.getString(_kRegNumber) ?? 'Reg. No: KMC-49281',
       letterheadTopMarginMm: prefs.getDouble(_kLetterheadMargin) ?? 45.0,
       supabaseUrl: prefs.getString(_kSupabaseUrl) ?? '',
       supabaseAnonKey: prefs.getString(_kSupabaseKey) ?? '',
+      geminiApiKey: prefs.getString(_kGeminiKey) ?? '',
     );
   }
 
@@ -106,9 +122,11 @@ class ClinicSettingsNotifier extends Notifier<ClinicSettings> {
     await prefs.setDouble(_kLetterheadMargin, updated.letterheadTopMarginMm);
     await prefs.setString(_kSupabaseUrl, updated.supabaseUrl);
     await prefs.setString(_kSupabaseKey, updated.supabaseAnonKey);
+    await prefs.setString(_kGeminiKey, updated.geminiApiKey);
   }
 }
 
 final clinicSettingsProvider =
-    NotifierProvider<ClinicSettingsNotifier, ClinicSettings>(ClinicSettingsNotifier.new);
-
+    NotifierProvider<ClinicSettingsNotifier, ClinicSettings>(
+      ClinicSettingsNotifier.new,
+    );

@@ -106,8 +106,10 @@ abstract class PatientVitals with _$PatientVitals {
   }
 
   // Adult defaults (for backwards compatibility)
-  bool get isHypotensive => (bpSys != null && bpSys! < 90) || (bpDia != null && bpDia! < 60);
-  bool get isHypertensive => (bpSys != null && bpSys! >= 140) || (bpDia != null && bpDia! >= 90);
+  bool get isHypotensive =>
+      (bpSys != null && bpSys! < 90) || (bpDia != null && bpDia! < 60);
+  bool get isHypertensive =>
+      (bpSys != null && bpSys! >= 140) || (bpDia != null && bpDia! >= 90);
   bool get isTachycardic => pulse != null && pulse! > 100;
   bool get isHypoxemic => spo2 != null && spo2! < 95;
   bool get isFebrile => (tempInFahrenheit ?? 0) >= 99.5;
@@ -162,7 +164,8 @@ abstract class SelectedComplaintState with _$SelectedComplaintState {
   const factory SelectedComplaintState({
     required String complaintId,
     required String complaintName,
-    @Default({}) Map<String, List<String>> selectedOptions, // subQuestionId -> options
+    @Default({})
+    Map<String, List<String>> selectedOptions, // subQuestionId -> options
     @Default('') String compiledProse,
   }) = _SelectedComplaintState;
 
@@ -229,6 +232,37 @@ abstract class DrugModel with _$DrugModel {
       _$DrugModelFromJson(json);
 }
 
+/// Standardized clinical drug classes used for contraindication & safety engines.
+class ControlledDrugClasses {
+  static const List<String> list = [
+    'Antibiotic',
+    'NSAID',
+    'Steroid',
+    'Antacid',
+    'Antihistamine',
+    'Antipyretic',
+    'Antihypertensive',
+    'Antidiabetic',
+    'Antiplatelet',
+    'Bronchodilator',
+    'Analgesic',
+    'Statin',
+    'Diuretic',
+    'Antiemetic',
+    'Antispasmodic',
+    'Antitussive',
+    'Laxative',
+    'Probiotic',
+    'Fluoroquinolones',
+    'Tetracyclines',
+    'ACE Inhibitors',
+    'Beta Blockers',
+    'Metformin',
+    'Aspirin',
+    'Other',
+  ];
+}
+
 @freezed
 abstract class PrescriptionItemModel with _$PrescriptionItemModel {
   const factory PrescriptionItemModel({
@@ -275,10 +309,7 @@ abstract class PrescriptionProtocolModel with _$PrescriptionProtocolModel {
       _$PrescriptionProtocolModelFromJson(json);
 }
 
-enum AlertSeverity {
-  warning,
-  critical,
-}
+enum AlertSeverity { warning, critical }
 
 @freezed
 abstract class SafetyAlert with _$SafetyAlert {

@@ -30,10 +30,13 @@ class SafetyEngine {
         if (_matchesAllergy(allergyClean, rx)) {
           alerts.add(
             SafetyAlert(
-              drugName: rx.brandName.isNotEmpty ? '${rx.brandName} (${rx.genericName})' : rx.genericName,
+              drugName: rx.brandName.isNotEmpty
+                  ? '${rx.brandName} (${rx.genericName})'
+                  : rx.genericName,
               drugClass: rx.drugClass,
               comorbidityName: 'Allergy: $allergyClean',
-              message: 'CRITICAL ALLERGY CONFLICT: Patient is allergic to "$allergyClean". '
+              message:
+                  'CRITICAL ALLERGY CONFLICT: Patient is allergic to "$allergyClean". '
                   'Do not administer ${rx.brandName.isNotEmpty ? rx.brandName : rx.genericName} (${rx.genericName}).',
               severity: AlertSeverity.critical,
             ),
@@ -64,13 +67,17 @@ class SafetyEngine {
 
             alerts.add(
               SafetyAlert(
-                drugName: rx.brandName.isNotEmpty ? '${rx.brandName} (${rx.genericName})' : rx.genericName,
+                drugName: rx.brandName.isNotEmpty
+                    ? '${rx.brandName} (${rx.genericName})'
+                    : rx.genericName,
                 drugClass: rx.drugClass,
                 comorbidityName: comorb.name,
                 message: isCritical
                     ? 'CRITICAL CONTRAINDICATION: ${rx.drugClass} is strictly contraindicated in ${comorb.name}.'
                     : 'WARNING: Caution advised using ${rx.drugClass} in ${comorb.name}.',
-                severity: isCritical ? AlertSeverity.critical : AlertSeverity.warning,
+                severity: isCritical
+                    ? AlertSeverity.critical
+                    : AlertSeverity.warning,
               ),
             );
           }
@@ -86,7 +93,8 @@ class SafetyEngine {
             drugName: 'Paediatric Dosing',
             drugClass: 'Clinical Protocol',
             comorbidityName: 'Patient Age < 12 Y',
-            message: 'PAEDIATRIC DOSING WARNING: Weight is not recorded. In children, verify mg/kg dosage calculations.',
+            message:
+                'PAEDIATRIC DOSING WARNING: Weight is not recorded. In children, verify mg/kg dosage calculations.',
             severity: AlertSeverity.warning,
           ),
         );
@@ -102,19 +110,23 @@ class SafetyEngine {
               drugName: rx.brandName,
               drugClass: rx.drugClass,
               comorbidityName: 'Child < 12 Y',
-              message: 'CRITICAL CONTRAINDICATION: Aspirin is contraindicated in children due to risk of Reye\'s Syndrome.',
+              message:
+                  'CRITICAL CONTRAINDICATION: Aspirin is contraindicated in children due to risk of Reye\'s Syndrome.',
               severity: AlertSeverity.critical,
             ),
           );
         }
 
-        if (classUpper.contains('FLUOROQUINOLONE') || genericUpper.contains('OFLOXACIN') || genericUpper.contains('CIPROFLOXACIN')) {
+        if (classUpper.contains('FLUOROQUINOLONE') ||
+            genericUpper.contains('OFLOXACIN') ||
+            genericUpper.contains('CIPROFLOXACIN')) {
           alerts.add(
             SafetyAlert(
               drugName: rx.brandName,
               drugClass: rx.drugClass,
               comorbidityName: 'Child < 12 Y',
-              message: 'PAEDIATRIC CAUTION: Fluoroquinolones generally restricted in children due to potential cartilage toxicity.',
+              message:
+                  'PAEDIATRIC CAUTION: Fluoroquinolones generally restricted in children due to potential cartilage toxicity.',
               severity: AlertSeverity.warning,
             ),
           );
@@ -132,7 +144,8 @@ class SafetyEngine {
               drugName: rx.brandName,
               drugClass: rx.drugClass,
               comorbidityName: 'Geriatric (Age $patientAge)',
-              message: 'GERIATRIC CAUTION: High risk of GI bleeding, acute kidney injury, and fluid retention with NSAIDs.',
+              message:
+                  'GERIATRIC CAUTION: High risk of GI bleeding, acute kidney injury, and fluid retention with NSAIDs.',
               severity: AlertSeverity.warning,
             ),
           );
@@ -159,7 +172,8 @@ class SafetyEngine {
     }
 
     // Penicillin / Beta-lactam family
-    if (allergyUpper.contains('PENICILLIN') || allergyUpper.contains('BETA-LACTAM')) {
+    if (allergyUpper.contains('PENICILLIN') ||
+        allergyUpper.contains('BETA-LACTAM')) {
       if (genericUpper.contains('AMOXICILLIN') ||
           genericUpper.contains('AMPICILLIN') ||
           genericUpper.contains('PENICILLIN') ||
@@ -170,7 +184,8 @@ class SafetyEngine {
     }
 
     // Sulfa / Sulfonamides
-    if (allergyUpper.contains('SULFA') || allergyUpper.contains('SULFONAMIDE')) {
+    if (allergyUpper.contains('SULFA') ||
+        allergyUpper.contains('SULFONAMIDE')) {
       if (genericUpper.contains('COTRIMOXAZOLE') ||
           genericUpper.contains('SULFA') ||
           brandUpper.contains('BACTRIM') ||
@@ -180,7 +195,9 @@ class SafetyEngine {
     }
 
     // NSAIDs & Aspirin
-    if (allergyUpper.contains('NSAID') || allergyUpper.contains('ASPIRIN') || allergyUpper.contains('IBUPROFEN')) {
+    if (allergyUpper.contains('NSAID') ||
+        allergyUpper.contains('ASPIRIN') ||
+        allergyUpper.contains('IBUPROFEN')) {
       if (classUpper.contains('NSAID') ||
           genericUpper.contains('IBUPROFEN') ||
           genericUpper.contains('DICLOFENAC') ||
@@ -194,7 +211,9 @@ class SafetyEngine {
     }
 
     // Paracetamol / Acetaminophen
-    if (allergyUpper.contains('PARACETAMOL') || allergyUpper.contains('PCM') || allergyUpper.contains('ACETAMINOPHEN')) {
+    if (allergyUpper.contains('PARACETAMOL') ||
+        allergyUpper.contains('PCM') ||
+        allergyUpper.contains('ACETAMINOPHEN')) {
       if (genericUpper.contains('PARACETAMOL') ||
           brandUpper.contains('DOLO') ||
           brandUpper.contains('CALPOL') ||
@@ -204,7 +223,9 @@ class SafetyEngine {
     }
 
     // Fluoroquinolones
-    if (allergyUpper.contains('CIPRO') || allergyUpper.contains('FLUOROQUINOLONE') || allergyUpper.contains('OFLOX')) {
+    if (allergyUpper.contains('CIPRO') ||
+        allergyUpper.contains('FLUOROQUINOLONE') ||
+        allergyUpper.contains('OFLOX')) {
       if (classUpper.contains('FLUOROQUINOLONE') ||
           genericUpper.contains('OFLOXACIN') ||
           genericUpper.contains('CIPROFLOXACIN') ||
@@ -214,8 +235,11 @@ class SafetyEngine {
     }
 
     // Cephalosporins
-    if (allergyUpper.contains('CEPHALOSPORIN') || allergyUpper.contains('CEF')) {
-      if (genericUpper.startsWith('CEF') || genericUpper.contains('CEFIXIME') || genericUpper.contains('CEFPODOXIME')) {
+    if (allergyUpper.contains('CEPHALOSPORIN') ||
+        allergyUpper.contains('CEF')) {
+      if (genericUpper.startsWith('CEF') ||
+          genericUpper.contains('CEFIXIME') ||
+          genericUpper.contains('CEFPODOXIME')) {
         return true;
       }
     }
@@ -226,13 +250,18 @@ class SafetyEngine {
   /// Checks if drug class and contraindicated class conflict, normalizing aliases
   static bool _classesConflict(String drugClassUpper, String contraClassUpper) {
     if (drugClassUpper == contraClassUpper) return true;
-    if (drugClassUpper.contains(contraClassUpper) || contraClassUpper.contains(drugClassUpper)) {
+    if (drugClassUpper.contains(contraClassUpper) ||
+        contraClassUpper.contains(drugClassUpper)) {
       return true;
     }
 
     // Steroid alias normalization
-    final isDrugSteroid = drugClassUpper.contains('STEROID') || drugClassUpper.contains('CORTICOSTEROID');
-    final isContraSteroid = contraClassUpper.contains('STEROID') || contraClassUpper.contains('CORTICOSTEROID');
+    final isDrugSteroid =
+        drugClassUpper.contains('STEROID') ||
+        drugClassUpper.contains('CORTICOSTEROID');
+    final isContraSteroid =
+        contraClassUpper.contains('STEROID') ||
+        contraClassUpper.contains('CORTICOSTEROID');
     if (isDrugSteroid && isContraSteroid) return true;
 
     // Beta-blocker normalization
@@ -245,12 +274,20 @@ class SafetyEngine {
 
   static bool _isStrictlyCritical(String comorbidityId, String drugClassUpper) {
     // High-risk clinical contraindications
-    if (comorbidityId == 'comorb_ckd' && drugClassUpper.contains('NSAID')) return true;
-    if (comorbidityId == 'comorb_ckd' && drugClassUpper.contains('METFORMIN')) return true;
-    if (comorbidityId == 'comorb_pregnant' && drugClassUpper.contains('FLUOROQUINOLONES')) return true;
-    if (comorbidityId == 'comorb_pregnant' && drugClassUpper.contains('NSAID')) return true;
-    if (comorbidityId == 'comorb_pud' && drugClassUpper.contains('NSAID')) return true;
-    if (comorbidityId == 'comorb_asthma' && drugClassUpper.contains('BETA BLOCKER')) return true;
+    if (comorbidityId == 'comorb_ckd' && drugClassUpper.contains('NSAID'))
+      return true;
+    if (comorbidityId == 'comorb_ckd' && drugClassUpper.contains('METFORMIN'))
+      return true;
+    if (comorbidityId == 'comorb_pregnant' &&
+        drugClassUpper.contains('FLUOROQUINOLONES'))
+      return true;
+    if (comorbidityId == 'comorb_pregnant' && drugClassUpper.contains('NSAID'))
+      return true;
+    if (comorbidityId == 'comorb_pud' && drugClassUpper.contains('NSAID'))
+      return true;
+    if (comorbidityId == 'comorb_asthma' &&
+        drugClassUpper.contains('BETA BLOCKER'))
+      return true;
     return false;
   }
 }

@@ -50,6 +50,9 @@ dependencies:
   shared_preferences: ^2.5.5
   supabase_flutter: ^2.18.3
   drift_flutter: ^0.2.7
+  record: ^6.2.1
+  google_generative_ai: ^0.4.7
+  http: ^1.6.0
 
 dependency_overrides:
   archive: ^4.6.0

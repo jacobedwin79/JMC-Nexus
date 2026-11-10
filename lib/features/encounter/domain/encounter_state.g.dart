@@ -50,6 +50,11 @@ _EncounterState _$EncounterStateFromJson(
           )
           .toList() ??
       const [],
+  investigations:
+      (json['investigations'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
   generalAdvice: json['generalAdvice'] as String? ?? '',
   followUpDays: (json['followUpDays'] as num?)?.toInt(),
   safetyAlerts:
@@ -57,6 +62,8 @@ _EncounterState _$EncounterStateFromJson(
           ?.map((e) => SafetyAlert.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  overrideReason: json['overrideReason'] as String?,
+  printDiagnosis: json['printDiagnosis'] as bool? ?? true,
   isLetterheadMode: json['isLetterheadMode'] as bool? ?? false,
   isLoading: json['isLoading'] as bool? ?? false,
   lastDraftSavedAt: json['lastDraftSavedAt'] == null
@@ -76,9 +83,12 @@ Map<String, dynamic> _$EncounterStateToJson(_EncounterState instance) =>
       'examStates': instance.examStates,
       'selectedDiagnosisIds': instance.selectedDiagnosisIds,
       'activePrescription': instance.activePrescription,
+      'investigations': instance.investigations,
       'generalAdvice': instance.generalAdvice,
       'followUpDays': instance.followUpDays,
       'safetyAlerts': instance.safetyAlerts,
+      'overrideReason': instance.overrideReason,
+      'printDiagnosis': instance.printDiagnosis,
       'isLetterheadMode': instance.isLetterheadMode,
       'isLoading': instance.isLoading,
       'lastDraftSavedAt': instance.lastDraftSavedAt?.toIso8601String(),

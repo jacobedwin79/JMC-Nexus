@@ -8,12 +8,14 @@ import '../../../core/database/database_provider.dart';
 import '../../../core/sync/realtime_queue_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../encounter/application/clinical_catalog_providers.dart';
+import '../../encounter/domain/clinical_models.dart';
 
 class CatalogManagerScreen extends ConsumerStatefulWidget {
   const CatalogManagerScreen({super.key});
 
   @override
-  ConsumerState<CatalogManagerScreen> createState() => _CatalogManagerScreenState();
+  ConsumerState<CatalogManagerScreen> createState() =>
+      _CatalogManagerScreenState();
 }
 
 class _CatalogManagerScreenState extends ConsumerState<CatalogManagerScreen>
@@ -40,7 +42,10 @@ class _CatalogManagerScreenState extends ConsumerState<CatalogManagerScreen>
           children: [
             Icon(LucideIcons.database, color: AppTheme.primaryBlue, size: 20),
             SizedBox(width: 10),
-            Text('Clinical Catalog & Clinic Settings', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              'Clinical Catalog & Clinic Settings',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ],
         ),
         bottom: TabBar(
@@ -48,9 +53,18 @@ class _CatalogManagerScreenState extends ConsumerState<CatalogManagerScreen>
           labelColor: AppTheme.primaryBlue,
           indicatorColor: AppTheme.primaryBlue,
           tabs: const [
-            Tab(icon: Icon(LucideIcons.pill, size: 16), text: 'Master Formulary'),
-            Tab(icon: Icon(LucideIcons.fileSpreadsheet, size: 16), text: 'Clinical Protocols'),
-            Tab(icon: Icon(LucideIcons.settings, size: 16), text: 'Clinic & Print Setup'),
+            Tab(
+              icon: Icon(LucideIcons.pill, size: 16),
+              text: 'Master Formulary',
+            ),
+            Tab(
+              icon: Icon(LucideIcons.fileSpreadsheet, size: 16),
+              text: 'Clinical Protocols',
+            ),
+            Tab(
+              icon: Icon(LucideIcons.settings, size: 16),
+              text: 'Clinic & Print Setup',
+            ),
           ],
         ),
       ),
@@ -82,7 +96,7 @@ class _DrugsFormularyTabState extends ConsumerState<_DrugsFormularyTab> {
   void _showAddDrugDialog() {
     final brandController = TextEditingController();
     final genericController = TextEditingController();
-    final classController = TextEditingController();
+    String selectedDrugClass = ControlledDrugClasses.list.first;
     final doseController = TextEditingController(text: '1 tab');
     final routeController = TextEditingController(text: 'PO');
     final freqController = TextEditingController(text: 'BD');
@@ -92,70 +106,329 @@ class _DrugsFormularyTabState extends ConsumerState<_DrugsFormularyTab> {
     showDialog(
       context: context,
       builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Row(
+                children: [
+                  Icon(LucideIcons.plusCircle, color: AppTheme.primaryBlue),
+                  SizedBox(width: 8),
+                  Text('Add Drug to Formulary'),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: SizedBox(
+                  width: 450,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: brandController,
+                        decoration: const InputDecoration(
+                          labelText: 'Brand Name (e.g. Tab. Augmentin 625)',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: genericController,
+                        decoration: const InputDecoration(
+                          labelText:
+                              'Generic Name (e.g. Amoxicillin + Clavulanic Acid)',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String>(
+                        value: selectedDrugClass,
+                        decoration: const InputDecoration(
+                          labelText: 'Controlled Drug Class *',
+                        ),
+                        items: ControlledDrugClasses.list.map((c) {
+                          return DropdownMenuItem(value: c, child: Text(c));
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            setDialogState(() => selectedDrugClass = val);
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: doseController,
+                              decoration: const InputDecoration(
+                                labelText: 'Default Dose',
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextField(
+                              controller: routeController,
+                              decoration: const InputDecoration(
+                                labelText: 'Route',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: freqController,
+                              decoration: const InputDecoration(
+                                labelText: 'Frequency',
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextField(
+                              controller: durController,
+                              decoration: const InputDecoration(
+                                labelText: 'Duration',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: instController,
+                        decoration: const InputDecoration(
+                          labelText: 'Instructions',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (brandController.text.trim().isEmpty ||
+                        genericController.text.trim().isEmpty)
+                      return;
+                    final db = ref.read(appDatabaseProvider);
+                    await db
+                        .into(db.drugsTable)
+                        .insert(
+                          DrugsTableCompanion.insert(
+                            id: 'drug_${const Uuid().v4().substring(0, 8)}',
+                            brandName: brandController.text.trim(),
+                            genericName: genericController.text.trim(),
+                            drugClass: selectedDrugClass,
+                            defaultDose: doseController.text.trim(),
+                            defaultRoute: routeController.text.trim(),
+                            defaultFrequency: freqController.text.trim(),
+                            defaultDuration: durController.text.trim(),
+                            defaultInstructions: instController.text.trim(),
+                          ),
+                        );
+                    ref.invalidate(drugsCatalogProvider);
+                    if (context.mounted) Navigator.pop(context);
+                  },
+                  child: const Text('Save Drug'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showEditDrugDialog(dynamic drug) {
+    final brandController = TextEditingController(text: drug.brandName);
+    final genericController = TextEditingController(text: drug.genericName);
+    String selectedDrugClass =
+        ControlledDrugClasses.list.contains(drug.drugClass)
+        ? drug.drugClass
+        : ControlledDrugClasses.list.first;
+    final doseController = TextEditingController(text: drug.defaultDose);
+    final routeController = TextEditingController(text: drug.defaultRoute);
+    final freqController = TextEditingController(text: drug.defaultFrequency);
+    final durController = TextEditingController(text: drug.defaultDuration);
+    final instController = TextEditingController(
+      text: drug.defaultInstructions,
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Row(
+                children: [
+                  Icon(LucideIcons.edit, color: AppTheme.primaryBlue),
+                  SizedBox(width: 8),
+                  Text('Edit Formulary Drug'),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: SizedBox(
+                  width: 450,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: brandController,
+                        decoration: const InputDecoration(
+                          labelText: 'Brand Name',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: genericController,
+                        decoration: const InputDecoration(
+                          labelText: 'Generic Name',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String>(
+                        value: selectedDrugClass,
+                        decoration: const InputDecoration(
+                          labelText: 'Controlled Drug Class *',
+                        ),
+                        items: ControlledDrugClasses.list.map((c) {
+                          return DropdownMenuItem(value: c, child: Text(c));
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            setDialogState(() => selectedDrugClass = val);
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: doseController,
+                              decoration: const InputDecoration(
+                                labelText: 'Default Dose',
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextField(
+                              controller: routeController,
+                              decoration: const InputDecoration(
+                                labelText: 'Route',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: freqController,
+                              decoration: const InputDecoration(
+                                labelText: 'Frequency',
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextField(
+                              controller: durController,
+                              decoration: const InputDecoration(
+                                labelText: 'Duration',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: instController,
+                        decoration: const InputDecoration(
+                          labelText: 'Instructions',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (brandController.text.trim().isEmpty ||
+                        genericController.text.trim().isEmpty)
+                      return;
+                    final db = ref.read(appDatabaseProvider);
+                    await db.updateDrug(
+                      id: drug.id,
+                      brandName: brandController.text.trim(),
+                      genericName: genericController.text.trim(),
+                      drugClass: selectedDrugClass,
+                      defaultDose: doseController.text.trim(),
+                      defaultRoute: routeController.text.trim(),
+                      defaultFrequency: freqController.text.trim(),
+                      defaultDuration: durController.text.trim(),
+                      defaultInstructions: instController.text.trim(),
+                    );
+                    ref.invalidate(drugsCatalogProvider);
+                    if (context.mounted) Navigator.pop(context);
+                  },
+                  child: const Text('Save Changes'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _confirmSoftDelete(dynamic drug) {
+    showDialog(
+      context: context,
+      builder: (context) {
         return AlertDialog(
           title: const Row(
             children: [
-              Icon(LucideIcons.plusCircle, color: AppTheme.primaryBlue),
+              Icon(LucideIcons.alertTriangle, color: AppTheme.slaOverdue),
               SizedBox(width: 8),
-              Text('Add Drug to Formulary'),
+              Text('Remove Drug from Formulary?'),
             ],
           ),
-          content: SingleChildScrollView(
-            child: SizedBox(
-              width: 450,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(controller: brandController, decoration: const InputDecoration(labelText: 'Brand Name (e.g. Tab. Augmentin 625)')),
-                  const SizedBox(height: 8),
-                  TextField(controller: genericController, decoration: const InputDecoration(labelText: 'Generic Name (e.g. Amoxicillin + Clavulanic Acid)')),
-                  const SizedBox(height: 8),
-                  TextField(controller: classController, decoration: const InputDecoration(labelText: 'Drug Class (e.g. Antibiotic, NSAID, Antacid)')),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(child: TextField(controller: doseController, decoration: const InputDecoration(labelText: 'Default Dose'))),
-                      const SizedBox(width: 8),
-                      Expanded(child: TextField(controller: routeController, decoration: const InputDecoration(labelText: 'Route'))),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(child: TextField(controller: freqController, decoration: const InputDecoration(labelText: 'Frequency'))),
-                      const SizedBox(width: 8),
-                      Expanded(child: TextField(controller: durController, decoration: const InputDecoration(labelText: 'Duration'))),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(controller: instController, decoration: const InputDecoration(labelText: 'Instructions')),
-                ],
-              ),
-            ),
+          content: Text(
+            'Are you sure you want to soft-delete "${drug.brandName}"? Historical prescriptions will remain preserved.',
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
             ElevatedButton(
               onPressed: () async {
-                if (brandController.text.trim().isEmpty || genericController.text.trim().isEmpty) return;
                 final db = ref.read(appDatabaseProvider);
-                await db.into(db.drugsTable).insert(
-                      DrugsTableCompanion.insert(
-                        id: 'drug_${const Uuid().v4().substring(0, 8)}',
-                        brandName: brandController.text.trim(),
-                        genericName: genericController.text.trim(),
-                        drugClass: classController.text.trim(),
-                        defaultDose: doseController.text.trim(),
-                        defaultRoute: routeController.text.trim(),
-                        defaultFrequency: freqController.text.trim(),
-                        defaultDuration: durController.text.trim(),
-                        defaultInstructions: instController.text.trim(),
-                      ),
-                    );
+                await db.softDeleteDrug(drug.id);
                 ref.invalidate(drugsCatalogProvider);
                 if (context.mounted) Navigator.pop(context);
               },
-              child: const Text('Save Drug'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.slaOverdue,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Soft Delete'),
             ),
           ],
         );
@@ -176,7 +449,8 @@ class _DrugsFormularyTabState extends ConsumerState<_DrugsFormularyTab> {
               Expanded(
                 child: TextField(
                   decoration: const InputDecoration(
-                    hintText: 'Search formulary by brand, generic, or drug class...',
+                    hintText:
+                        'Search formulary by brand, generic, or drug class...',
                     prefixIcon: Icon(LucideIcons.search, size: 18),
                   ),
                   onChanged: (val) => setState(() => _searchQuery = val),
@@ -190,7 +464,10 @@ class _DrugsFormularyTabState extends ConsumerState<_DrugsFormularyTab> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryBlue,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                 ),
               ),
             ],
@@ -209,7 +486,10 @@ class _DrugsFormularyTabState extends ConsumerState<_DrugsFormularyTab> {
               }).toList();
 
               return ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 itemCount: filtered.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {
@@ -224,26 +504,78 @@ class _DrugsFormularyTabState extends ConsumerState<_DrugsFormularyTab> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(drug.brandName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                            Text('${drug.genericName} • ${drug.drugClass}', style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-                            const SizedBox(height: 4),
-                            Text('${drug.defaultDose} | ${drug.defaultRoute} | ${drug.defaultFrequency} | ${drug.defaultDuration} (${drug.defaultInstructions})',
-                                style: const TextStyle(fontSize: 11, color: AppTheme.textMuted)),
-                          ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                drug.brandName,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              Text(
+                                '${drug.genericName} • ${drug.drugClass}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppTheme.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${drug.defaultDose} | ${drug.defaultRoute} | ${drug.defaultFrequency} | ${drug.defaultDuration} (${drug.defaultInstructions})',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppTheme.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            drug.drugClass,
-                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryBlue),
-                          ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primaryBlue.withValues(
+                                  alpha: 0.1,
+                                ),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                drug.drugClass,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primaryBlue,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              icon: const Icon(
+                                LucideIcons.edit2,
+                                size: 16,
+                                color: AppTheme.primaryBlue,
+                              ),
+                              tooltip: 'Edit Drug',
+                              onPressed: () => _showEditDrugDialog(drug),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                LucideIcons.trash2,
+                                size: 16,
+                                color: AppTheme.slaOverdue,
+                              ),
+                              tooltip: 'Soft Delete Drug',
+                              onPressed: () => _confirmSoftDelete(drug),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -293,10 +625,17 @@ class _ProtocolsTab extends ConsumerWidget {
                     children: [
                       Text(
                         diag.name,
-                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppTheme.primaryBlue),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: AppTheme.primaryBlue,
+                        ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.surfaceBackground,
                           borderRadius: BorderRadius.circular(6),
@@ -304,7 +643,10 @@ class _ProtocolsTab extends ConsumerWidget {
                         ),
                         child: Text(
                           diag.icd10Code ?? 'ICD-10',
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
@@ -312,12 +654,19 @@ class _ProtocolsTab extends ConsumerWidget {
                   const SizedBox(height: 8),
                   Text(
                     'Pre-linked Complaints: ${diag.linkedComplaintIds.map((c) => c.replaceAll("pc_", "").toUpperCase()).join(", ")}',
-                    style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   const Text(
                     'Auto-loads corresponding evidence-based regimen into Rx builder upon 1-tap selection.',
-                    style: TextStyle(fontSize: 12, color: AppTheme.textMuted, fontStyle: FontStyle.italic),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppTheme.textMuted,
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
                 ],
               ),
@@ -347,6 +696,8 @@ class _ClinicSettingsTabState extends ConsumerState<_ClinicSettingsTab> {
   final _marginController = TextEditingController();
   final _supabaseUrlController = TextEditingController();
   final _supabaseKeyController = TextEditingController();
+  final _geminiApiKeyController = TextEditingController();
+  bool _obscureGeminiKey = true;
 
   bool _isLoaded = false;
 
@@ -359,6 +710,7 @@ class _ClinicSettingsTabState extends ConsumerState<_ClinicSettingsTab> {
     _marginController.dispose();
     _supabaseUrlController.dispose();
     _supabaseKeyController.dispose();
+    _geminiApiKeyController.dispose();
     super.dispose();
   }
 
@@ -371,6 +723,7 @@ class _ClinicSettingsTabState extends ConsumerState<_ClinicSettingsTab> {
       _marginController.text = settings.letterheadTopMarginMm.toString();
       _supabaseUrlController.text = settings.supabaseUrl;
       _supabaseKeyController.text = settings.supabaseAnonKey;
+      _geminiApiKeyController.text = settings.geminiApiKey;
       _isLoaded = true;
     }
   }
@@ -398,27 +751,57 @@ class _ClinicSettingsTabState extends ConsumerState<_ClinicSettingsTab> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Doctor & Clinic Letterhead Profile', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                const Text(
+                  'Doctor & Clinic Letterhead Profile',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 12),
-                TextField(controller: _clinicNameController, decoration: const InputDecoration(labelText: 'Clinic / Hospital Name')),
+                TextField(
+                  controller: _clinicNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Clinic / Hospital Name',
+                  ),
+                ),
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    Expanded(child: TextField(controller: _doctorNameController, decoration: const InputDecoration(labelText: 'Doctor Name'))),
+                    Expanded(
+                      child: TextField(
+                        controller: _doctorNameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Doctor Name',
+                        ),
+                      ),
+                    ),
                     const SizedBox(width: 10),
-                    Expanded(child: TextField(controller: _regController, decoration: const InputDecoration(labelText: 'Medical Reg. No.'))),
+                    Expanded(
+                      child: TextField(
+                        controller: _regController,
+                        decoration: const InputDecoration(
+                          labelText: 'Medical Reg. No.',
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 10),
-                TextField(controller: _qualsController, decoration: const InputDecoration(labelText: 'Qualifications (e.g. MBBS, MD)')),
+                TextField(
+                  controller: _qualsController,
+                  decoration: const InputDecoration(
+                    labelText: 'Qualifications (e.g. MBBS, MD)',
+                  ),
+                ),
                 const SizedBox(height: 10),
                 TextField(
                   controller: _marginController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   decoration: const InputDecoration(
                     labelText: 'Pre-printed Letterhead Top Margin (mm)',
                     hintText: '45.0',
-                    helperText: 'Standard physical letterhead margin to keep printed content strictly below pre-printed graphics.',
+                    helperText:
+                        'Standard physical letterhead margin to keep printed content strictly below pre-printed graphics.',
                   ),
                 ),
               ],
@@ -440,9 +823,18 @@ class _ClinicSettingsTabState extends ConsumerState<_ClinicSettingsTab> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Supabase Multi-Device Cloud Sync', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Supabase Multi-Device Cloud Sync',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: syncState.isConnected
                             ? AppTheme.slaNormal.withValues(alpha: 0.15)
@@ -450,24 +842,114 @@ class _ClinicSettingsTabState extends ConsumerState<_ClinicSettingsTab> {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        syncState.isConnected ? '● Connected' : '○ Offline Mode (SQLite Active)',
+                        syncState.isConnected
+                            ? '● Connected'
+                            : '○ Offline Mode (SQLite Active)',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: syncState.isConnected ? AppTheme.slaNormal : AppTheme.textSecondary,
+                          color: syncState.isConnected
+                              ? AppTheme.slaNormal
+                              : AppTheme.textSecondary,
                         ),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
-                TextField(controller: _supabaseUrlController, decoration: const InputDecoration(labelText: 'Supabase Project URL', hintText: 'https://xyz.supabase.co')),
+                TextField(
+                  controller: _supabaseUrlController,
+                  decoration: const InputDecoration(
+                    labelText: 'Supabase Project URL',
+                    hintText: 'https://xyz.supabase.co',
+                  ),
+                ),
                 const SizedBox(height: 10),
-                TextField(controller: _supabaseKeyController, decoration: const InputDecoration(labelText: 'Supabase Anon / Publishable Key')),
+                TextField(
+                  controller: _supabaseKeyController,
+                  decoration: const InputDecoration(
+                    labelText: 'Supabase Anon / Publishable Key',
+                  ),
+                ),
                 if (syncState.syncError != null) ...[
                   const SizedBox(height: 8),
-                  Text(syncState.syncError!, style: const TextStyle(color: AppTheme.slaOverdue, fontSize: 12)),
+                  Text(
+                    syncState.syncError!,
+                    style: const TextStyle(
+                      color: AppTheme.slaOverdue,
+                      fontSize: 12,
+                    ),
+                  ),
                 ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Google Gemini AI Voice Scribe Configuration
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppTheme.borderLight),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF2563EB), Color(0xFF7C3AED)],
+                        ),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(
+                        LucideIcons.sparkles,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Google Gemini AI Voice & Scribe Setup',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Powers WhatsApp-style incremental voice notes, multi-turn clinical EMR synthesis, and real-time drug interaction / safety checks.',
+                  style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _geminiApiKeyController,
+                  obscureText: _obscureGeminiKey,
+                  decoration: InputDecoration(
+                    labelText: 'Gemini API Key',
+                    hintText: 'AIzaSy...',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureGeminiKey
+                            ? LucideIcons.eyeOff
+                            : LucideIcons.eye,
+                        size: 18,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscureGeminiKey = !_obscureGeminiKey;
+                        });
+                      },
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -481,15 +963,21 @@ class _ClinicSettingsTabState extends ConsumerState<_ClinicSettingsTab> {
                 doctorName: _doctorNameController.text.trim(),
                 doctorQualifications: _qualsController.text.trim(),
                 registrationNumber: _regController.text.trim(),
-                letterheadTopMarginMm: double.tryParse(_marginController.text) ?? 45.0,
+                letterheadTopMarginMm:
+                    double.tryParse(_marginController.text) ?? 45.0,
                 supabaseUrl: _supabaseUrlController.text.trim(),
                 supabaseAnonKey: _supabaseKeyController.text.trim(),
+                geminiApiKey: _geminiApiKeyController.text.trim(),
               );
 
-              await ref.read(clinicSettingsProvider.notifier).updateSettings(updated);
+              await ref
+                  .read(clinicSettingsProvider.notifier)
+                  .updateSettings(updated);
 
               if (updated.hasSupabaseCredentials) {
-                await ref.read(realtimeQueueServiceProvider.notifier).initialize(
+                await ref
+                    .read(realtimeQueueServiceProvider.notifier)
+                    .initialize(
                       supabaseUrl: updated.supabaseUrl,
                       supabaseAnonKey: updated.supabaseAnonKey,
                     );
@@ -505,7 +993,10 @@ class _ClinicSettingsTabState extends ConsumerState<_ClinicSettingsTab> {
               }
             },
             icon: const Icon(LucideIcons.save, size: 18),
-            label: const Text('Save Settings & Apply Profile', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+            label: const Text(
+              'Save Settings & Apply Profile',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.primaryBlue,
               foregroundColor: Colors.white,

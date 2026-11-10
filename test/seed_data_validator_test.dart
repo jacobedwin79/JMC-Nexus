@@ -34,78 +34,97 @@ void main() {
           expect(
             drugIdSet.contains(drugId),
             isTrue,
-            reason: 'Protocol for "${diag.name}" references non-existent drugId: "$drugId"',
+            reason:
+                'Protocol for "${diag.name}" references non-existent drugId: "$drugId"',
           );
         }
       }
     });
 
-    test('PUD and DM steroid contraindication matches master formulary Prednisolone', () async {
-      final allComorbs = await db.getAllComorbidities();
-      final pud = allComorbs.firstWhere((c) => c.id == 'comorb_pud');
-      final dm = allComorbs.firstWhere((c) => c.id == 'comorb_dm');
+    test(
+      'PUD and DM steroid contraindication matches master formulary Prednisolone',
+      () async {
+        final allComorbs = await db.getAllComorbidities();
+        final pud = allComorbs.firstWhere((c) => c.id == 'comorb_pud');
+        final dm = allComorbs.firstWhere((c) => c.id == 'comorb_dm');
 
-      final pudContras = (jsonDecode(pud.contraindicatedDrugClasses) as List).cast<String>();
-      final dmContras = (jsonDecode(dm.contraindicatedDrugClasses) as List).cast<String>();
+        final pudContras = (jsonDecode(pud.contraindicatedDrugClasses) as List)
+            .cast<String>();
+        final dmContras = (jsonDecode(dm.contraindicatedDrugClasses) as List)
+            .cast<String>();
 
-      // Both should contain Systemic Steroids or Corticosteroids
-      expect(
-        pudContras.any((c) => c.toLowerCase().contains('steroid')),
-        isTrue,
-        reason: 'PUD must contain Steroid contraindication',
-      );
-      expect(
-        dmContras.any((c) => c.toLowerCase().contains('steroid')),
-        isTrue,
-        reason: 'DM must contain Steroid contraindication',
-      );
+        // Both should contain Systemic Steroids or Corticosteroids
+        expect(
+          pudContras.any((c) => c.toLowerCase().contains('steroid')),
+          isTrue,
+          reason: 'PUD must contain Steroid contraindication',
+        );
+        expect(
+          dmContras.any((c) => c.toLowerCase().contains('steroid')),
+          isTrue,
+          reason: 'DM must contain Steroid contraindication',
+        );
 
-      // Verify that Prednisolone (Systemic Steroids) triggers safety alert for PUD
-      const prednisolone = PrescriptionItemModel(
-        drugId: 'drug_prednisolone_20',
-        genericName: 'Prednisolone',
-        brandName: 'Tab. Wysolone 20mg',
-        drugClass: 'Systemic Steroids',
-        dose: '20 mg',
-        route: 'PO',
-        frequency: 'OD',
-        duration: '5 days',
-        instructions: 'After breakfast',
-      );
+        // Verify that Prednisolone (Systemic Steroids) triggers safety alert for PUD
+        const prednisolone = PrescriptionItemModel(
+          drugId: 'drug_prednisolone_20',
+          genericName: 'Prednisolone',
+          brandName: 'Tab. Wysolone 20mg',
+          drugClass: 'Systemic Steroids',
+          dose: '20 mg',
+          route: 'PO',
+          frequency: 'OD',
+          duration: '5 days',
+          instructions: 'After breakfast',
+        );
 
-      final comorbModels = allComorbs
-          .map((c) => ComorbidityModel(
+        final comorbModels = allComorbs
+            .map(
+              (c) => ComorbidityModel(
                 id: c.id,
                 name: c.name,
-                contraindicatedDrugClasses: (jsonDecode(c.contraindicatedDrugClasses) as List).cast<String>(),
-              ))
-          .toList();
+                contraindicatedDrugClasses:
+                    (jsonDecode(c.contraindicatedDrugClasses) as List)
+                        .cast<String>(),
+              ),
+            )
+            .toList();
 
-      final pudAlerts = SafetyEngine.evaluate(
-        selectedComorbidityIds: ['comorb_pud'],
-        activePrescription: [prednisolone],
-        comorbiditiesCatalog: comorbModels,
-      );
+        final pudAlerts = SafetyEngine.evaluate(
+          selectedComorbidityIds: ['comorb_pud'],
+          activePrescription: [prednisolone],
+          comorbiditiesCatalog: comorbModels,
+        );
 
-      expect(pudAlerts, isNotEmpty, reason: 'Prednisolone must trigger contraindication alert for PUD');
-    });
+        expect(
+          pudAlerts,
+          isNotEmpty,
+          reason: 'Prednisolone must trigger contraindication alert for PUD',
+        );
+      },
+    );
 
-    test('every diagnosis linked complaint exists in PresentingComplaints table', () async {
-      final allComplaints = await db.getAllComplaints();
-      final complaintIdSet = allComplaints.map((c) => c.id).toSet();
+    test(
+      'every diagnosis linked complaint exists in PresentingComplaints table',
+      () async {
+        final allComplaints = await db.getAllComplaints();
+        final complaintIdSet = allComplaints.map((c) => c.id).toSet();
 
-      final allDiagnoses = await db.getAllDiagnoses();
-      for (final diag in allDiagnoses) {
-        final linked = (jsonDecode(diag.linkedComplaintIds) as List).cast<String>();
-        for (final cid in linked) {
-          expect(
-            complaintIdSet.contains(cid),
-            isTrue,
-            reason: 'Diagnosis "${diag.name}" links to non-existent complaint: "$cid"',
-          );
+        final allDiagnoses = await db.getAllDiagnoses();
+        for (final diag in allDiagnoses) {
+          final linked = (jsonDecode(diag.linkedComplaintIds) as List)
+              .cast<String>();
+          for (final cid in linked) {
+            expect(
+              complaintIdSet.contains(cid),
+              isTrue,
+              reason:
+                  'Diagnosis "${diag.name}" links to non-existent complaint: "$cid"',
+            );
+          }
         }
-      }
-    });
+      },
+    );
   });
 
   group('Allergy Detection Engine', () {
@@ -174,36 +193,42 @@ void main() {
       instructions: 'After food',
     );
 
-    test('Aspirin in paediatric patient (<12) triggers Reye\'s syndrome alert', () {
-      final alerts = SafetyEngine.evaluate(
-        selectedComorbidityIds: const [],
-        activePrescription: [aspirin],
-        comorbiditiesCatalog: const [],
-        patientAge: 8,
-        patientWeight: 24,
-      );
+    test(
+      'Aspirin in paediatric patient (<12) triggers Reye\'s syndrome alert',
+      () {
+        final alerts = SafetyEngine.evaluate(
+          selectedComorbidityIds: const [],
+          activePrescription: [aspirin],
+          comorbiditiesCatalog: const [],
+          patientAge: 8,
+          patientWeight: 24,
+        );
 
-      expect(
-        alerts.any((a) => a.message.contains("Reye's Syndrome")),
-        isTrue,
-        reason: 'Aspirin must be strictly flagged in children',
-      );
-    });
+        expect(
+          alerts.any((a) => a.message.contains("Reye's Syndrome")),
+          isTrue,
+          reason: 'Aspirin must be strictly flagged in children',
+        );
+      },
+    );
 
-    test('Child without recorded weight triggers paediatric dosing warning', () {
-      final alerts = SafetyEngine.evaluate(
-        selectedComorbidityIds: const [],
-        activePrescription: [aspirin],
-        comorbiditiesCatalog: const [],
-        patientAge: 5,
-        patientWeight: null, // missing weight
-      );
+    test(
+      'Child without recorded weight triggers paediatric dosing warning',
+      () {
+        final alerts = SafetyEngine.evaluate(
+          selectedComorbidityIds: const [],
+          activePrescription: [aspirin],
+          comorbiditiesCatalog: const [],
+          patientAge: 5,
+          patientWeight: null, // missing weight
+        );
 
-      expect(
-        alerts.any((a) => a.message.contains('PAEDIATRIC DOSING WARNING')),
-        isTrue,
-      );
-    });
+        expect(
+          alerts.any((a) => a.message.contains('PAEDIATRIC DOSING WARNING')),
+          isTrue,
+        );
+      },
+    );
   });
 
   group('Age-Stratified Vitals Evaluation', () {
@@ -243,17 +268,20 @@ void main() {
   });
 
   group('Vitals Clearing Logic', () {
-    test('Setting vital to null clears the value rather than persisting old value', () {
-      // Start with vitals populated
-      var state = const ReceptionFormState(
-        vitals: PatientVitals(bpSys: 120, bpDia: 80, pulse: 72),
-      );
-      expect(state.vitals.bpSys, equals(120));
+    test(
+      'Setting vital to null clears the value rather than persisting old value',
+      () {
+        // Start with vitals populated
+        var state = const ReceptionFormState(
+          vitals: PatientVitals(bpSys: 120, bpDia: 80, pulse: 72),
+        );
+        expect(state.vitals.bpSys, equals(120));
 
-      // Clear bpSys
-      state = state.copyWith(vitals: state.vitals.copyWith(bpSys: null));
-      expect(state.vitals.bpSys, isNull);
-      expect(state.vitals.bpDia, equals(80)); // others preserved
-    });
+        // Clear bpSys
+        state = state.copyWith(vitals: state.vitals.copyWith(bpSys: null));
+        expect(state.vitals.bpSys, isNull);
+        expect(state.vitals.bpDia, equals(80)); // others preserved
+      },
+    );
   });
 }

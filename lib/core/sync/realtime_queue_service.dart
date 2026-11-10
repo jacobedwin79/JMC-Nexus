@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../database/app_database.dart';
 import '../database/database_provider.dart';
+import 'server_time_service.dart';
 
 class SyncState {
   final bool isConnected;
@@ -67,6 +68,9 @@ class RealtimeQueueService extends Notifier<SyncState> {
         _client = Supabase.instance.client;
       }
 
+      // Initial server time synchronization
+      await syncServerTime();
+
       _subscribeToPatientQueue();
       state = state.copyWith(
         isConnected: true,
@@ -82,6 +86,26 @@ class RealtimeQueueService extends Notifier<SyncState> {
     }
   }
 
+  /// Syncs system clock with remote DB / server time
+  Future<void> syncServerTime() async {
+    if (_client == null) return;
+    try {
+      final requestTime = DateTime.now();
+      final res = await _client!
+          .rpc('get_server_timestamp')
+          .catchError((_) => null);
+      if (res != null) {
+        final serverTimestamp = DateTime.parse(res as String);
+        ServerTimeService.updateServerTime(
+          serverTimestamp,
+          localRequestTime: requestTime,
+        );
+      }
+    } catch (_) {
+      // Graceful fallback if RPC is not present
+    }
+  }
+
   void _subscribeToPatientQueue() {
     if (_client == null) return;
 
@@ -93,14 +117,57 @@ class RealtimeQueueService extends Notifier<SyncState> {
           table: 'patient_queue',
           callback: (payload) async {
             try {
+              // 1. Handle Hard Deletes from Postgres
+              if (payload.eventType == PostgresChangeEvent.delete) {
+                final oldRecord = payload.oldRecord;
+                final deleteId = oldRecord['id'] as String?;
+                if (deleteId != null) {
+                  await _db.softDeletePatientQueue(deleteId);
+                }
+                return;
+              }
+
               final record = payload.newRecord;
               if (record.isEmpty) return;
 
               final id = record['id'] as String;
+
+              // 2. Handle Soft Deletes (deleted_at is set)
+              final deletedAtStr = record['deleted_at'] as String?;
+              if (deletedAtStr != null) {
+                await _db.softDeletePatientQueue(id);
+                return;
+              }
+
+              // 3. Optimistic Locking & Conflict Resolution
+              final localEntry = await _db.getPatientQueueById(id);
+              final remoteVersion = record['version'] as int? ?? 1;
+              final remoteUpdatedAtStr = record['updated_at'] as String?;
+              final remoteUpdatedAt = remoteUpdatedAtStr != null
+                  ? DateTime.parse(remoteUpdatedAtStr)
+                  : DateTime.now();
+
+              // Timestamp sync opportunity
+              ServerTimeService.updateServerTime(remoteUpdatedAt);
+
+              if (localEntry != null) {
+                // If local version is strictly newer than incoming remote version, reject incoming stale payload
+                if (localEntry.version > remoteVersion) {
+                  debugPrint(
+                    'Rejecting stale remote update for $id (local v${localEntry.version} > remote v$remoteVersion)',
+                  );
+                  return;
+                }
+              }
+
               final patientId = record['patient_id'] as String?;
               final tokenNumber = record['token_number'] as int;
               final patientName = record['patient_name'] as String;
               final age = record['age'] as int;
+              final dobStr = record['date_of_birth'] as String?;
+              final dateOfBirth = dobStr != null
+                  ? DateTime.parse(dobStr)
+                  : null;
               final gender = record['gender'] as String;
               final phone = record['phone'] as String?;
               final vitalsJson = record['vitals_json'] as String?;
@@ -111,22 +178,32 @@ class RealtimeQueueService extends Notifier<SyncState> {
               final status = record['status'] as String;
               final entryTime = DateTime.parse(record['entry_time'] as String);
 
-              final consultTimeStr = record['consultation_start_time'] as String?;
-              final consultTime = consultTimeStr != null ? DateTime.parse(consultTimeStr) : null;
+              final consultTimeStr =
+                  record['consultation_start_time'] as String?;
+              final consultTime = consultTimeStr != null
+                  ? DateTime.parse(consultTimeStr)
+                  : null;
 
               final compTimeStr = record['completion_time'] as String?;
-              final compTime = compTimeStr != null ? DateTime.parse(compTimeStr) : null;
+              final compTime = compTimeStr != null
+                  ? DateTime.parse(compTimeStr)
+                  : null;
 
               final rxJson = record['compiled_prescription_json'] as String?;
+              final snapshotJson = record['encounter_snapshot_json'] as String?;
+              final overrideReason = record['override_reason'] as String?;
 
               // Upsert into local SQLite Drift database
-              await _db.into(_db.patientQueueTable).insertOnConflictUpdate(
+              await _db
+                  .into(_db.patientQueueTable)
+                  .insertOnConflictUpdate(
                     PatientQueueTableCompanion.insert(
                       id: id,
                       patientId: Value(patientId),
                       tokenNumber: tokenNumber,
                       patientName: patientName,
                       age: age,
+                      dateOfBirth: Value(dateOfBirth),
                       gender: gender,
                       phone: Value(phone),
                       vitalsJson: Value(vitalsJson),
@@ -139,6 +216,10 @@ class RealtimeQueueService extends Notifier<SyncState> {
                       consultationStartTime: Value(consultTime),
                       completionTime: Value(compTime),
                       compiledPrescriptionJson: Value(rxJson),
+                      encounterSnapshotJson: Value(snapshotJson),
+                      overrideReason: Value(overrideReason),
+                      updatedAt: Value(remoteUpdatedAt),
+                      version: Value(remoteVersion),
                     ),
                   );
 
@@ -151,13 +232,14 @@ class RealtimeQueueService extends Notifier<SyncState> {
         .subscribe();
   }
 
-  /// Pushes a local patient queue record up to Supabase
+  /// Pushes a local patient queue record up to Supabase with version and soft delete fields
   Future<void> pushPatientQueueRecord({
     required String id,
     String? patientId,
     required int tokenNumber,
     required String patientName,
     required int age,
+    DateTime? dateOfBirth,
     required String gender,
     String? phone,
     String? vitalsJson,
@@ -170,16 +252,22 @@ class RealtimeQueueService extends Notifier<SyncState> {
     DateTime? consultationStartTime,
     DateTime? completionTime,
     String? compiledPrescriptionJson,
+    String? encounterSnapshotJson,
+    String? overrideReason,
+    int version = 1,
+    DateTime? deletedAt,
   }) async {
     if (_client == null || !state.isConnected) return;
 
     try {
+      final now = DateTime.now().toUtc();
       await _client!.from('patient_queue').upsert({
         'id': id,
         'patient_id': patientId,
         'token_number': tokenNumber,
         'patient_name': patientName,
         'age': age,
+        'date_of_birth': dateOfBirth?.toIso8601String(),
         'gender': gender,
         'phone': phone,
         'vitals_json': vitalsJson,
@@ -189,9 +277,16 @@ class RealtimeQueueService extends Notifier<SyncState> {
         'is_pregnant': isPregnant,
         'status': status,
         'entry_time': entryTime.toUtc().toIso8601String(),
-        'consultation_start_time': consultationStartTime?.toUtc().toIso8601String(),
+        'consultation_start_time': consultationStartTime
+            ?.toUtc()
+            .toIso8601String(),
         'completion_time': completionTime?.toUtc().toIso8601String(),
         'compiled_prescription_json': compiledPrescriptionJson,
+        'encounter_snapshot_json': encounterSnapshotJson,
+        'override_reason': overrideReason,
+        'updated_at': now.toIso8601String(),
+        'version': version,
+        'deleted_at': deletedAt?.toUtc().toIso8601String(),
       });
       state = state.copyWith(lastSyncedAt: DateTime.now());
     } catch (e) {

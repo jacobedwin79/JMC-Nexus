@@ -22,6 +22,7 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
   final _patientIdController = TextEditingController();
   final _nameController = TextEditingController();
   final _ageController = TextEditingController();
+  final _dobController = TextEditingController();
   final _phoneController = TextEditingController();
 
   final _searchController = TextEditingController();
@@ -45,6 +46,7 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
     _patientIdController.dispose();
     _nameController.dispose();
     _ageController.dispose();
+    _dobController.dispose();
     _phoneController.dispose();
     _searchController.dispose();
     _searchDebounce?.cancel();
@@ -62,6 +64,7 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
     _patientIdController.clear();
     _nameController.clear();
     _ageController.clear();
+    _dobController.clear();
     _phoneController.clear();
     _searchController.clear();
     _bpSysController.clear();
@@ -90,8 +93,9 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
 
     setState(() => _isSearching = true);
     _searchDebounce = Timer(const Duration(milliseconds: 250), () async {
-      final results =
-          await ref.read(receptionProvider.notifier).searchPreviousPatients(query);
+      final results = await ref
+          .read(receptionProvider.notifier)
+          .searchPreviousPatients(query);
       if (!mounted) return;
       setState(() {
         _searchResults = results;
@@ -105,6 +109,13 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
     _patientIdController.text = patient.patientId ?? '';
     _nameController.text = patient.patientName;
     _ageController.text = patient.age.toString();
+    if (patient.dateOfBirth != null) {
+      _dobController.text = DateFormat(
+        'dd/MM/yyyy',
+      ).format(patient.dateOfBirth!);
+    } else {
+      _dobController.clear();
+    }
     _phoneController.text = patient.phone ?? '';
     _bpSysController.text = vitals.bpSys?.toString() ?? '';
     _bpDiaController.text = vitals.bpDia?.toString() ?? '';
@@ -125,7 +136,9 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Loaded previous record for ${patient.patientName} (${patient.allergies.isNotEmpty ? "${patient.allergies.length} allergies recorded" : "No allergies"})'),
+        content: Text(
+          'Loaded previous record for ${patient.patientName} (${patient.allergies.isNotEmpty ? "${patient.allergies.length} allergies recorded" : "No allergies"})',
+        ),
         backgroundColor: AppTheme.primaryBlue,
         duration: const Duration(seconds: 2),
       ),
@@ -206,7 +219,9 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
   }
 
   Future<void> _handleRegister() async {
-    final token = await ref.read(receptionProvider.notifier).registerAndGenerateToken();
+    final token = await ref
+        .read(receptionProvider.notifier)
+        .registerAndGenerateToken();
     if (token != null && mounted) {
       _clearFields();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -229,24 +244,28 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
   }
 
   void _seedDemoOverduePatient() async {
-    await ref.read(receptionProvider.notifier).registerMockPatientWithElapsedWait(
-      name: 'Mohan Lal (Overdue Demo)',
-      age: 62,
-      gender: 'M',
-      elapsedWait: const Duration(minutes: 52),
-      comorbs: ['comorb_dm', 'comorb_htn'],
-      vitals: const PatientVitals(
-        bpSys: 145,
-        bpDia: 92,
-        pulse: 88,
-        spo2: 97,
-        temp: 98.6,
-      ),
-    );
+    await ref
+        .read(receptionProvider.notifier)
+        .registerMockPatientWithElapsedWait(
+          name: 'Mohan Lal (Overdue Demo)',
+          age: 62,
+          gender: 'M',
+          elapsedWait: const Duration(minutes: 52),
+          comorbs: ['comorb_dm', 'comorb_htn'],
+          vitals: const PatientVitals(
+            bpSys: 145,
+            bpDia: 92,
+            pulse: 88,
+            spo2: 97,
+            temp: 98.6,
+          ),
+        );
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Simulated Patient Mohan Lal (52m wait) added! Overdue alert triggered.'),
+          content: Text(
+            'Simulated Patient Mohan Lal (52m wait) added! Overdue alert triggered.',
+          ),
           backgroundColor: AppTheme.slaOverdue,
           duration: Duration(seconds: 3),
         ),
@@ -311,18 +330,31 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                 ),
                 ElevatedButton.icon(
                   onPressed: _seedDemoOverduePatient,
-                  icon: const Icon(LucideIcons.alertTriangle, size: 12, color: AppTheme.slaOverdue),
+                  icon: const Icon(
+                    LucideIcons.alertTriangle,
+                    size: 12,
+                    color: AppTheme.slaOverdue,
+                  ),
                   label: const Text(
                     '>45m Test',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.black87),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 6,
+                    ),
                     elevation: 0,
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
               ],
@@ -343,10 +375,17 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                   onTap: () => setState(() => _showSearch = !_showSearch),
                   borderRadius: BorderRadius.circular(8),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     child: Row(
                       children: [
-                        const Icon(LucideIcons.history, size: 18, color: AppTheme.primaryBlue),
+                        const Icon(
+                          LucideIcons.history,
+                          size: 18,
+                          color: AppTheme.primaryBlue,
+                        ),
                         const SizedBox(width: 8),
                         const Expanded(
                           child: Text(
@@ -359,7 +398,9 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                           ),
                         ),
                         Icon(
-                          _showSearch ? LucideIcons.chevronUp : LucideIcons.chevronDown,
+                          _showSearch
+                              ? LucideIcons.chevronUp
+                              : LucideIcons.chevronDown,
                           size: 18,
                           color: AppTheme.textSecondary,
                         ),
@@ -380,14 +421,19 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                           onChanged: _onSearchChanged,
                           decoration: InputDecoration(
                             hintText: 'Search by UHID, phone, or name...',
-                            prefixIcon: const Icon(LucideIcons.search, size: 18),
+                            prefixIcon: const Icon(
+                              LucideIcons.search,
+                              size: 18,
+                            ),
                             suffixIcon: _isSearching
                                 ? const Padding(
                                     padding: EdgeInsets.all(12),
                                     child: SizedBox(
                                       width: 16,
                                       height: 16,
-                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
                                     ),
                                   )
                                 : null,
@@ -405,14 +451,19 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                             child: ListView.separated(
                               shrinkWrap: true,
                               itemCount: _searchResults.length,
-                              separatorBuilder: (_, __) => const Divider(height: 1),
+                              separatorBuilder: (_, __) =>
+                                  const Divider(height: 1),
                               itemBuilder: (context, index) {
                                 final p = _searchResults[index];
-                                final dateLabel =
-                                    DateFormat('d MMM yyyy').format(p.entryTime.toLocal());
+                                final dateLabel = DateFormat(
+                                  'd MMM yyyy',
+                                ).format(p.entryTime.toLocal());
                                 return ListTile(
                                   dense: true,
-                                  leading: const Icon(LucideIcons.userCheck, size: 18),
+                                  leading: const Icon(
+                                    LucideIcons.userCheck,
+                                    size: 18,
+                                  ),
                                   title: Text(
                                     p.patientName,
                                     style: const TextStyle(
@@ -427,17 +478,24 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                                     ' • $dateLabel',
                                     style: const TextStyle(fontSize: 11),
                                   ),
-                                  trailing: const Icon(LucideIcons.arrowRight, size: 16),
+                                  trailing: const Icon(
+                                    LucideIcons.arrowRight,
+                                    size: 16,
+                                  ),
                                   onTap: () => _loadPreviousPatient(p),
                                 );
                               },
                             ),
                           ),
-                        ] else if (_searchController.text.trim().length >= 2 && !_isSearching) ...[
+                        ] else if (_searchController.text.trim().length >= 2 &&
+                            !_isSearching) ...[
                           const SizedBox(height: 8),
                           const Text(
                             'No matching previous patients found.',
-                            style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.textSecondary,
+                            ),
                           ),
                         ],
                       ],
@@ -460,12 +518,20 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
               ),
               child: Row(
                 children: [
-                  const Icon(LucideIcons.alertCircle, color: AppTheme.slaOverdue, size: 18),
+                  const Icon(
+                    LucideIcons.alertCircle,
+                    color: AppTheme.slaOverdue,
+                    size: 18,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       formState.errorMessage!,
-                      style: const TextStyle(color: AppTheme.slaOverdue, fontSize: 13, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        color: AppTheme.slaOverdue,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -477,7 +543,8 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
           // Patient ID / UHID (Optional but recommended for repeat visits)
           TextField(
             controller: _patientIdController,
-            onChanged: (val) => ref.read(receptionProvider.notifier).setPatientId(val),
+            onChanged: (val) =>
+                ref.read(receptionProvider.notifier).setPatientId(val),
             decoration: const InputDecoration(
               labelText: 'Patient ID / UHID (Optional)',
               hintText: 'e.g. JMC-10234',
@@ -490,7 +557,8 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
           TextField(
             controller: _nameController,
             textCapitalization: TextCapitalization.words,
-            onChanged: (val) => ref.read(receptionProvider.notifier).setPatientName(val),
+            onChanged: (val) =>
+                ref.read(receptionProvider.notifier).setPatientName(val),
             decoration: const InputDecoration(
               labelText: 'Patient Full Name *',
               hintText: 'e.g. Rajesh Kumar',
@@ -499,11 +567,90 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
           ),
           const SizedBox(height: 12),
 
-          // Age & Gender Row
+          // Date of Birth & Age Row with Dynamic Age Formatting
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Age Input
+              // Date of Birth Picker / Input
+              Expanded(
+                flex: 3,
+                child: TextField(
+                  controller: _dobController,
+                  readOnly: true,
+                  onTap: () async {
+                    final now = DateTime.now();
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate:
+                          formState.dateOfBirth ??
+                          DateTime(
+                            now.year - (formState.age ?? 25),
+                            now.month,
+                            now.day,
+                          ),
+                      firstDate: DateTime(1900),
+                      lastDate: now,
+                    );
+                    if (picked != null) {
+                      ref
+                          .read(receptionProvider.notifier)
+                          .setDateOfBirth(picked);
+                      _dobController.text = DateFormat(
+                        'dd/MM/yyyy',
+                      ).format(picked);
+                      _ageController.text =
+                          (ref.read(receptionProvider).effectiveAgeInYears ?? 0)
+                              .toString();
+                      if (ref.read(receptionProvider).isPaediatric) {
+                        setState(() => _showVitals = true);
+                      }
+                    }
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Date of Birth (DOB)',
+                    hintText: 'DD/MM/YYYY',
+                    prefixIcon: const Icon(LucideIcons.calendarDays, size: 18),
+                    suffixIcon: IconButton(
+                      icon: const Icon(LucideIcons.calendar, size: 16),
+                      onPressed: () async {
+                        final now = DateTime.now();
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate:
+                              formState.dateOfBirth ??
+                              DateTime(
+                                now.year - (formState.age ?? 25),
+                                now.month,
+                                now.day,
+                              ),
+                          firstDate: DateTime(1900),
+                          lastDate: now,
+                        );
+                        if (picked != null) {
+                          ref
+                              .read(receptionProvider.notifier)
+                              .setDateOfBirth(picked);
+                          _dobController.text = DateFormat(
+                            'dd/MM/yyyy',
+                          ).format(picked);
+                          _ageController.text =
+                              (ref
+                                          .read(receptionProvider)
+                                          .effectiveAgeInYears ??
+                                      0)
+                                  .toString();
+                          if (ref.read(receptionProvider).isPaediatric) {
+                            setState(() => _showVitals = true);
+                          }
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+
+              // Age (Years) Input
               Expanded(
                 flex: 2,
                 child: TextField(
@@ -513,11 +660,20 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                   onChanged: (val) {
                     final age = int.tryParse(val);
                     ref.read(receptionProvider.notifier).setAge(age);
+                    final state = ref.read(receptionProvider);
+                    if (state.dateOfBirth != null) {
+                      _dobController.text = DateFormat(
+                        'dd/MM/yyyy',
+                      ).format(state.dateOfBirth!);
+                    }
+                    if (state.isPaediatric) {
+                      setState(() => _showVitals = true);
+                    }
                   },
                   decoration: const InputDecoration(
-                    labelText: 'Age *',
+                    labelText: 'Age (Yrs) *',
                     hintText: 'Yrs',
-                    prefixIcon: Icon(LucideIcons.calendar, size: 18),
+                    prefixIcon: Icon(LucideIcons.userCheck, size: 18),
                   ),
                 ),
               ),
@@ -531,7 +687,11 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                   children: [
                     const Text(
                       'Sex',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.textSecondary),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Row(
@@ -539,26 +699,42 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                         final isSelected = formState.gender == g;
                         return Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 1.5),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 1.5,
+                            ),
                             child: InkWell(
-                              onTap: () => ref.read(receptionProvider.notifier).setGender(g),
+                              onTap: () => ref
+                                  .read(receptionProvider.notifier)
+                                  .setGender(g),
                               borderRadius: BorderRadius.circular(8),
                               child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                ),
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
-                                  color: isSelected ? AppTheme.primaryBlue : Colors.white,
+                                  color: isSelected
+                                      ? AppTheme.primaryBlue
+                                      : Colors.white,
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                    color: isSelected ? AppTheme.primaryBlue : AppTheme.borderLight,
+                                    color: isSelected
+                                        ? AppTheme.primaryBlue
+                                        : AppTheme.borderLight,
                                   ),
                                 ),
                                 child: Text(
-                                  g == 'M' ? 'Male' : (g == 'F' ? 'Female' : 'Other'),
+                                  g == 'M'
+                                      ? 'Male'
+                                      : (g == 'F' ? 'Female' : 'Other'),
                                   style: TextStyle(
                                     fontSize: 11,
-                                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                                    color: isSelected ? Colors.white : AppTheme.textPrimary,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : AppTheme.textPrimary,
                                   ),
                                 ),
                               ),
@@ -572,6 +748,48 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
               ),
             ],
           ),
+          if (formState.dynamicAgeDisplay.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: formState.isPaediatric
+                    ? Colors.amber.shade50
+                    : AppTheme.primaryBlue.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: formState.isPaediatric
+                      ? Colors.amber.shade400
+                      : AppTheme.primaryBlue.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    formState.isPaediatric
+                        ? LucideIcons.baby
+                        : LucideIcons.clock,
+                    size: 14,
+                    color: formState.isPaediatric
+                        ? Colors.amber.shade900
+                        : AppTheme.primaryBlue,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Calculated Clinical Age: ${formState.dynamicAgeDisplay}${formState.isPaediatric ? " (Paediatric - Weight Required)" : ""}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: formState.isPaediatric
+                          ? Colors.amber.shade900
+                          : AppTheme.primaryBlue,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
 
           // Reproductive Screen & Pregnancy (Inferred for reproductive age females)
@@ -591,12 +809,20 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                 children: [
                   Row(
                     children: [
-                      const Icon(LucideIcons.heartHandshake, size: 16, color: Colors.purple),
+                      const Icon(
+                        LucideIcons.heartHandshake,
+                        size: 16,
+                        color: Colors.purple,
+                      ),
                       const SizedBox(width: 6),
                       const Expanded(
                         child: Text(
                           'Reproductive & Pregnancy Screen',
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.purple),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.purple,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -604,10 +830,18 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                         value: formState.isPregnant,
                         activeColor: Colors.purple,
                         onChanged: (val) {
-                          ref.read(receptionProvider.notifier).setIsPregnant(val ?? false);
+                          ref
+                              .read(receptionProvider.notifier)
+                              .setIsPregnant(val ?? false);
                         },
                       ),
-                      const Text('Pregnant', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                      const Text(
+                        'Pregnant',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ],
                   ),
                   Row(
@@ -616,20 +850,30 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                         child: OutlinedButton.icon(
                           icon: const Icon(LucideIcons.calendar, size: 14),
                           label: Text(
-                            formState.lmp != null ? 'LMP: ${formState.lmp}' : 'Set Last Menstrual Period (LMP)',
+                            formState.lmp != null
+                                ? 'LMP: ${formState.lmp}'
+                                : 'Set Last Menstrual Period (LMP)',
                             style: const TextStyle(fontSize: 12),
                           ),
                           onPressed: () async {
                             final now = DateTime.now();
                             final picked = await showDatePicker(
                               context: context,
-                              initialDate: now.subtract(const Duration(days: 30)),
-                              firstDate: now.subtract(const Duration(days: 300)),
+                              initialDate: now.subtract(
+                                const Duration(days: 30),
+                              ),
+                              firstDate: now.subtract(
+                                const Duration(days: 300),
+                              ),
                               lastDate: now,
                             );
                             if (picked != null) {
-                              final formatted = DateFormat('dd MMM yyyy').format(picked);
-                              ref.read(receptionProvider.notifier).setLmp(formatted);
+                              final formatted = DateFormat(
+                                'dd MMM yyyy',
+                              ).format(picked);
+                              ref
+                                  .read(receptionProvider.notifier)
+                                  .setLmp(formatted);
                             }
                           },
                         ),
@@ -637,8 +881,13 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                       if (formState.lmp != null) ...[
                         const SizedBox(width: 8),
                         IconButton(
-                          icon: const Icon(LucideIcons.x, size: 16, color: Colors.grey),
-                          onPressed: () => ref.read(receptionProvider.notifier).setLmp(null),
+                          icon: const Icon(
+                            LucideIcons.x,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () =>
+                              ref.read(receptionProvider.notifier).setLmp(null),
                         ),
                       ],
                     ],
@@ -673,7 +922,11 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
             children: [
               const Text(
                 'Known Comorbidities (Optional)',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.textSecondary),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textSecondary,
+                ),
               ),
               const SizedBox(height: 6),
               comorbiditiesAsync.when(
@@ -687,7 +940,10 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                 ),
                 error: (err, _) => Text(
                   'Could not load comorbidities: $err',
-                  style: const TextStyle(fontSize: 12, color: AppTheme.slaOverdue),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.slaOverdue,
+                  ),
                 ),
                 data: (comorbidities) {
                   return Wrap(
@@ -695,11 +951,15 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                     runSpacing: 8,
                     children: [
                       ...comorbidities.map((c) {
-                        final isSelected = formState.selectedComorbIds.contains(c.id);
+                        final isSelected = formState.selectedComorbIds.contains(
+                          c.id,
+                        );
                         return ClinicalChip(
                           label: comorbidityDisplayLabel(c),
                           isSelected: isSelected,
-                          onTap: () => ref.read(receptionProvider.notifier).toggleComorbidity(c.id),
+                          onTap: () => ref
+                              .read(receptionProvider.notifier)
+                              .toggleComorbidity(c.id),
                           activeColor: AppTheme.primaryAccent,
                         );
                       }),
@@ -707,7 +967,10 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                         onTap: _showAddCustomComorbidityDialog,
                         borderRadius: BorderRadius.circular(20),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20),
@@ -719,7 +982,11 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: const [
-                              Icon(LucideIcons.plus, size: 12, color: AppTheme.primaryAccent),
+                              Icon(
+                                LucideIcons.plus,
+                                size: 12,
+                                color: AppTheme.primaryAccent,
+                              ),
                               SizedBox(width: 4),
                               Text(
                                 'Custom',
@@ -747,7 +1014,11 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
             children: [
               Row(
                 children: const [
-                  Icon(LucideIcons.shieldAlert, size: 14, color: AppTheme.emergencyRed),
+                  Icon(
+                    LucideIcons.shieldAlert,
+                    size: 14,
+                    color: AppTheme.emergencyRed,
+                  ),
                   SizedBox(width: 4),
                   Expanded(
                     child: Text(
@@ -776,37 +1047,48 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                     'Fluoroquinolones',
                     'Macrolides',
                   ].map((allergy) {
-                    final isSelected = formState.selectedAllergies.contains(allergy);
+                    final isSelected = formState.selectedAllergies.contains(
+                      allergy,
+                    );
                     return ClinicalChip(
                       label: allergy,
                       isSelected: isSelected,
-                      onTap: () => ref.read(receptionProvider.notifier).toggleAllergy(allergy),
+                      onTap: () => ref
+                          .read(receptionProvider.notifier)
+                          .toggleAllergy(allergy),
                       activeColor: AppTheme.emergencyRed,
                     );
                   }),
                   ...formState.selectedAllergies
-                      .where((a) => ![
-                            'Penicillin',
-                            'Sulfa',
-                            'NSAIDs / Aspirin',
-                            'Paracetamol',
-                            'Cephalosporins',
-                            'Fluoroquinolones',
-                            'Macrolides',
-                          ].contains(a))
+                      .where(
+                        (a) => ![
+                          'Penicillin',
+                          'Sulfa',
+                          'NSAIDs / Aspirin',
+                          'Paracetamol',
+                          'Cephalosporins',
+                          'Fluoroquinolones',
+                          'Macrolides',
+                        ].contains(a),
+                      )
                       .map((customAllergy) {
-                    return ClinicalChip(
-                      label: customAllergy,
-                      isSelected: true,
-                      onTap: () => ref.read(receptionProvider.notifier).toggleAllergy(customAllergy),
-                      activeColor: AppTheme.emergencyRed,
-                    );
-                  }),
+                        return ClinicalChip(
+                          label: customAllergy,
+                          isSelected: true,
+                          onTap: () => ref
+                              .read(receptionProvider.notifier)
+                              .toggleAllergy(customAllergy),
+                          activeColor: AppTheme.emergencyRed,
+                        );
+                      }),
                   InkWell(
                     onTap: _showAddCustomAllergyDialog,
                     borderRadius: BorderRadius.circular(20),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
@@ -815,7 +1097,11 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(LucideIcons.plus, size: 12, color: AppTheme.emergencyRed),
+                          const Icon(
+                            LucideIcons.plus,
+                            size: 12,
+                            color: AppTheme.emergencyRed,
+                          ),
                           const SizedBox(width: 4),
                           const Text(
                             '+ Allergy',
@@ -848,11 +1134,17 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
               ),
               child: Row(
                 children: [
-                  const Icon(LucideIcons.activity, size: 18, color: AppTheme.primaryBlue),
+                  const Icon(
+                    LucideIcons.activity,
+                    size: 18,
+                    color: AppTheme.primaryBlue,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      _showVitals ? 'Hide Entry Vitals' : '+ Entry Vitals (BP, Pulse, SpO2, RBS)',
+                      _showVitals
+                          ? 'Hide Entry Vitals'
+                          : '+ Entry Vitals (BP, Pulse, SpO2, RBS)',
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -862,7 +1154,9 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                     ),
                   ),
                   Icon(
-                    _showVitals ? LucideIcons.chevronUp : LucideIcons.chevronDown,
+                    _showVitals
+                        ? LucideIcons.chevronUp
+                        : LucideIcons.chevronDown,
                     size: 18,
                     color: AppTheme.textSecondary,
                   ),
@@ -888,8 +1182,13 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                         child: TextField(
                           controller: _bpSysController,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(labelText: 'BP Sys', hintText: '120'),
-                          onChanged: (val) => ref.read(receptionProvider.notifier).setBpSys(int.tryParse(val)),
+                          decoration: const InputDecoration(
+                            labelText: 'BP Sys',
+                            hintText: '120',
+                          ),
+                          onChanged: (val) => ref
+                              .read(receptionProvider.notifier)
+                              .setBpSys(int.tryParse(val)),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -897,8 +1196,13 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                         child: TextField(
                           controller: _bpDiaController,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(labelText: 'BP Dia', hintText: '80'),
-                          onChanged: (val) => ref.read(receptionProvider.notifier).setBpDia(int.tryParse(val)),
+                          decoration: const InputDecoration(
+                            labelText: 'BP Dia',
+                            hintText: '80',
+                          ),
+                          onChanged: (val) => ref
+                              .read(receptionProvider.notifier)
+                              .setBpDia(int.tryParse(val)),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -906,8 +1210,13 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                         child: TextField(
                           controller: _pulseController,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(labelText: 'Pulse', hintText: '72'),
-                          onChanged: (val) => ref.read(receptionProvider.notifier).setPulse(int.tryParse(val)),
+                          decoration: const InputDecoration(
+                            labelText: 'Pulse',
+                            hintText: '72',
+                          ),
+                          onChanged: (val) => ref
+                              .read(receptionProvider.notifier)
+                              .setPulse(int.tryParse(val)),
                         ),
                       ),
                     ],
@@ -919,32 +1228,55 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                         child: TextField(
                           controller: _spo2Controller,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(labelText: 'SpO2 %', hintText: '98'),
-                          onChanged: (val) => ref.read(receptionProvider.notifier).setSpo2(int.tryParse(val)),
+                          decoration: const InputDecoration(
+                            labelText: 'SpO2 %',
+                            hintText: '98',
+                          ),
+                          onChanged: (val) => ref
+                              .read(receptionProvider.notifier)
+                              .setSpo2(int.tryParse(val)),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: TextField(
                           controller: _tempController,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           decoration: InputDecoration(
-                            labelText: formState.vitals.tempIsCelsius ? 'Temp °C' : 'Temp °F',
-                            hintText: formState.vitals.tempIsCelsius ? '37.0' : '98.6',
+                            labelText: formState.vitals.tempIsCelsius
+                                ? 'Temp °C'
+                                : 'Temp °F',
+                            hintText: formState.vitals.tempIsCelsius
+                                ? '37.0'
+                                : '98.6',
                             suffixIcon: InkWell(
                               onTap: () {
-                                ref.read(receptionProvider.notifier).setTempIsCelsius(!formState.vitals.tempIsCelsius);
+                                ref
+                                    .read(receptionProvider.notifier)
+                                    .setTempIsCelsius(
+                                      !formState.vitals.tempIsCelsius,
+                                    );
                               },
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 8,
+                                ),
                                 child: Text(
                                   formState.vitals.tempIsCelsius ? '°C' : '°F',
-                                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryBlue),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.primaryBlue,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                          onChanged: (val) => ref.read(receptionProvider.notifier).setTemp(double.tryParse(val)),
+                          onChanged: (val) => ref
+                              .read(receptionProvider.notifier)
+                              .setTemp(double.tryParse(val)),
                         ),
                       ),
                     ],
@@ -955,9 +1287,37 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                       Expanded(
                         child: TextField(
                           controller: _weightController,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          decoration: const InputDecoration(labelText: 'Wt (kg)', hintText: '65'),
-                          onChanged: (val) => ref.read(receptionProvider.notifier).setWeight(double.tryParse(val)),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: InputDecoration(
+                            labelText: formState.isPaediatric
+                                ? 'Wt (kg) * (Mandatory)'
+                                : 'Wt (kg)',
+                            hintText: 'e.g. 15',
+                            prefixIcon: formState.isPaediatric
+                                ? const Icon(
+                                    LucideIcons.alertTriangle,
+                                    size: 16,
+                                    color: AppTheme.slaOverdue,
+                                  )
+                                : null,
+                            enabledBorder:
+                                formState.isPaediatric &&
+                                    (formState.vitals.weight == null ||
+                                        formState.vitals.weight! <= 0)
+                                ? OutlineInputBorder(
+                                    borderSide: const BorderSide(
+                                      color: AppTheme.slaOverdue,
+                                      width: 1.5,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                  )
+                                : null,
+                          ),
+                          onChanged: (val) => ref
+                              .read(receptionProvider.notifier)
+                              .setWeight(double.tryParse(val)),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -965,8 +1325,13 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                         child: TextField(
                           controller: _rbsController,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(labelText: 'RBS mg/dL', hintText: '110'),
-                          onChanged: (val) => ref.read(receptionProvider.notifier).setRbs(int.tryParse(val)),
+                          decoration: const InputDecoration(
+                            labelText: 'RBS mg/dL',
+                            hintText: '110',
+                          ),
+                          onChanged: (val) => ref
+                              .read(receptionProvider.notifier)
+                              .setRbs(int.tryParse(val)),
                         ),
                       ),
                     ],
@@ -986,19 +1351,27 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
                     )
                   : const Icon(LucideIcons.ticket, size: 20),
               label: Text(
                 formState.isSubmitting
                     ? 'Issuing Token...'
                     : 'Issue Token #${formState.nextTokenNumber}',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryBlue,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 elevation: 1,
               ),
             ),

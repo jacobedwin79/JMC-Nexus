@@ -38,12 +38,16 @@ class ClinicalChip extends StatelessWidget {
           decoration: BoxDecoration(
             color: isSelected
                 ? effectiveActiveColor
-                : (isAlert ? AppTheme.slaOverdue.withValues(alpha: 0.08) : Colors.white),
+                : (isAlert
+                      ? AppTheme.slaOverdue.withValues(alpha: 0.08)
+                      : Colors.white),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: isSelected
                   ? effectiveActiveColor
-                  : (isAlert ? AppTheme.slaOverdue.withValues(alpha: 0.4) : AppTheme.borderLight),
+                  : (isAlert
+                        ? AppTheme.slaOverdue.withValues(alpha: 0.4)
+                        : AppTheme.borderLight),
               width: isSelected ? 1.5 : 1.0,
             ),
             boxShadow: isSelected
@@ -65,7 +69,9 @@ class ClinicalChip extends StatelessWidget {
                   size: 14,
                   color: isSelected
                       ? Colors.white
-                      : (isAlert ? AppTheme.slaOverdue : AppTheme.textSecondary),
+                      : (isAlert
+                            ? AppTheme.slaOverdue
+                            : AppTheme.textSecondary),
                 ),
                 const SizedBox(width: 6),
               ],

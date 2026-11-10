@@ -60,6 +60,17 @@ class $PatientQueueTableTable extends PatientQueueTable
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _dateOfBirthMeta = const VerificationMeta(
+    'dateOfBirth',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dateOfBirth = GeneratedColumn<DateTime>(
+    'date_of_birth',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _genderMeta = const VerificationMeta('gender');
   @override
   late final GeneratedColumn<String> gender = GeneratedColumn<String>(
@@ -189,6 +200,63 @@ class $PatientQueueTableTable extends PatientQueueTable
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _encounterSnapshotJsonMeta =
+      const VerificationMeta('encounterSnapshotJson');
+  @override
+  late final GeneratedColumn<String> encounterSnapshotJson =
+      GeneratedColumn<String>(
+        'encounter_snapshot_json',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _overrideReasonMeta = const VerificationMeta(
+    'overrideReason',
+  );
+  @override
+  late final GeneratedColumn<String> overrideReason = GeneratedColumn<String>(
+    'override_reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -196,6 +264,7 @@ class $PatientQueueTableTable extends PatientQueueTable
     tokenNumber,
     patientName,
     age,
+    dateOfBirth,
     gender,
     phone,
     vitalsJson,
@@ -208,6 +277,11 @@ class $PatientQueueTableTable extends PatientQueueTable
     consultationStartTime,
     completionTime,
     compiledPrescriptionJson,
+    encounterSnapshotJson,
+    overrideReason,
+    updatedAt,
+    version,
+    deletedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -261,6 +335,15 @@ class $PatientQueueTableTable extends PatientQueueTable
       );
     } else if (isInserting) {
       context.missing(_ageMeta);
+    }
+    if (data.containsKey('date_of_birth')) {
+      context.handle(
+        _dateOfBirthMeta,
+        dateOfBirth.isAcceptableOrUnknown(
+          data['date_of_birth']!,
+          _dateOfBirthMeta,
+        ),
+      );
     }
     if (data.containsKey('gender')) {
       context.handle(
@@ -352,6 +435,42 @@ class $PatientQueueTableTable extends PatientQueueTable
         ),
       );
     }
+    if (data.containsKey('encounter_snapshot_json')) {
+      context.handle(
+        _encounterSnapshotJsonMeta,
+        encounterSnapshotJson.isAcceptableOrUnknown(
+          data['encounter_snapshot_json']!,
+          _encounterSnapshotJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('override_reason')) {
+      context.handle(
+        _overrideReasonMeta,
+        overrideReason.isAcceptableOrUnknown(
+          data['override_reason']!,
+          _overrideReasonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
     return context;
   }
 
@@ -381,6 +500,10 @@ class $PatientQueueTableTable extends PatientQueueTable
         DriftSqlType.int,
         data['${effectivePrefix}age'],
       )!,
+      dateOfBirth: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}date_of_birth'],
+      ),
       gender: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}gender'],
@@ -429,6 +552,26 @@ class $PatientQueueTableTable extends PatientQueueTable
         DriftSqlType.string,
         data['${effectivePrefix}compiled_prescription_json'],
       ),
+      encounterSnapshotJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}encounter_snapshot_json'],
+      ),
+      overrideReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}override_reason'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
     );
   }
 
@@ -447,6 +590,7 @@ class PatientQueueEntry extends DataClass
   final int tokenNumber;
   final String patientName;
   final int age;
+  final DateTime? dateOfBirth;
   final String gender;
   final String? phone;
   final String? vitalsJson;
@@ -459,12 +603,18 @@ class PatientQueueEntry extends DataClass
   final DateTime? consultationStartTime;
   final DateTime? completionTime;
   final String? compiledPrescriptionJson;
+  final String? encounterSnapshotJson;
+  final String? overrideReason;
+  final DateTime updatedAt;
+  final int version;
+  final DateTime? deletedAt;
   const PatientQueueEntry({
     required this.id,
     this.patientId,
     required this.tokenNumber,
     required this.patientName,
     required this.age,
+    this.dateOfBirth,
     required this.gender,
     this.phone,
     this.vitalsJson,
@@ -477,6 +627,11 @@ class PatientQueueEntry extends DataClass
     this.consultationStartTime,
     this.completionTime,
     this.compiledPrescriptionJson,
+    this.encounterSnapshotJson,
+    this.overrideReason,
+    required this.updatedAt,
+    required this.version,
+    this.deletedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -488,6 +643,9 @@ class PatientQueueEntry extends DataClass
     map['token_number'] = Variable<int>(tokenNumber);
     map['patient_name'] = Variable<String>(patientName);
     map['age'] = Variable<int>(age);
+    if (!nullToAbsent || dateOfBirth != null) {
+      map['date_of_birth'] = Variable<DateTime>(dateOfBirth);
+    }
     map['gender'] = Variable<String>(gender);
     if (!nullToAbsent || phone != null) {
       map['phone'] = Variable<String>(phone);
@@ -520,6 +678,17 @@ class PatientQueueEntry extends DataClass
         compiledPrescriptionJson,
       );
     }
+    if (!nullToAbsent || encounterSnapshotJson != null) {
+      map['encounter_snapshot_json'] = Variable<String>(encounterSnapshotJson);
+    }
+    if (!nullToAbsent || overrideReason != null) {
+      map['override_reason'] = Variable<String>(overrideReason);
+    }
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['version'] = Variable<int>(version);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
     return map;
   }
 
@@ -532,6 +701,9 @@ class PatientQueueEntry extends DataClass
       tokenNumber: Value(tokenNumber),
       patientName: Value(patientName),
       age: Value(age),
+      dateOfBirth: dateOfBirth == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dateOfBirth),
       gender: Value(gender),
       phone: phone == null && nullToAbsent
           ? const Value.absent()
@@ -558,6 +730,17 @@ class PatientQueueEntry extends DataClass
       compiledPrescriptionJson: compiledPrescriptionJson == null && nullToAbsent
           ? const Value.absent()
           : Value(compiledPrescriptionJson),
+      encounterSnapshotJson: encounterSnapshotJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(encounterSnapshotJson),
+      overrideReason: overrideReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(overrideReason),
+      updatedAt: Value(updatedAt),
+      version: Value(version),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
     );
   }
 
@@ -572,6 +755,7 @@ class PatientQueueEntry extends DataClass
       tokenNumber: serializer.fromJson<int>(json['tokenNumber']),
       patientName: serializer.fromJson<String>(json['patientName']),
       age: serializer.fromJson<int>(json['age']),
+      dateOfBirth: serializer.fromJson<DateTime?>(json['dateOfBirth']),
       gender: serializer.fromJson<String>(json['gender']),
       phone: serializer.fromJson<String?>(json['phone']),
       vitalsJson: serializer.fromJson<String?>(json['vitalsJson']),
@@ -588,6 +772,13 @@ class PatientQueueEntry extends DataClass
       compiledPrescriptionJson: serializer.fromJson<String?>(
         json['compiledPrescriptionJson'],
       ),
+      encounterSnapshotJson: serializer.fromJson<String?>(
+        json['encounterSnapshotJson'],
+      ),
+      overrideReason: serializer.fromJson<String?>(json['overrideReason']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      version: serializer.fromJson<int>(json['version']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
     );
   }
   @override
@@ -599,6 +790,7 @@ class PatientQueueEntry extends DataClass
       'tokenNumber': serializer.toJson<int>(tokenNumber),
       'patientName': serializer.toJson<String>(patientName),
       'age': serializer.toJson<int>(age),
+      'dateOfBirth': serializer.toJson<DateTime?>(dateOfBirth),
       'gender': serializer.toJson<String>(gender),
       'phone': serializer.toJson<String?>(phone),
       'vitalsJson': serializer.toJson<String?>(vitalsJson),
@@ -615,6 +807,13 @@ class PatientQueueEntry extends DataClass
       'compiledPrescriptionJson': serializer.toJson<String?>(
         compiledPrescriptionJson,
       ),
+      'encounterSnapshotJson': serializer.toJson<String?>(
+        encounterSnapshotJson,
+      ),
+      'overrideReason': serializer.toJson<String?>(overrideReason),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'version': serializer.toJson<int>(version),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
     };
   }
 
@@ -624,6 +823,7 @@ class PatientQueueEntry extends DataClass
     int? tokenNumber,
     String? patientName,
     int? age,
+    Value<DateTime?> dateOfBirth = const Value.absent(),
     String? gender,
     Value<String?> phone = const Value.absent(),
     Value<String?> vitalsJson = const Value.absent(),
@@ -636,12 +836,18 @@ class PatientQueueEntry extends DataClass
     Value<DateTime?> consultationStartTime = const Value.absent(),
     Value<DateTime?> completionTime = const Value.absent(),
     Value<String?> compiledPrescriptionJson = const Value.absent(),
+    Value<String?> encounterSnapshotJson = const Value.absent(),
+    Value<String?> overrideReason = const Value.absent(),
+    DateTime? updatedAt,
+    int? version,
+    Value<DateTime?> deletedAt = const Value.absent(),
   }) => PatientQueueEntry(
     id: id ?? this.id,
     patientId: patientId.present ? patientId.value : this.patientId,
     tokenNumber: tokenNumber ?? this.tokenNumber,
     patientName: patientName ?? this.patientName,
     age: age ?? this.age,
+    dateOfBirth: dateOfBirth.present ? dateOfBirth.value : this.dateOfBirth,
     gender: gender ?? this.gender,
     phone: phone.present ? phone.value : this.phone,
     vitalsJson: vitalsJson.present ? vitalsJson.value : this.vitalsJson,
@@ -662,6 +868,15 @@ class PatientQueueEntry extends DataClass
     compiledPrescriptionJson: compiledPrescriptionJson.present
         ? compiledPrescriptionJson.value
         : this.compiledPrescriptionJson,
+    encounterSnapshotJson: encounterSnapshotJson.present
+        ? encounterSnapshotJson.value
+        : this.encounterSnapshotJson,
+    overrideReason: overrideReason.present
+        ? overrideReason.value
+        : this.overrideReason,
+    updatedAt: updatedAt ?? this.updatedAt,
+    version: version ?? this.version,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
   );
   PatientQueueEntry copyWithCompanion(PatientQueueTableCompanion data) {
     return PatientQueueEntry(
@@ -674,6 +889,9 @@ class PatientQueueEntry extends DataClass
           ? data.patientName.value
           : this.patientName,
       age: data.age.present ? data.age.value : this.age,
+      dateOfBirth: data.dateOfBirth.present
+          ? data.dateOfBirth.value
+          : this.dateOfBirth,
       gender: data.gender.present ? data.gender.value : this.gender,
       phone: data.phone.present ? data.phone.value : this.phone,
       vitalsJson: data.vitalsJson.present
@@ -698,6 +916,15 @@ class PatientQueueEntry extends DataClass
       compiledPrescriptionJson: data.compiledPrescriptionJson.present
           ? data.compiledPrescriptionJson.value
           : this.compiledPrescriptionJson,
+      encounterSnapshotJson: data.encounterSnapshotJson.present
+          ? data.encounterSnapshotJson.value
+          : this.encounterSnapshotJson,
+      overrideReason: data.overrideReason.present
+          ? data.overrideReason.value
+          : this.overrideReason,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      version: data.version.present ? data.version.value : this.version,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
     );
   }
 
@@ -709,6 +936,7 @@ class PatientQueueEntry extends DataClass
           ..write('tokenNumber: $tokenNumber, ')
           ..write('patientName: $patientName, ')
           ..write('age: $age, ')
+          ..write('dateOfBirth: $dateOfBirth, ')
           ..write('gender: $gender, ')
           ..write('phone: $phone, ')
           ..write('vitalsJson: $vitalsJson, ')
@@ -720,18 +948,24 @@ class PatientQueueEntry extends DataClass
           ..write('entryTime: $entryTime, ')
           ..write('consultationStartTime: $consultationStartTime, ')
           ..write('completionTime: $completionTime, ')
-          ..write('compiledPrescriptionJson: $compiledPrescriptionJson')
+          ..write('compiledPrescriptionJson: $compiledPrescriptionJson, ')
+          ..write('encounterSnapshotJson: $encounterSnapshotJson, ')
+          ..write('overrideReason: $overrideReason, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     patientId,
     tokenNumber,
     patientName,
     age,
+    dateOfBirth,
     gender,
     phone,
     vitalsJson,
@@ -744,7 +978,12 @@ class PatientQueueEntry extends DataClass
     consultationStartTime,
     completionTime,
     compiledPrescriptionJson,
-  );
+    encounterSnapshotJson,
+    overrideReason,
+    updatedAt,
+    version,
+    deletedAt,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -754,6 +993,7 @@ class PatientQueueEntry extends DataClass
           other.tokenNumber == this.tokenNumber &&
           other.patientName == this.patientName &&
           other.age == this.age &&
+          other.dateOfBirth == this.dateOfBirth &&
           other.gender == this.gender &&
           other.phone == this.phone &&
           other.vitalsJson == this.vitalsJson &&
@@ -765,7 +1005,12 @@ class PatientQueueEntry extends DataClass
           other.entryTime == this.entryTime &&
           other.consultationStartTime == this.consultationStartTime &&
           other.completionTime == this.completionTime &&
-          other.compiledPrescriptionJson == this.compiledPrescriptionJson);
+          other.compiledPrescriptionJson == this.compiledPrescriptionJson &&
+          other.encounterSnapshotJson == this.encounterSnapshotJson &&
+          other.overrideReason == this.overrideReason &&
+          other.updatedAt == this.updatedAt &&
+          other.version == this.version &&
+          other.deletedAt == this.deletedAt);
 }
 
 class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
@@ -774,6 +1019,7 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
   final Value<int> tokenNumber;
   final Value<String> patientName;
   final Value<int> age;
+  final Value<DateTime?> dateOfBirth;
   final Value<String> gender;
   final Value<String?> phone;
   final Value<String?> vitalsJson;
@@ -786,6 +1032,11 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
   final Value<DateTime?> consultationStartTime;
   final Value<DateTime?> completionTime;
   final Value<String?> compiledPrescriptionJson;
+  final Value<String?> encounterSnapshotJson;
+  final Value<String?> overrideReason;
+  final Value<DateTime> updatedAt;
+  final Value<int> version;
+  final Value<DateTime?> deletedAt;
   final Value<int> rowid;
   const PatientQueueTableCompanion({
     this.id = const Value.absent(),
@@ -793,6 +1044,7 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
     this.tokenNumber = const Value.absent(),
     this.patientName = const Value.absent(),
     this.age = const Value.absent(),
+    this.dateOfBirth = const Value.absent(),
     this.gender = const Value.absent(),
     this.phone = const Value.absent(),
     this.vitalsJson = const Value.absent(),
@@ -805,6 +1057,11 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
     this.consultationStartTime = const Value.absent(),
     this.completionTime = const Value.absent(),
     this.compiledPrescriptionJson = const Value.absent(),
+    this.encounterSnapshotJson = const Value.absent(),
+    this.overrideReason = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PatientQueueTableCompanion.insert({
@@ -813,6 +1070,7 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
     required int tokenNumber,
     required String patientName,
     required int age,
+    this.dateOfBirth = const Value.absent(),
     required String gender,
     this.phone = const Value.absent(),
     this.vitalsJson = const Value.absent(),
@@ -825,6 +1083,11 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
     this.consultationStartTime = const Value.absent(),
     this.completionTime = const Value.absent(),
     this.compiledPrescriptionJson = const Value.absent(),
+    this.encounterSnapshotJson = const Value.absent(),
+    this.overrideReason = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        tokenNumber = Value(tokenNumber),
@@ -839,6 +1102,7 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
     Expression<int>? tokenNumber,
     Expression<String>? patientName,
     Expression<int>? age,
+    Expression<DateTime>? dateOfBirth,
     Expression<String>? gender,
     Expression<String>? phone,
     Expression<String>? vitalsJson,
@@ -851,6 +1115,11 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
     Expression<DateTime>? consultationStartTime,
     Expression<DateTime>? completionTime,
     Expression<String>? compiledPrescriptionJson,
+    Expression<String>? encounterSnapshotJson,
+    Expression<String>? overrideReason,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? version,
+    Expression<DateTime>? deletedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -859,6 +1128,7 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
       if (tokenNumber != null) 'token_number': tokenNumber,
       if (patientName != null) 'patient_name': patientName,
       if (age != null) 'age': age,
+      if (dateOfBirth != null) 'date_of_birth': dateOfBirth,
       if (gender != null) 'gender': gender,
       if (phone != null) 'phone': phone,
       if (vitalsJson != null) 'vitals_json': vitalsJson,
@@ -873,6 +1143,12 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
       if (completionTime != null) 'completion_time': completionTime,
       if (compiledPrescriptionJson != null)
         'compiled_prescription_json': compiledPrescriptionJson,
+      if (encounterSnapshotJson != null)
+        'encounter_snapshot_json': encounterSnapshotJson,
+      if (overrideReason != null) 'override_reason': overrideReason,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (version != null) 'version': version,
+      if (deletedAt != null) 'deleted_at': deletedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -883,6 +1159,7 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
     Value<int>? tokenNumber,
     Value<String>? patientName,
     Value<int>? age,
+    Value<DateTime?>? dateOfBirth,
     Value<String>? gender,
     Value<String?>? phone,
     Value<String?>? vitalsJson,
@@ -895,6 +1172,11 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
     Value<DateTime?>? consultationStartTime,
     Value<DateTime?>? completionTime,
     Value<String?>? compiledPrescriptionJson,
+    Value<String?>? encounterSnapshotJson,
+    Value<String?>? overrideReason,
+    Value<DateTime>? updatedAt,
+    Value<int>? version,
+    Value<DateTime?>? deletedAt,
     Value<int>? rowid,
   }) {
     return PatientQueueTableCompanion(
@@ -903,6 +1185,7 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
       tokenNumber: tokenNumber ?? this.tokenNumber,
       patientName: patientName ?? this.patientName,
       age: age ?? this.age,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       gender: gender ?? this.gender,
       phone: phone ?? this.phone,
       vitalsJson: vitalsJson ?? this.vitalsJson,
@@ -917,6 +1200,12 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
       completionTime: completionTime ?? this.completionTime,
       compiledPrescriptionJson:
           compiledPrescriptionJson ?? this.compiledPrescriptionJson,
+      encounterSnapshotJson:
+          encounterSnapshotJson ?? this.encounterSnapshotJson,
+      overrideReason: overrideReason ?? this.overrideReason,
+      updatedAt: updatedAt ?? this.updatedAt,
+      version: version ?? this.version,
+      deletedAt: deletedAt ?? this.deletedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -938,6 +1227,9 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
     }
     if (age.present) {
       map['age'] = Variable<int>(age.value);
+    }
+    if (dateOfBirth.present) {
+      map['date_of_birth'] = Variable<DateTime>(dateOfBirth.value);
     }
     if (gender.present) {
       map['gender'] = Variable<String>(gender.value);
@@ -979,6 +1271,23 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
         compiledPrescriptionJson.value,
       );
     }
+    if (encounterSnapshotJson.present) {
+      map['encounter_snapshot_json'] = Variable<String>(
+        encounterSnapshotJson.value,
+      );
+    }
+    if (overrideReason.present) {
+      map['override_reason'] = Variable<String>(overrideReason.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -993,6 +1302,7 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
           ..write('tokenNumber: $tokenNumber, ')
           ..write('patientName: $patientName, ')
           ..write('age: $age, ')
+          ..write('dateOfBirth: $dateOfBirth, ')
           ..write('gender: $gender, ')
           ..write('phone: $phone, ')
           ..write('vitalsJson: $vitalsJson, ')
@@ -1005,6 +1315,11 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
           ..write('consultationStartTime: $consultationStartTime, ')
           ..write('completionTime: $completionTime, ')
           ..write('compiledPrescriptionJson: $compiledPrescriptionJson, ')
+          ..write('encounterSnapshotJson: $encounterSnapshotJson, ')
+          ..write('overrideReason: $overrideReason, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1046,8 +1361,50 @@ class $ComorbiditiesTableTable extends ComorbiditiesTable
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, name, contraindicatedDrugClasses];
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    contraindicatedDrugClasses,
+    updatedAt,
+    version,
+    deletedAt,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1084,6 +1441,24 @@ class $ComorbiditiesTableTable extends ComorbiditiesTable
     } else if (isInserting) {
       context.missing(_contraindicatedDrugClassesMeta);
     }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
     return context;
   }
 
@@ -1105,6 +1480,18 @@ class $ComorbiditiesTableTable extends ComorbiditiesTable
         DriftSqlType.string,
         data['${effectivePrefix}contraindicated_drug_classes'],
       )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
     );
   }
 
@@ -1119,10 +1506,16 @@ class ComorbidityEntry extends DataClass
   final String id;
   final String name;
   final String contraindicatedDrugClasses;
+  final DateTime updatedAt;
+  final int version;
+  final DateTime? deletedAt;
   const ComorbidityEntry({
     required this.id,
     required this.name,
     required this.contraindicatedDrugClasses,
+    required this.updatedAt,
+    required this.version,
+    this.deletedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1132,6 +1525,11 @@ class ComorbidityEntry extends DataClass
     map['contraindicated_drug_classes'] = Variable<String>(
       contraindicatedDrugClasses,
     );
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['version'] = Variable<int>(version);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
     return map;
   }
 
@@ -1140,6 +1538,11 @@ class ComorbidityEntry extends DataClass
       id: Value(id),
       name: Value(name),
       contraindicatedDrugClasses: Value(contraindicatedDrugClasses),
+      updatedAt: Value(updatedAt),
+      version: Value(version),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
     );
   }
 
@@ -1154,6 +1557,9 @@ class ComorbidityEntry extends DataClass
       contraindicatedDrugClasses: serializer.fromJson<String>(
         json['contraindicatedDrugClasses'],
       ),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      version: serializer.fromJson<int>(json['version']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
     );
   }
   @override
@@ -1165,6 +1571,9 @@ class ComorbidityEntry extends DataClass
       'contraindicatedDrugClasses': serializer.toJson<String>(
         contraindicatedDrugClasses,
       ),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'version': serializer.toJson<int>(version),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
     };
   }
 
@@ -1172,11 +1581,17 @@ class ComorbidityEntry extends DataClass
     String? id,
     String? name,
     String? contraindicatedDrugClasses,
+    DateTime? updatedAt,
+    int? version,
+    Value<DateTime?> deletedAt = const Value.absent(),
   }) => ComorbidityEntry(
     id: id ?? this.id,
     name: name ?? this.name,
     contraindicatedDrugClasses:
         contraindicatedDrugClasses ?? this.contraindicatedDrugClasses,
+    updatedAt: updatedAt ?? this.updatedAt,
+    version: version ?? this.version,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
   );
   ComorbidityEntry copyWithCompanion(ComorbiditiesTableCompanion data) {
     return ComorbidityEntry(
@@ -1185,6 +1600,9 @@ class ComorbidityEntry extends DataClass
       contraindicatedDrugClasses: data.contraindicatedDrugClasses.present
           ? data.contraindicatedDrugClasses.value
           : this.contraindicatedDrugClasses,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      version: data.version.present ? data.version.value : this.version,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
     );
   }
 
@@ -1193,37 +1611,59 @@ class ComorbidityEntry extends DataClass
     return (StringBuffer('ComorbidityEntry(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('contraindicatedDrugClasses: $contraindicatedDrugClasses')
+          ..write('contraindicatedDrugClasses: $contraindicatedDrugClasses, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, contraindicatedDrugClasses);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    contraindicatedDrugClasses,
+    updatedAt,
+    version,
+    deletedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ComorbidityEntry &&
           other.id == this.id &&
           other.name == this.name &&
-          other.contraindicatedDrugClasses == this.contraindicatedDrugClasses);
+          other.contraindicatedDrugClasses == this.contraindicatedDrugClasses &&
+          other.updatedAt == this.updatedAt &&
+          other.version == this.version &&
+          other.deletedAt == this.deletedAt);
 }
 
 class ComorbiditiesTableCompanion extends UpdateCompanion<ComorbidityEntry> {
   final Value<String> id;
   final Value<String> name;
   final Value<String> contraindicatedDrugClasses;
+  final Value<DateTime> updatedAt;
+  final Value<int> version;
+  final Value<DateTime?> deletedAt;
   final Value<int> rowid;
   const ComorbiditiesTableCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.contraindicatedDrugClasses = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ComorbiditiesTableCompanion.insert({
     required String id,
     required String name,
     required String contraindicatedDrugClasses,
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
@@ -1232,6 +1672,9 @@ class ComorbiditiesTableCompanion extends UpdateCompanion<ComorbidityEntry> {
     Expression<String>? id,
     Expression<String>? name,
     Expression<String>? contraindicatedDrugClasses,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? version,
+    Expression<DateTime>? deletedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1239,6 +1682,9 @@ class ComorbiditiesTableCompanion extends UpdateCompanion<ComorbidityEntry> {
       if (name != null) 'name': name,
       if (contraindicatedDrugClasses != null)
         'contraindicated_drug_classes': contraindicatedDrugClasses,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (version != null) 'version': version,
+      if (deletedAt != null) 'deleted_at': deletedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1247,6 +1693,9 @@ class ComorbiditiesTableCompanion extends UpdateCompanion<ComorbidityEntry> {
     Value<String>? id,
     Value<String>? name,
     Value<String>? contraindicatedDrugClasses,
+    Value<DateTime>? updatedAt,
+    Value<int>? version,
+    Value<DateTime?>? deletedAt,
     Value<int>? rowid,
   }) {
     return ComorbiditiesTableCompanion(
@@ -1254,6 +1703,9 @@ class ComorbiditiesTableCompanion extends UpdateCompanion<ComorbidityEntry> {
       name: name ?? this.name,
       contraindicatedDrugClasses:
           contraindicatedDrugClasses ?? this.contraindicatedDrugClasses,
+      updatedAt: updatedAt ?? this.updatedAt,
+      version: version ?? this.version,
+      deletedAt: deletedAt ?? this.deletedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1272,6 +1724,15 @@ class ComorbiditiesTableCompanion extends UpdateCompanion<ComorbidityEntry> {
         contraindicatedDrugClasses.value,
       );
     }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1284,6 +1745,9 @@ class ComorbiditiesTableCompanion extends UpdateCompanion<ComorbidityEntry> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('contraindicatedDrugClasses: $contraindicatedDrugClasses, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1337,8 +1801,51 @@ class $PresentingComplaintsTableTable extends PresentingComplaintsTable
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, name, category, displayOrder];
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    category,
+    displayOrder,
+    updatedAt,
+    version,
+    deletedAt,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1381,6 +1888,24 @@ class $PresentingComplaintsTableTable extends PresentingComplaintsTable
         ),
       );
     }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
     return context;
   }
 
@@ -1409,6 +1934,18 @@ class $PresentingComplaintsTableTable extends PresentingComplaintsTable
         DriftSqlType.int,
         data['${effectivePrefix}display_order'],
       )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
     );
   }
 
@@ -1424,11 +1961,17 @@ class PresentingComplaintEntry extends DataClass
   final String name;
   final String category;
   final int displayOrder;
+  final DateTime updatedAt;
+  final int version;
+  final DateTime? deletedAt;
   const PresentingComplaintEntry({
     required this.id,
     required this.name,
     required this.category,
     required this.displayOrder,
+    required this.updatedAt,
+    required this.version,
+    this.deletedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1437,6 +1980,11 @@ class PresentingComplaintEntry extends DataClass
     map['name'] = Variable<String>(name);
     map['category'] = Variable<String>(category);
     map['display_order'] = Variable<int>(displayOrder);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['version'] = Variable<int>(version);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
     return map;
   }
 
@@ -1446,6 +1994,11 @@ class PresentingComplaintEntry extends DataClass
       name: Value(name),
       category: Value(category),
       displayOrder: Value(displayOrder),
+      updatedAt: Value(updatedAt),
+      version: Value(version),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
     );
   }
 
@@ -1459,6 +2012,9 @@ class PresentingComplaintEntry extends DataClass
       name: serializer.fromJson<String>(json['name']),
       category: serializer.fromJson<String>(json['category']),
       displayOrder: serializer.fromJson<int>(json['displayOrder']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      version: serializer.fromJson<int>(json['version']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
     );
   }
   @override
@@ -1469,6 +2025,9 @@ class PresentingComplaintEntry extends DataClass
       'name': serializer.toJson<String>(name),
       'category': serializer.toJson<String>(category),
       'displayOrder': serializer.toJson<int>(displayOrder),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'version': serializer.toJson<int>(version),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
     };
   }
 
@@ -1477,11 +2036,17 @@ class PresentingComplaintEntry extends DataClass
     String? name,
     String? category,
     int? displayOrder,
+    DateTime? updatedAt,
+    int? version,
+    Value<DateTime?> deletedAt = const Value.absent(),
   }) => PresentingComplaintEntry(
     id: id ?? this.id,
     name: name ?? this.name,
     category: category ?? this.category,
     displayOrder: displayOrder ?? this.displayOrder,
+    updatedAt: updatedAt ?? this.updatedAt,
+    version: version ?? this.version,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
   );
   PresentingComplaintEntry copyWithCompanion(
     PresentingComplaintsTableCompanion data,
@@ -1493,6 +2058,9 @@ class PresentingComplaintEntry extends DataClass
       displayOrder: data.displayOrder.present
           ? data.displayOrder.value
           : this.displayOrder,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      version: data.version.present ? data.version.value : this.version,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
     );
   }
 
@@ -1502,13 +2070,24 @@ class PresentingComplaintEntry extends DataClass
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('category: $category, ')
-          ..write('displayOrder: $displayOrder')
+          ..write('displayOrder: $displayOrder, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, category, displayOrder);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    category,
+    displayOrder,
+    updatedAt,
+    version,
+    deletedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1516,7 +2095,10 @@ class PresentingComplaintEntry extends DataClass
           other.id == this.id &&
           other.name == this.name &&
           other.category == this.category &&
-          other.displayOrder == this.displayOrder);
+          other.displayOrder == this.displayOrder &&
+          other.updatedAt == this.updatedAt &&
+          other.version == this.version &&
+          other.deletedAt == this.deletedAt);
 }
 
 class PresentingComplaintsTableCompanion
@@ -1525,12 +2107,18 @@ class PresentingComplaintsTableCompanion
   final Value<String> name;
   final Value<String> category;
   final Value<int> displayOrder;
+  final Value<DateTime> updatedAt;
+  final Value<int> version;
+  final Value<DateTime?> deletedAt;
   final Value<int> rowid;
   const PresentingComplaintsTableCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.category = const Value.absent(),
     this.displayOrder = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PresentingComplaintsTableCompanion.insert({
@@ -1538,6 +2126,9 @@ class PresentingComplaintsTableCompanion
     required String name,
     required String category,
     this.displayOrder = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
@@ -1547,6 +2138,9 @@ class PresentingComplaintsTableCompanion
     Expression<String>? name,
     Expression<String>? category,
     Expression<int>? displayOrder,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? version,
+    Expression<DateTime>? deletedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1554,6 +2148,9 @@ class PresentingComplaintsTableCompanion
       if (name != null) 'name': name,
       if (category != null) 'category': category,
       if (displayOrder != null) 'display_order': displayOrder,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (version != null) 'version': version,
+      if (deletedAt != null) 'deleted_at': deletedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1563,6 +2160,9 @@ class PresentingComplaintsTableCompanion
     Value<String>? name,
     Value<String>? category,
     Value<int>? displayOrder,
+    Value<DateTime>? updatedAt,
+    Value<int>? version,
+    Value<DateTime?>? deletedAt,
     Value<int>? rowid,
   }) {
     return PresentingComplaintsTableCompanion(
@@ -1570,6 +2170,9 @@ class PresentingComplaintsTableCompanion
       name: name ?? this.name,
       category: category ?? this.category,
       displayOrder: displayOrder ?? this.displayOrder,
+      updatedAt: updatedAt ?? this.updatedAt,
+      version: version ?? this.version,
+      deletedAt: deletedAt ?? this.deletedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1589,6 +2192,15 @@ class PresentingComplaintsTableCompanion
     if (displayOrder.present) {
       map['display_order'] = Variable<int>(displayOrder.value);
     }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1602,6 +2214,9 @@ class PresentingComplaintsTableCompanion
           ..write('name: $name, ')
           ..write('category: $category, ')
           ..write('displayOrder: $displayOrder, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1699,6 +2314,41 @@ class $ComplaintSubQuestionsTableTable extends ComplaintSubQuestionsTable
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1708,6 +2358,9 @@ class $ComplaintSubQuestionsTableTable extends ComplaintSubQuestionsTable
     sentenceTemplate,
     isMultiSelect,
     sequenceOrder,
+    updatedAt,
+    version,
+    deletedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1786,6 +2439,24 @@ class $ComplaintSubQuestionsTableTable extends ComplaintSubQuestionsTable
         ),
       );
     }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
     return context;
   }
 
@@ -1826,6 +2497,18 @@ class $ComplaintSubQuestionsTableTable extends ComplaintSubQuestionsTable
         DriftSqlType.int,
         data['${effectivePrefix}sequence_order'],
       )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
     );
   }
 
@@ -1844,6 +2527,9 @@ class ComplaintSubQuestionEntry extends DataClass
   final String sentenceTemplate;
   final bool isMultiSelect;
   final int sequenceOrder;
+  final DateTime updatedAt;
+  final int version;
+  final DateTime? deletedAt;
   const ComplaintSubQuestionEntry({
     required this.id,
     required this.complaintId,
@@ -1852,6 +2538,9 @@ class ComplaintSubQuestionEntry extends DataClass
     required this.sentenceTemplate,
     required this.isMultiSelect,
     required this.sequenceOrder,
+    required this.updatedAt,
+    required this.version,
+    this.deletedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1863,6 +2552,11 @@ class ComplaintSubQuestionEntry extends DataClass
     map['sentence_template'] = Variable<String>(sentenceTemplate);
     map['is_multi_select'] = Variable<bool>(isMultiSelect);
     map['sequence_order'] = Variable<int>(sequenceOrder);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['version'] = Variable<int>(version);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
     return map;
   }
 
@@ -1875,6 +2569,11 @@ class ComplaintSubQuestionEntry extends DataClass
       sentenceTemplate: Value(sentenceTemplate),
       isMultiSelect: Value(isMultiSelect),
       sequenceOrder: Value(sequenceOrder),
+      updatedAt: Value(updatedAt),
+      version: Value(version),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
     );
   }
 
@@ -1891,6 +2590,9 @@ class ComplaintSubQuestionEntry extends DataClass
       sentenceTemplate: serializer.fromJson<String>(json['sentenceTemplate']),
       isMultiSelect: serializer.fromJson<bool>(json['isMultiSelect']),
       sequenceOrder: serializer.fromJson<int>(json['sequenceOrder']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      version: serializer.fromJson<int>(json['version']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
     );
   }
   @override
@@ -1904,6 +2606,9 @@ class ComplaintSubQuestionEntry extends DataClass
       'sentenceTemplate': serializer.toJson<String>(sentenceTemplate),
       'isMultiSelect': serializer.toJson<bool>(isMultiSelect),
       'sequenceOrder': serializer.toJson<int>(sequenceOrder),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'version': serializer.toJson<int>(version),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
     };
   }
 
@@ -1915,6 +2620,9 @@ class ComplaintSubQuestionEntry extends DataClass
     String? sentenceTemplate,
     bool? isMultiSelect,
     int? sequenceOrder,
+    DateTime? updatedAt,
+    int? version,
+    Value<DateTime?> deletedAt = const Value.absent(),
   }) => ComplaintSubQuestionEntry(
     id: id ?? this.id,
     complaintId: complaintId ?? this.complaintId,
@@ -1923,6 +2631,9 @@ class ComplaintSubQuestionEntry extends DataClass
     sentenceTemplate: sentenceTemplate ?? this.sentenceTemplate,
     isMultiSelect: isMultiSelect ?? this.isMultiSelect,
     sequenceOrder: sequenceOrder ?? this.sequenceOrder,
+    updatedAt: updatedAt ?? this.updatedAt,
+    version: version ?? this.version,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
   );
   ComplaintSubQuestionEntry copyWithCompanion(
     ComplaintSubQuestionsTableCompanion data,
@@ -1947,6 +2658,9 @@ class ComplaintSubQuestionEntry extends DataClass
       sequenceOrder: data.sequenceOrder.present
           ? data.sequenceOrder.value
           : this.sequenceOrder,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      version: data.version.present ? data.version.value : this.version,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
     );
   }
 
@@ -1959,7 +2673,10 @@ class ComplaintSubQuestionEntry extends DataClass
           ..write('optionsJson: $optionsJson, ')
           ..write('sentenceTemplate: $sentenceTemplate, ')
           ..write('isMultiSelect: $isMultiSelect, ')
-          ..write('sequenceOrder: $sequenceOrder')
+          ..write('sequenceOrder: $sequenceOrder, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }
@@ -1973,6 +2690,9 @@ class ComplaintSubQuestionEntry extends DataClass
     sentenceTemplate,
     isMultiSelect,
     sequenceOrder,
+    updatedAt,
+    version,
+    deletedAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -1984,7 +2704,10 @@ class ComplaintSubQuestionEntry extends DataClass
           other.optionsJson == this.optionsJson &&
           other.sentenceTemplate == this.sentenceTemplate &&
           other.isMultiSelect == this.isMultiSelect &&
-          other.sequenceOrder == this.sequenceOrder);
+          other.sequenceOrder == this.sequenceOrder &&
+          other.updatedAt == this.updatedAt &&
+          other.version == this.version &&
+          other.deletedAt == this.deletedAt);
 }
 
 class ComplaintSubQuestionsTableCompanion
@@ -1996,6 +2719,9 @@ class ComplaintSubQuestionsTableCompanion
   final Value<String> sentenceTemplate;
   final Value<bool> isMultiSelect;
   final Value<int> sequenceOrder;
+  final Value<DateTime> updatedAt;
+  final Value<int> version;
+  final Value<DateTime?> deletedAt;
   final Value<int> rowid;
   const ComplaintSubQuestionsTableCompanion({
     this.id = const Value.absent(),
@@ -2005,6 +2731,9 @@ class ComplaintSubQuestionsTableCompanion
     this.sentenceTemplate = const Value.absent(),
     this.isMultiSelect = const Value.absent(),
     this.sequenceOrder = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ComplaintSubQuestionsTableCompanion.insert({
@@ -2015,6 +2744,9 @@ class ComplaintSubQuestionsTableCompanion
     this.sentenceTemplate = const Value.absent(),
     this.isMultiSelect = const Value.absent(),
     this.sequenceOrder = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        complaintId = Value(complaintId),
@@ -2028,6 +2760,9 @@ class ComplaintSubQuestionsTableCompanion
     Expression<String>? sentenceTemplate,
     Expression<bool>? isMultiSelect,
     Expression<int>? sequenceOrder,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? version,
+    Expression<DateTime>? deletedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2038,6 +2773,9 @@ class ComplaintSubQuestionsTableCompanion
       if (sentenceTemplate != null) 'sentence_template': sentenceTemplate,
       if (isMultiSelect != null) 'is_multi_select': isMultiSelect,
       if (sequenceOrder != null) 'sequence_order': sequenceOrder,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (version != null) 'version': version,
+      if (deletedAt != null) 'deleted_at': deletedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2050,6 +2788,9 @@ class ComplaintSubQuestionsTableCompanion
     Value<String>? sentenceTemplate,
     Value<bool>? isMultiSelect,
     Value<int>? sequenceOrder,
+    Value<DateTime>? updatedAt,
+    Value<int>? version,
+    Value<DateTime?>? deletedAt,
     Value<int>? rowid,
   }) {
     return ComplaintSubQuestionsTableCompanion(
@@ -2060,6 +2801,9 @@ class ComplaintSubQuestionsTableCompanion
       sentenceTemplate: sentenceTemplate ?? this.sentenceTemplate,
       isMultiSelect: isMultiSelect ?? this.isMultiSelect,
       sequenceOrder: sequenceOrder ?? this.sequenceOrder,
+      updatedAt: updatedAt ?? this.updatedAt,
+      version: version ?? this.version,
+      deletedAt: deletedAt ?? this.deletedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2088,6 +2832,15 @@ class ComplaintSubQuestionsTableCompanion
     if (sequenceOrder.present) {
       map['sequence_order'] = Variable<int>(sequenceOrder.value);
     }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2104,6 +2857,9 @@ class ComplaintSubQuestionsTableCompanion
           ..write('sentenceTemplate: $sentenceTemplate, ')
           ..write('isMultiSelect: $isMultiSelect, ')
           ..write('sequenceOrder: $sequenceOrder, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2159,12 +2915,50 @@ class $ExaminationSystemsTableTable extends ExaminationSystemsTable
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     systemName,
     defaultNormalText,
     abnormalFindingsJson,
+    updatedAt,
+    version,
+    deletedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2213,6 +3007,24 @@ class $ExaminationSystemsTableTable extends ExaminationSystemsTable
     } else if (isInserting) {
       context.missing(_abnormalFindingsJsonMeta);
     }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
     return context;
   }
 
@@ -2238,6 +3050,18 @@ class $ExaminationSystemsTableTable extends ExaminationSystemsTable
         DriftSqlType.string,
         data['${effectivePrefix}abnormal_findings_json'],
       )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
     );
   }
 
@@ -2253,11 +3077,17 @@ class ExaminationSystemEntry extends DataClass
   final String systemName;
   final String defaultNormalText;
   final String abnormalFindingsJson;
+  final DateTime updatedAt;
+  final int version;
+  final DateTime? deletedAt;
   const ExaminationSystemEntry({
     required this.id,
     required this.systemName,
     required this.defaultNormalText,
     required this.abnormalFindingsJson,
+    required this.updatedAt,
+    required this.version,
+    this.deletedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2266,6 +3096,11 @@ class ExaminationSystemEntry extends DataClass
     map['system_name'] = Variable<String>(systemName);
     map['default_normal_text'] = Variable<String>(defaultNormalText);
     map['abnormal_findings_json'] = Variable<String>(abnormalFindingsJson);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['version'] = Variable<int>(version);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
     return map;
   }
 
@@ -2275,6 +3110,11 @@ class ExaminationSystemEntry extends DataClass
       systemName: Value(systemName),
       defaultNormalText: Value(defaultNormalText),
       abnormalFindingsJson: Value(abnormalFindingsJson),
+      updatedAt: Value(updatedAt),
+      version: Value(version),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
     );
   }
 
@@ -2290,6 +3130,9 @@ class ExaminationSystemEntry extends DataClass
       abnormalFindingsJson: serializer.fromJson<String>(
         json['abnormalFindingsJson'],
       ),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      version: serializer.fromJson<int>(json['version']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
     );
   }
   @override
@@ -2300,6 +3143,9 @@ class ExaminationSystemEntry extends DataClass
       'systemName': serializer.toJson<String>(systemName),
       'defaultNormalText': serializer.toJson<String>(defaultNormalText),
       'abnormalFindingsJson': serializer.toJson<String>(abnormalFindingsJson),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'version': serializer.toJson<int>(version),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
     };
   }
 
@@ -2308,11 +3154,17 @@ class ExaminationSystemEntry extends DataClass
     String? systemName,
     String? defaultNormalText,
     String? abnormalFindingsJson,
+    DateTime? updatedAt,
+    int? version,
+    Value<DateTime?> deletedAt = const Value.absent(),
   }) => ExaminationSystemEntry(
     id: id ?? this.id,
     systemName: systemName ?? this.systemName,
     defaultNormalText: defaultNormalText ?? this.defaultNormalText,
     abnormalFindingsJson: abnormalFindingsJson ?? this.abnormalFindingsJson,
+    updatedAt: updatedAt ?? this.updatedAt,
+    version: version ?? this.version,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
   );
   ExaminationSystemEntry copyWithCompanion(
     ExaminationSystemsTableCompanion data,
@@ -2328,6 +3180,9 @@ class ExaminationSystemEntry extends DataClass
       abnormalFindingsJson: data.abnormalFindingsJson.present
           ? data.abnormalFindingsJson.value
           : this.abnormalFindingsJson,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      version: data.version.present ? data.version.value : this.version,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
     );
   }
 
@@ -2337,14 +3192,24 @@ class ExaminationSystemEntry extends DataClass
           ..write('id: $id, ')
           ..write('systemName: $systemName, ')
           ..write('defaultNormalText: $defaultNormalText, ')
-          ..write('abnormalFindingsJson: $abnormalFindingsJson')
+          ..write('abnormalFindingsJson: $abnormalFindingsJson, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, systemName, defaultNormalText, abnormalFindingsJson);
+  int get hashCode => Object.hash(
+    id,
+    systemName,
+    defaultNormalText,
+    abnormalFindingsJson,
+    updatedAt,
+    version,
+    deletedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2352,7 +3217,10 @@ class ExaminationSystemEntry extends DataClass
           other.id == this.id &&
           other.systemName == this.systemName &&
           other.defaultNormalText == this.defaultNormalText &&
-          other.abnormalFindingsJson == this.abnormalFindingsJson);
+          other.abnormalFindingsJson == this.abnormalFindingsJson &&
+          other.updatedAt == this.updatedAt &&
+          other.version == this.version &&
+          other.deletedAt == this.deletedAt);
 }
 
 class ExaminationSystemsTableCompanion
@@ -2361,12 +3229,18 @@ class ExaminationSystemsTableCompanion
   final Value<String> systemName;
   final Value<String> defaultNormalText;
   final Value<String> abnormalFindingsJson;
+  final Value<DateTime> updatedAt;
+  final Value<int> version;
+  final Value<DateTime?> deletedAt;
   final Value<int> rowid;
   const ExaminationSystemsTableCompanion({
     this.id = const Value.absent(),
     this.systemName = const Value.absent(),
     this.defaultNormalText = const Value.absent(),
     this.abnormalFindingsJson = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ExaminationSystemsTableCompanion.insert({
@@ -2374,6 +3248,9 @@ class ExaminationSystemsTableCompanion
     required String systemName,
     required String defaultNormalText,
     required String abnormalFindingsJson,
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        systemName = Value(systemName),
@@ -2384,6 +3261,9 @@ class ExaminationSystemsTableCompanion
     Expression<String>? systemName,
     Expression<String>? defaultNormalText,
     Expression<String>? abnormalFindingsJson,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? version,
+    Expression<DateTime>? deletedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2392,6 +3272,9 @@ class ExaminationSystemsTableCompanion
       if (defaultNormalText != null) 'default_normal_text': defaultNormalText,
       if (abnormalFindingsJson != null)
         'abnormal_findings_json': abnormalFindingsJson,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (version != null) 'version': version,
+      if (deletedAt != null) 'deleted_at': deletedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2401,6 +3284,9 @@ class ExaminationSystemsTableCompanion
     Value<String>? systemName,
     Value<String>? defaultNormalText,
     Value<String>? abnormalFindingsJson,
+    Value<DateTime>? updatedAt,
+    Value<int>? version,
+    Value<DateTime?>? deletedAt,
     Value<int>? rowid,
   }) {
     return ExaminationSystemsTableCompanion(
@@ -2408,6 +3294,9 @@ class ExaminationSystemsTableCompanion
       systemName: systemName ?? this.systemName,
       defaultNormalText: defaultNormalText ?? this.defaultNormalText,
       abnormalFindingsJson: abnormalFindingsJson ?? this.abnormalFindingsJson,
+      updatedAt: updatedAt ?? this.updatedAt,
+      version: version ?? this.version,
+      deletedAt: deletedAt ?? this.deletedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2429,6 +3318,15 @@ class ExaminationSystemsTableCompanion
         abnormalFindingsJson.value,
       );
     }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2442,6 +3340,9 @@ class ExaminationSystemsTableCompanion
           ..write('systemName: $systemName, ')
           ..write('defaultNormalText: $defaultNormalText, ')
           ..write('abnormalFindingsJson: $abnormalFindingsJson, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2494,12 +3395,50 @@ class $DiagnosesTableTable extends DiagnosesTable
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     name,
     icd10Code,
     linkedComplaintIds,
+    updatedAt,
+    version,
+    deletedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2543,6 +3482,24 @@ class $DiagnosesTableTable extends DiagnosesTable
     } else if (isInserting) {
       context.missing(_linkedComplaintIdsMeta);
     }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
     return context;
   }
 
@@ -2568,6 +3525,18 @@ class $DiagnosesTableTable extends DiagnosesTable
         DriftSqlType.string,
         data['${effectivePrefix}linked_complaint_ids'],
       )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
     );
   }
 
@@ -2582,11 +3551,17 @@ class DiagnosisEntry extends DataClass implements Insertable<DiagnosisEntry> {
   final String name;
   final String? icd10Code;
   final String linkedComplaintIds;
+  final DateTime updatedAt;
+  final int version;
+  final DateTime? deletedAt;
   const DiagnosisEntry({
     required this.id,
     required this.name,
     this.icd10Code,
     required this.linkedComplaintIds,
+    required this.updatedAt,
+    required this.version,
+    this.deletedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2597,6 +3572,11 @@ class DiagnosisEntry extends DataClass implements Insertable<DiagnosisEntry> {
       map['icd10_code'] = Variable<String>(icd10Code);
     }
     map['linked_complaint_ids'] = Variable<String>(linkedComplaintIds);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['version'] = Variable<int>(version);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
     return map;
   }
 
@@ -2608,6 +3588,11 @@ class DiagnosisEntry extends DataClass implements Insertable<DiagnosisEntry> {
           ? const Value.absent()
           : Value(icd10Code),
       linkedComplaintIds: Value(linkedComplaintIds),
+      updatedAt: Value(updatedAt),
+      version: Value(version),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
     );
   }
 
@@ -2623,6 +3608,9 @@ class DiagnosisEntry extends DataClass implements Insertable<DiagnosisEntry> {
       linkedComplaintIds: serializer.fromJson<String>(
         json['linkedComplaintIds'],
       ),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      version: serializer.fromJson<int>(json['version']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
     );
   }
   @override
@@ -2633,6 +3621,9 @@ class DiagnosisEntry extends DataClass implements Insertable<DiagnosisEntry> {
       'name': serializer.toJson<String>(name),
       'icd10Code': serializer.toJson<String?>(icd10Code),
       'linkedComplaintIds': serializer.toJson<String>(linkedComplaintIds),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'version': serializer.toJson<int>(version),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
     };
   }
 
@@ -2641,11 +3632,17 @@ class DiagnosisEntry extends DataClass implements Insertable<DiagnosisEntry> {
     String? name,
     Value<String?> icd10Code = const Value.absent(),
     String? linkedComplaintIds,
+    DateTime? updatedAt,
+    int? version,
+    Value<DateTime?> deletedAt = const Value.absent(),
   }) => DiagnosisEntry(
     id: id ?? this.id,
     name: name ?? this.name,
     icd10Code: icd10Code.present ? icd10Code.value : this.icd10Code,
     linkedComplaintIds: linkedComplaintIds ?? this.linkedComplaintIds,
+    updatedAt: updatedAt ?? this.updatedAt,
+    version: version ?? this.version,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
   );
   DiagnosisEntry copyWithCompanion(DiagnosesTableCompanion data) {
     return DiagnosisEntry(
@@ -2655,6 +3652,9 @@ class DiagnosisEntry extends DataClass implements Insertable<DiagnosisEntry> {
       linkedComplaintIds: data.linkedComplaintIds.present
           ? data.linkedComplaintIds.value
           : this.linkedComplaintIds,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      version: data.version.present ? data.version.value : this.version,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
     );
   }
 
@@ -2664,13 +3664,24 @@ class DiagnosisEntry extends DataClass implements Insertable<DiagnosisEntry> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('icd10Code: $icd10Code, ')
-          ..write('linkedComplaintIds: $linkedComplaintIds')
+          ..write('linkedComplaintIds: $linkedComplaintIds, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, icd10Code, linkedComplaintIds);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    icd10Code,
+    linkedComplaintIds,
+    updatedAt,
+    version,
+    deletedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2678,7 +3689,10 @@ class DiagnosisEntry extends DataClass implements Insertable<DiagnosisEntry> {
           other.id == this.id &&
           other.name == this.name &&
           other.icd10Code == this.icd10Code &&
-          other.linkedComplaintIds == this.linkedComplaintIds);
+          other.linkedComplaintIds == this.linkedComplaintIds &&
+          other.updatedAt == this.updatedAt &&
+          other.version == this.version &&
+          other.deletedAt == this.deletedAt);
 }
 
 class DiagnosesTableCompanion extends UpdateCompanion<DiagnosisEntry> {
@@ -2686,12 +3700,18 @@ class DiagnosesTableCompanion extends UpdateCompanion<DiagnosisEntry> {
   final Value<String> name;
   final Value<String?> icd10Code;
   final Value<String> linkedComplaintIds;
+  final Value<DateTime> updatedAt;
+  final Value<int> version;
+  final Value<DateTime?> deletedAt;
   final Value<int> rowid;
   const DiagnosesTableCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.icd10Code = const Value.absent(),
     this.linkedComplaintIds = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DiagnosesTableCompanion.insert({
@@ -2699,6 +3719,9 @@ class DiagnosesTableCompanion extends UpdateCompanion<DiagnosisEntry> {
     required String name,
     this.icd10Code = const Value.absent(),
     required String linkedComplaintIds,
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
@@ -2708,6 +3731,9 @@ class DiagnosesTableCompanion extends UpdateCompanion<DiagnosisEntry> {
     Expression<String>? name,
     Expression<String>? icd10Code,
     Expression<String>? linkedComplaintIds,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? version,
+    Expression<DateTime>? deletedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2716,6 +3742,9 @@ class DiagnosesTableCompanion extends UpdateCompanion<DiagnosisEntry> {
       if (icd10Code != null) 'icd10_code': icd10Code,
       if (linkedComplaintIds != null)
         'linked_complaint_ids': linkedComplaintIds,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (version != null) 'version': version,
+      if (deletedAt != null) 'deleted_at': deletedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2725,6 +3754,9 @@ class DiagnosesTableCompanion extends UpdateCompanion<DiagnosisEntry> {
     Value<String>? name,
     Value<String?>? icd10Code,
     Value<String>? linkedComplaintIds,
+    Value<DateTime>? updatedAt,
+    Value<int>? version,
+    Value<DateTime?>? deletedAt,
     Value<int>? rowid,
   }) {
     return DiagnosesTableCompanion(
@@ -2732,6 +3764,9 @@ class DiagnosesTableCompanion extends UpdateCompanion<DiagnosisEntry> {
       name: name ?? this.name,
       icd10Code: icd10Code ?? this.icd10Code,
       linkedComplaintIds: linkedComplaintIds ?? this.linkedComplaintIds,
+      updatedAt: updatedAt ?? this.updatedAt,
+      version: version ?? this.version,
+      deletedAt: deletedAt ?? this.deletedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2751,6 +3786,15 @@ class DiagnosesTableCompanion extends UpdateCompanion<DiagnosisEntry> {
     if (linkedComplaintIds.present) {
       map['linked_complaint_ids'] = Variable<String>(linkedComplaintIds.value);
     }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2764,6 +3808,9 @@ class DiagnosesTableCompanion extends UpdateCompanion<DiagnosisEntry> {
           ..write('name: $name, ')
           ..write('icd10Code: $icd10Code, ')
           ..write('linkedComplaintIds: $linkedComplaintIds, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2873,6 +3920,41 @@ class $DrugsTableTable extends DrugsTable
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2884,6 +3966,9 @@ class $DrugsTableTable extends DrugsTable
     defaultFrequency,
     defaultDuration,
     defaultInstructions,
+    updatedAt,
+    version,
+    deletedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2984,6 +4069,24 @@ class $DrugsTableTable extends DrugsTable
     } else if (isInserting) {
       context.missing(_defaultInstructionsMeta);
     }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
     return context;
   }
 
@@ -3029,6 +4132,18 @@ class $DrugsTableTable extends DrugsTable
         DriftSqlType.string,
         data['${effectivePrefix}default_instructions'],
       )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
     );
   }
 
@@ -3048,6 +4163,9 @@ class DrugEntry extends DataClass implements Insertable<DrugEntry> {
   final String defaultFrequency;
   final String defaultDuration;
   final String defaultInstructions;
+  final DateTime updatedAt;
+  final int version;
+  final DateTime? deletedAt;
   const DrugEntry({
     required this.id,
     required this.genericName,
@@ -3058,6 +4176,9 @@ class DrugEntry extends DataClass implements Insertable<DrugEntry> {
     required this.defaultFrequency,
     required this.defaultDuration,
     required this.defaultInstructions,
+    required this.updatedAt,
+    required this.version,
+    this.deletedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3071,6 +4192,11 @@ class DrugEntry extends DataClass implements Insertable<DrugEntry> {
     map['default_frequency'] = Variable<String>(defaultFrequency);
     map['default_duration'] = Variable<String>(defaultDuration);
     map['default_instructions'] = Variable<String>(defaultInstructions);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['version'] = Variable<int>(version);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
     return map;
   }
 
@@ -3085,6 +4211,11 @@ class DrugEntry extends DataClass implements Insertable<DrugEntry> {
       defaultFrequency: Value(defaultFrequency),
       defaultDuration: Value(defaultDuration),
       defaultInstructions: Value(defaultInstructions),
+      updatedAt: Value(updatedAt),
+      version: Value(version),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
     );
   }
 
@@ -3105,6 +4236,9 @@ class DrugEntry extends DataClass implements Insertable<DrugEntry> {
       defaultInstructions: serializer.fromJson<String>(
         json['defaultInstructions'],
       ),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      version: serializer.fromJson<int>(json['version']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
     );
   }
   @override
@@ -3120,6 +4254,9 @@ class DrugEntry extends DataClass implements Insertable<DrugEntry> {
       'defaultFrequency': serializer.toJson<String>(defaultFrequency),
       'defaultDuration': serializer.toJson<String>(defaultDuration),
       'defaultInstructions': serializer.toJson<String>(defaultInstructions),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'version': serializer.toJson<int>(version),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
     };
   }
 
@@ -3133,6 +4270,9 @@ class DrugEntry extends DataClass implements Insertable<DrugEntry> {
     String? defaultFrequency,
     String? defaultDuration,
     String? defaultInstructions,
+    DateTime? updatedAt,
+    int? version,
+    Value<DateTime?> deletedAt = const Value.absent(),
   }) => DrugEntry(
     id: id ?? this.id,
     genericName: genericName ?? this.genericName,
@@ -3143,6 +4283,9 @@ class DrugEntry extends DataClass implements Insertable<DrugEntry> {
     defaultFrequency: defaultFrequency ?? this.defaultFrequency,
     defaultDuration: defaultDuration ?? this.defaultDuration,
     defaultInstructions: defaultInstructions ?? this.defaultInstructions,
+    updatedAt: updatedAt ?? this.updatedAt,
+    version: version ?? this.version,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
   );
   DrugEntry copyWithCompanion(DrugsTableCompanion data) {
     return DrugEntry(
@@ -3167,6 +4310,9 @@ class DrugEntry extends DataClass implements Insertable<DrugEntry> {
       defaultInstructions: data.defaultInstructions.present
           ? data.defaultInstructions.value
           : this.defaultInstructions,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      version: data.version.present ? data.version.value : this.version,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
     );
   }
 
@@ -3181,7 +4327,10 @@ class DrugEntry extends DataClass implements Insertable<DrugEntry> {
           ..write('defaultRoute: $defaultRoute, ')
           ..write('defaultFrequency: $defaultFrequency, ')
           ..write('defaultDuration: $defaultDuration, ')
-          ..write('defaultInstructions: $defaultInstructions')
+          ..write('defaultInstructions: $defaultInstructions, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }
@@ -3197,6 +4346,9 @@ class DrugEntry extends DataClass implements Insertable<DrugEntry> {
     defaultFrequency,
     defaultDuration,
     defaultInstructions,
+    updatedAt,
+    version,
+    deletedAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -3210,7 +4362,10 @@ class DrugEntry extends DataClass implements Insertable<DrugEntry> {
           other.defaultRoute == this.defaultRoute &&
           other.defaultFrequency == this.defaultFrequency &&
           other.defaultDuration == this.defaultDuration &&
-          other.defaultInstructions == this.defaultInstructions);
+          other.defaultInstructions == this.defaultInstructions &&
+          other.updatedAt == this.updatedAt &&
+          other.version == this.version &&
+          other.deletedAt == this.deletedAt);
 }
 
 class DrugsTableCompanion extends UpdateCompanion<DrugEntry> {
@@ -3223,6 +4378,9 @@ class DrugsTableCompanion extends UpdateCompanion<DrugEntry> {
   final Value<String> defaultFrequency;
   final Value<String> defaultDuration;
   final Value<String> defaultInstructions;
+  final Value<DateTime> updatedAt;
+  final Value<int> version;
+  final Value<DateTime?> deletedAt;
   final Value<int> rowid;
   const DrugsTableCompanion({
     this.id = const Value.absent(),
@@ -3234,6 +4392,9 @@ class DrugsTableCompanion extends UpdateCompanion<DrugEntry> {
     this.defaultFrequency = const Value.absent(),
     this.defaultDuration = const Value.absent(),
     this.defaultInstructions = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DrugsTableCompanion.insert({
@@ -3246,6 +4407,9 @@ class DrugsTableCompanion extends UpdateCompanion<DrugEntry> {
     required String defaultFrequency,
     required String defaultDuration,
     required String defaultInstructions,
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        genericName = Value(genericName),
@@ -3266,6 +4430,9 @@ class DrugsTableCompanion extends UpdateCompanion<DrugEntry> {
     Expression<String>? defaultFrequency,
     Expression<String>? defaultDuration,
     Expression<String>? defaultInstructions,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? version,
+    Expression<DateTime>? deletedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3279,6 +4446,9 @@ class DrugsTableCompanion extends UpdateCompanion<DrugEntry> {
       if (defaultDuration != null) 'default_duration': defaultDuration,
       if (defaultInstructions != null)
         'default_instructions': defaultInstructions,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (version != null) 'version': version,
+      if (deletedAt != null) 'deleted_at': deletedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3293,6 +4463,9 @@ class DrugsTableCompanion extends UpdateCompanion<DrugEntry> {
     Value<String>? defaultFrequency,
     Value<String>? defaultDuration,
     Value<String>? defaultInstructions,
+    Value<DateTime>? updatedAt,
+    Value<int>? version,
+    Value<DateTime?>? deletedAt,
     Value<int>? rowid,
   }) {
     return DrugsTableCompanion(
@@ -3305,6 +4478,9 @@ class DrugsTableCompanion extends UpdateCompanion<DrugEntry> {
       defaultFrequency: defaultFrequency ?? this.defaultFrequency,
       defaultDuration: defaultDuration ?? this.defaultDuration,
       defaultInstructions: defaultInstructions ?? this.defaultInstructions,
+      updatedAt: updatedAt ?? this.updatedAt,
+      version: version ?? this.version,
+      deletedAt: deletedAt ?? this.deletedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3339,6 +4515,15 @@ class DrugsTableCompanion extends UpdateCompanion<DrugEntry> {
     if (defaultInstructions.present) {
       map['default_instructions'] = Variable<String>(defaultInstructions.value);
     }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3357,6 +4542,9 @@ class DrugsTableCompanion extends UpdateCompanion<DrugEntry> {
           ..write('defaultFrequency: $defaultFrequency, ')
           ..write('defaultDuration: $defaultDuration, ')
           ..write('defaultInstructions: $defaultInstructions, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3417,12 +4605,50 @@ class $PrescriptionProtocolsTableTable extends PrescriptionProtocolsTable
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     diagnosisId,
     protocolItemsJson,
     generalAdvice,
+    updatedAt,
+    version,
+    deletedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3472,6 +4698,24 @@ class $PrescriptionProtocolsTableTable extends PrescriptionProtocolsTable
         ),
       );
     }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
     return context;
   }
 
@@ -3500,6 +4744,18 @@ class $PrescriptionProtocolsTableTable extends PrescriptionProtocolsTable
         DriftSqlType.string,
         data['${effectivePrefix}general_advice'],
       )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
     );
   }
 
@@ -3515,11 +4771,17 @@ class PrescriptionProtocolEntry extends DataClass
   final String diagnosisId;
   final String protocolItemsJson;
   final String generalAdvice;
+  final DateTime updatedAt;
+  final int version;
+  final DateTime? deletedAt;
   const PrescriptionProtocolEntry({
     required this.id,
     required this.diagnosisId,
     required this.protocolItemsJson,
     required this.generalAdvice,
+    required this.updatedAt,
+    required this.version,
+    this.deletedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3528,6 +4790,11 @@ class PrescriptionProtocolEntry extends DataClass
     map['diagnosis_id'] = Variable<String>(diagnosisId);
     map['protocol_items_json'] = Variable<String>(protocolItemsJson);
     map['general_advice'] = Variable<String>(generalAdvice);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['version'] = Variable<int>(version);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
     return map;
   }
 
@@ -3537,6 +4804,11 @@ class PrescriptionProtocolEntry extends DataClass
       diagnosisId: Value(diagnosisId),
       protocolItemsJson: Value(protocolItemsJson),
       generalAdvice: Value(generalAdvice),
+      updatedAt: Value(updatedAt),
+      version: Value(version),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
     );
   }
 
@@ -3550,6 +4822,9 @@ class PrescriptionProtocolEntry extends DataClass
       diagnosisId: serializer.fromJson<String>(json['diagnosisId']),
       protocolItemsJson: serializer.fromJson<String>(json['protocolItemsJson']),
       generalAdvice: serializer.fromJson<String>(json['generalAdvice']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      version: serializer.fromJson<int>(json['version']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
     );
   }
   @override
@@ -3560,6 +4835,9 @@ class PrescriptionProtocolEntry extends DataClass
       'diagnosisId': serializer.toJson<String>(diagnosisId),
       'protocolItemsJson': serializer.toJson<String>(protocolItemsJson),
       'generalAdvice': serializer.toJson<String>(generalAdvice),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'version': serializer.toJson<int>(version),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
     };
   }
 
@@ -3568,11 +4846,17 @@ class PrescriptionProtocolEntry extends DataClass
     String? diagnosisId,
     String? protocolItemsJson,
     String? generalAdvice,
+    DateTime? updatedAt,
+    int? version,
+    Value<DateTime?> deletedAt = const Value.absent(),
   }) => PrescriptionProtocolEntry(
     id: id ?? this.id,
     diagnosisId: diagnosisId ?? this.diagnosisId,
     protocolItemsJson: protocolItemsJson ?? this.protocolItemsJson,
     generalAdvice: generalAdvice ?? this.generalAdvice,
+    updatedAt: updatedAt ?? this.updatedAt,
+    version: version ?? this.version,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
   );
   PrescriptionProtocolEntry copyWithCompanion(
     PrescriptionProtocolsTableCompanion data,
@@ -3588,6 +4872,9 @@ class PrescriptionProtocolEntry extends DataClass
       generalAdvice: data.generalAdvice.present
           ? data.generalAdvice.value
           : this.generalAdvice,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      version: data.version.present ? data.version.value : this.version,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
     );
   }
 
@@ -3597,14 +4884,24 @@ class PrescriptionProtocolEntry extends DataClass
           ..write('id: $id, ')
           ..write('diagnosisId: $diagnosisId, ')
           ..write('protocolItemsJson: $protocolItemsJson, ')
-          ..write('generalAdvice: $generalAdvice')
+          ..write('generalAdvice: $generalAdvice, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, diagnosisId, protocolItemsJson, generalAdvice);
+  int get hashCode => Object.hash(
+    id,
+    diagnosisId,
+    protocolItemsJson,
+    generalAdvice,
+    updatedAt,
+    version,
+    deletedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3612,7 +4909,10 @@ class PrescriptionProtocolEntry extends DataClass
           other.id == this.id &&
           other.diagnosisId == this.diagnosisId &&
           other.protocolItemsJson == this.protocolItemsJson &&
-          other.generalAdvice == this.generalAdvice);
+          other.generalAdvice == this.generalAdvice &&
+          other.updatedAt == this.updatedAt &&
+          other.version == this.version &&
+          other.deletedAt == this.deletedAt);
 }
 
 class PrescriptionProtocolsTableCompanion
@@ -3621,12 +4921,18 @@ class PrescriptionProtocolsTableCompanion
   final Value<String> diagnosisId;
   final Value<String> protocolItemsJson;
   final Value<String> generalAdvice;
+  final Value<DateTime> updatedAt;
+  final Value<int> version;
+  final Value<DateTime?> deletedAt;
   final Value<int> rowid;
   const PrescriptionProtocolsTableCompanion({
     this.id = const Value.absent(),
     this.diagnosisId = const Value.absent(),
     this.protocolItemsJson = const Value.absent(),
     this.generalAdvice = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PrescriptionProtocolsTableCompanion.insert({
@@ -3634,6 +4940,9 @@ class PrescriptionProtocolsTableCompanion
     required String diagnosisId,
     required String protocolItemsJson,
     this.generalAdvice = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        diagnosisId = Value(diagnosisId),
@@ -3643,6 +4952,9 @@ class PrescriptionProtocolsTableCompanion
     Expression<String>? diagnosisId,
     Expression<String>? protocolItemsJson,
     Expression<String>? generalAdvice,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? version,
+    Expression<DateTime>? deletedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3650,6 +4962,9 @@ class PrescriptionProtocolsTableCompanion
       if (diagnosisId != null) 'diagnosis_id': diagnosisId,
       if (protocolItemsJson != null) 'protocol_items_json': protocolItemsJson,
       if (generalAdvice != null) 'general_advice': generalAdvice,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (version != null) 'version': version,
+      if (deletedAt != null) 'deleted_at': deletedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3659,6 +4974,9 @@ class PrescriptionProtocolsTableCompanion
     Value<String>? diagnosisId,
     Value<String>? protocolItemsJson,
     Value<String>? generalAdvice,
+    Value<DateTime>? updatedAt,
+    Value<int>? version,
+    Value<DateTime?>? deletedAt,
     Value<int>? rowid,
   }) {
     return PrescriptionProtocolsTableCompanion(
@@ -3666,6 +4984,9 @@ class PrescriptionProtocolsTableCompanion
       diagnosisId: diagnosisId ?? this.diagnosisId,
       protocolItemsJson: protocolItemsJson ?? this.protocolItemsJson,
       generalAdvice: generalAdvice ?? this.generalAdvice,
+      updatedAt: updatedAt ?? this.updatedAt,
+      version: version ?? this.version,
+      deletedAt: deletedAt ?? this.deletedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3685,6 +5006,15 @@ class PrescriptionProtocolsTableCompanion
     if (generalAdvice.present) {
       map['general_advice'] = Variable<String>(generalAdvice.value);
     }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3698,6 +5028,940 @@ class PrescriptionProtocolsTableCompanion
           ..write('diagnosisId: $diagnosisId, ')
           ..write('protocolItemsJson: $protocolItemsJson, ')
           ..write('generalAdvice: $generalAdvice, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $UnmappedTermsTableTable extends UnmappedTermsTable
+    with TableInfo<$UnmappedTermsTableTable, UnmappedTermEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $UnmappedTermsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _termMeta = const VerificationMeta('term');
+  @override
+  late final GeneratedColumn<String> term = GeneratedColumn<String>(
+    'term',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _encounterIdMeta = const VerificationMeta(
+    'encounterId',
+  );
+  @override
+  late final GeneratedColumn<String> encounterId = GeneratedColumn<String>(
+    'encounter_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    category,
+    term,
+    encounterId,
+    createdAt,
+    updatedAt,
+    version,
+    deletedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'unmapped_terms_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<UnmappedTermEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
+    }
+    if (data.containsKey('term')) {
+      context.handle(
+        _termMeta,
+        term.isAcceptableOrUnknown(data['term']!, _termMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_termMeta);
+    }
+    if (data.containsKey('encounter_id')) {
+      context.handle(
+        _encounterIdMeta,
+        encounterId.isAcceptableOrUnknown(
+          data['encounter_id']!,
+          _encounterIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  UnmappedTermEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return UnmappedTermEntry(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
+      term: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}term'],
+      )!,
+      encounterId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}encounter_id'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+    );
+  }
+
+  @override
+  $UnmappedTermsTableTable createAlias(String alias) {
+    return $UnmappedTermsTableTable(attachedDatabase, alias);
+  }
+}
+
+class UnmappedTermEntry extends DataClass
+    implements Insertable<UnmappedTermEntry> {
+  final String id;
+  final String category;
+  final String term;
+  final String? encounterId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final int version;
+  final DateTime? deletedAt;
+  const UnmappedTermEntry({
+    required this.id,
+    required this.category,
+    required this.term,
+    this.encounterId,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.version,
+    this.deletedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['category'] = Variable<String>(category);
+    map['term'] = Variable<String>(term);
+    if (!nullToAbsent || encounterId != null) {
+      map['encounter_id'] = Variable<String>(encounterId);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['version'] = Variable<int>(version);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    return map;
+  }
+
+  UnmappedTermsTableCompanion toCompanion(bool nullToAbsent) {
+    return UnmappedTermsTableCompanion(
+      id: Value(id),
+      category: Value(category),
+      term: Value(term),
+      encounterId: encounterId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(encounterId),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      version: Value(version),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory UnmappedTermEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return UnmappedTermEntry(
+      id: serializer.fromJson<String>(json['id']),
+      category: serializer.fromJson<String>(json['category']),
+      term: serializer.fromJson<String>(json['term']),
+      encounterId: serializer.fromJson<String?>(json['encounterId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      version: serializer.fromJson<int>(json['version']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'category': serializer.toJson<String>(category),
+      'term': serializer.toJson<String>(term),
+      'encounterId': serializer.toJson<String?>(encounterId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'version': serializer.toJson<int>(version),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+    };
+  }
+
+  UnmappedTermEntry copyWith({
+    String? id,
+    String? category,
+    String? term,
+    Value<String?> encounterId = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    int? version,
+    Value<DateTime?> deletedAt = const Value.absent(),
+  }) => UnmappedTermEntry(
+    id: id ?? this.id,
+    category: category ?? this.category,
+    term: term ?? this.term,
+    encounterId: encounterId.present ? encounterId.value : this.encounterId,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    version: version ?? this.version,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+  );
+  UnmappedTermEntry copyWithCompanion(UnmappedTermsTableCompanion data) {
+    return UnmappedTermEntry(
+      id: data.id.present ? data.id.value : this.id,
+      category: data.category.present ? data.category.value : this.category,
+      term: data.term.present ? data.term.value : this.term,
+      encounterId: data.encounterId.present
+          ? data.encounterId.value
+          : this.encounterId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      version: data.version.present ? data.version.value : this.version,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UnmappedTermEntry(')
+          ..write('id: $id, ')
+          ..write('category: $category, ')
+          ..write('term: $term, ')
+          ..write('encounterId: $encounterId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    category,
+    term,
+    encounterId,
+    createdAt,
+    updatedAt,
+    version,
+    deletedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is UnmappedTermEntry &&
+          other.id == this.id &&
+          other.category == this.category &&
+          other.term == this.term &&
+          other.encounterId == this.encounterId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.version == this.version &&
+          other.deletedAt == this.deletedAt);
+}
+
+class UnmappedTermsTableCompanion extends UpdateCompanion<UnmappedTermEntry> {
+  final Value<String> id;
+  final Value<String> category;
+  final Value<String> term;
+  final Value<String?> encounterId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> version;
+  final Value<DateTime?> deletedAt;
+  final Value<int> rowid;
+  const UnmappedTermsTableCompanion({
+    this.id = const Value.absent(),
+    this.category = const Value.absent(),
+    this.term = const Value.absent(),
+    this.encounterId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  UnmappedTermsTableCompanion.insert({
+    required String id,
+    required String category,
+    required String term,
+    this.encounterId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       category = Value(category),
+       term = Value(term);
+  static Insertable<UnmappedTermEntry> custom({
+    Expression<String>? id,
+    Expression<String>? category,
+    Expression<String>? term,
+    Expression<String>? encounterId,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? version,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (category != null) 'category': category,
+      if (term != null) 'term': term,
+      if (encounterId != null) 'encounter_id': encounterId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (version != null) 'version': version,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  UnmappedTermsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? category,
+    Value<String>? term,
+    Value<String?>? encounterId,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? version,
+    Value<DateTime?>? deletedAt,
+    Value<int>? rowid,
+  }) {
+    return UnmappedTermsTableCompanion(
+      id: id ?? this.id,
+      category: category ?? this.category,
+      term: term ?? this.term,
+      encounterId: encounterId ?? this.encounterId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      version: version ?? this.version,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (term.present) {
+      map['term'] = Variable<String>(term.value);
+    }
+    if (encounterId.present) {
+      map['encounter_id'] = Variable<String>(encounterId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UnmappedTermsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('category: $category, ')
+          ..write('term: $term, ')
+          ..write('encounterId: $encounterId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DrugUsageTableTable extends DrugUsageTable
+    with TableInfo<$DrugUsageTableTable, DrugUsageEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DrugUsageTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _drugIdMeta = const VerificationMeta('drugId');
+  @override
+  late final GeneratedColumn<String> drugId = GeneratedColumn<String>(
+    'drug_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _usageCountMeta = const VerificationMeta(
+    'usageCount',
+  );
+  @override
+  late final GeneratedColumn<int> usageCount = GeneratedColumn<int>(
+    'usage_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _lastUsedAtMeta = const VerificationMeta(
+    'lastUsedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastUsedAt = GeneratedColumn<DateTime>(
+    'last_used_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    drugId,
+    usageCount,
+    lastUsedAt,
+    updatedAt,
+    version,
+    deletedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'drug_usage_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DrugUsageEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('drug_id')) {
+      context.handle(
+        _drugIdMeta,
+        drugId.isAcceptableOrUnknown(data['drug_id']!, _drugIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_drugIdMeta);
+    }
+    if (data.containsKey('usage_count')) {
+      context.handle(
+        _usageCountMeta,
+        usageCount.isAcceptableOrUnknown(data['usage_count']!, _usageCountMeta),
+      );
+    }
+    if (data.containsKey('last_used_at')) {
+      context.handle(
+        _lastUsedAtMeta,
+        lastUsedAt.isAcceptableOrUnknown(
+          data['last_used_at']!,
+          _lastUsedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {drugId};
+  @override
+  DrugUsageEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DrugUsageEntry(
+      drugId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}drug_id'],
+      )!,
+      usageCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}usage_count'],
+      )!,
+      lastUsedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_used_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+    );
+  }
+
+  @override
+  $DrugUsageTableTable createAlias(String alias) {
+    return $DrugUsageTableTable(attachedDatabase, alias);
+  }
+}
+
+class DrugUsageEntry extends DataClass implements Insertable<DrugUsageEntry> {
+  final String drugId;
+  final int usageCount;
+  final DateTime lastUsedAt;
+  final DateTime updatedAt;
+  final int version;
+  final DateTime? deletedAt;
+  const DrugUsageEntry({
+    required this.drugId,
+    required this.usageCount,
+    required this.lastUsedAt,
+    required this.updatedAt,
+    required this.version,
+    this.deletedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['drug_id'] = Variable<String>(drugId);
+    map['usage_count'] = Variable<int>(usageCount);
+    map['last_used_at'] = Variable<DateTime>(lastUsedAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['version'] = Variable<int>(version);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    return map;
+  }
+
+  DrugUsageTableCompanion toCompanion(bool nullToAbsent) {
+    return DrugUsageTableCompanion(
+      drugId: Value(drugId),
+      usageCount: Value(usageCount),
+      lastUsedAt: Value(lastUsedAt),
+      updatedAt: Value(updatedAt),
+      version: Value(version),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory DrugUsageEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DrugUsageEntry(
+      drugId: serializer.fromJson<String>(json['drugId']),
+      usageCount: serializer.fromJson<int>(json['usageCount']),
+      lastUsedAt: serializer.fromJson<DateTime>(json['lastUsedAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      version: serializer.fromJson<int>(json['version']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'drugId': serializer.toJson<String>(drugId),
+      'usageCount': serializer.toJson<int>(usageCount),
+      'lastUsedAt': serializer.toJson<DateTime>(lastUsedAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'version': serializer.toJson<int>(version),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+    };
+  }
+
+  DrugUsageEntry copyWith({
+    String? drugId,
+    int? usageCount,
+    DateTime? lastUsedAt,
+    DateTime? updatedAt,
+    int? version,
+    Value<DateTime?> deletedAt = const Value.absent(),
+  }) => DrugUsageEntry(
+    drugId: drugId ?? this.drugId,
+    usageCount: usageCount ?? this.usageCount,
+    lastUsedAt: lastUsedAt ?? this.lastUsedAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    version: version ?? this.version,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+  );
+  DrugUsageEntry copyWithCompanion(DrugUsageTableCompanion data) {
+    return DrugUsageEntry(
+      drugId: data.drugId.present ? data.drugId.value : this.drugId,
+      usageCount: data.usageCount.present
+          ? data.usageCount.value
+          : this.usageCount,
+      lastUsedAt: data.lastUsedAt.present
+          ? data.lastUsedAt.value
+          : this.lastUsedAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      version: data.version.present ? data.version.value : this.version,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DrugUsageEntry(')
+          ..write('drugId: $drugId, ')
+          ..write('usageCount: $usageCount, ')
+          ..write('lastUsedAt: $lastUsedAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    drugId,
+    usageCount,
+    lastUsedAt,
+    updatedAt,
+    version,
+    deletedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DrugUsageEntry &&
+          other.drugId == this.drugId &&
+          other.usageCount == this.usageCount &&
+          other.lastUsedAt == this.lastUsedAt &&
+          other.updatedAt == this.updatedAt &&
+          other.version == this.version &&
+          other.deletedAt == this.deletedAt);
+}
+
+class DrugUsageTableCompanion extends UpdateCompanion<DrugUsageEntry> {
+  final Value<String> drugId;
+  final Value<int> usageCount;
+  final Value<DateTime> lastUsedAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> version;
+  final Value<DateTime?> deletedAt;
+  final Value<int> rowid;
+  const DrugUsageTableCompanion({
+    this.drugId = const Value.absent(),
+    this.usageCount = const Value.absent(),
+    this.lastUsedAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DrugUsageTableCompanion.insert({
+    required String drugId,
+    this.usageCount = const Value.absent(),
+    this.lastUsedAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : drugId = Value(drugId);
+  static Insertable<DrugUsageEntry> custom({
+    Expression<String>? drugId,
+    Expression<int>? usageCount,
+    Expression<DateTime>? lastUsedAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? version,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (drugId != null) 'drug_id': drugId,
+      if (usageCount != null) 'usage_count': usageCount,
+      if (lastUsedAt != null) 'last_used_at': lastUsedAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (version != null) 'version': version,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DrugUsageTableCompanion copyWith({
+    Value<String>? drugId,
+    Value<int>? usageCount,
+    Value<DateTime>? lastUsedAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? version,
+    Value<DateTime?>? deletedAt,
+    Value<int>? rowid,
+  }) {
+    return DrugUsageTableCompanion(
+      drugId: drugId ?? this.drugId,
+      usageCount: usageCount ?? this.usageCount,
+      lastUsedAt: lastUsedAt ?? this.lastUsedAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      version: version ?? this.version,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (drugId.present) {
+      map['drug_id'] = Variable<String>(drugId.value);
+    }
+    if (usageCount.present) {
+      map['usage_count'] = Variable<int>(usageCount.value);
+    }
+    if (lastUsedAt.present) {
+      map['last_used_at'] = Variable<DateTime>(lastUsedAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DrugUsageTableCompanion(')
+          ..write('drugId: $drugId, ')
+          ..write('usageCount: $usageCount, ')
+          ..write('lastUsedAt: $lastUsedAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3721,6 +5985,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DrugsTableTable drugsTable = $DrugsTableTable(this);
   late final $PrescriptionProtocolsTableTable prescriptionProtocolsTable =
       $PrescriptionProtocolsTableTable(this);
+  late final $UnmappedTermsTableTable unmappedTermsTable =
+      $UnmappedTermsTableTable(this);
+  late final $DrugUsageTableTable drugUsageTable = $DrugUsageTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3734,6 +6001,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     diagnosesTable,
     drugsTable,
     prescriptionProtocolsTable,
+    unmappedTermsTable,
+    drugUsageTable,
   ];
 }
 
@@ -3744,6 +6013,7 @@ typedef $$PatientQueueTableTableCreateCompanionBuilder =
       required int tokenNumber,
       required String patientName,
       required int age,
+      Value<DateTime?> dateOfBirth,
       required String gender,
       Value<String?> phone,
       Value<String?> vitalsJson,
@@ -3756,6 +6026,11 @@ typedef $$PatientQueueTableTableCreateCompanionBuilder =
       Value<DateTime?> consultationStartTime,
       Value<DateTime?> completionTime,
       Value<String?> compiledPrescriptionJson,
+      Value<String?> encounterSnapshotJson,
+      Value<String?> overrideReason,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 typedef $$PatientQueueTableTableUpdateCompanionBuilder =
@@ -3765,6 +6040,7 @@ typedef $$PatientQueueTableTableUpdateCompanionBuilder =
       Value<int> tokenNumber,
       Value<String> patientName,
       Value<int> age,
+      Value<DateTime?> dateOfBirth,
       Value<String> gender,
       Value<String?> phone,
       Value<String?> vitalsJson,
@@ -3777,6 +6053,11 @@ typedef $$PatientQueueTableTableUpdateCompanionBuilder =
       Value<DateTime?> consultationStartTime,
       Value<DateTime?> completionTime,
       Value<String?> compiledPrescriptionJson,
+      Value<String?> encounterSnapshotJson,
+      Value<String?> overrideReason,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 
@@ -3811,6 +6092,11 @@ class $$PatientQueueTableTableFilterComposer
 
   ColumnFilters<int> get age => $composableBuilder(
     column: $table.age,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dateOfBirth => $composableBuilder(
+    column: $table.dateOfBirth,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3873,6 +6159,31 @@ class $$PatientQueueTableTableFilterComposer
     column: $table.compiledPrescriptionJson,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get encounterSnapshotJson => $composableBuilder(
+    column: $table.encounterSnapshotJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get overrideReason => $composableBuilder(
+    column: $table.overrideReason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$PatientQueueTableTableOrderingComposer
@@ -3906,6 +6217,11 @@ class $$PatientQueueTableTableOrderingComposer
 
   ColumnOrderings<int> get age => $composableBuilder(
     column: $table.age,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get dateOfBirth => $composableBuilder(
+    column: $table.dateOfBirth,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -3968,6 +6284,31 @@ class $$PatientQueueTableTableOrderingComposer
     column: $table.compiledPrescriptionJson,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get encounterSnapshotJson => $composableBuilder(
+    column: $table.encounterSnapshotJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get overrideReason => $composableBuilder(
+    column: $table.overrideReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PatientQueueTableTableAnnotationComposer
@@ -3997,6 +6338,11 @@ class $$PatientQueueTableTableAnnotationComposer
 
   GeneratedColumn<int> get age =>
       $composableBuilder(column: $table.age, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get dateOfBirth => $composableBuilder(
+    column: $table.dateOfBirth,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get gender =>
       $composableBuilder(column: $table.gender, builder: (column) => column);
@@ -4045,6 +6391,25 @@ class $$PatientQueueTableTableAnnotationComposer
     column: $table.compiledPrescriptionJson,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get encounterSnapshotJson => $composableBuilder(
+    column: $table.encounterSnapshotJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get overrideReason => $composableBuilder(
+    column: $table.overrideReason,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 }
 
 class $$PatientQueueTableTableTableManager
@@ -4092,6 +6457,7 @@ class $$PatientQueueTableTableTableManager
                 Value<int> tokenNumber = const Value.absent(),
                 Value<String> patientName = const Value.absent(),
                 Value<int> age = const Value.absent(),
+                Value<DateTime?> dateOfBirth = const Value.absent(),
                 Value<String> gender = const Value.absent(),
                 Value<String?> phone = const Value.absent(),
                 Value<String?> vitalsJson = const Value.absent(),
@@ -4104,6 +6470,11 @@ class $$PatientQueueTableTableTableManager
                 Value<DateTime?> consultationStartTime = const Value.absent(),
                 Value<DateTime?> completionTime = const Value.absent(),
                 Value<String?> compiledPrescriptionJson = const Value.absent(),
+                Value<String?> encounterSnapshotJson = const Value.absent(),
+                Value<String?> overrideReason = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PatientQueueTableCompanion(
                 id: id,
@@ -4111,6 +6482,7 @@ class $$PatientQueueTableTableTableManager
                 tokenNumber: tokenNumber,
                 patientName: patientName,
                 age: age,
+                dateOfBirth: dateOfBirth,
                 gender: gender,
                 phone: phone,
                 vitalsJson: vitalsJson,
@@ -4123,6 +6495,11 @@ class $$PatientQueueTableTableTableManager
                 consultationStartTime: consultationStartTime,
                 completionTime: completionTime,
                 compiledPrescriptionJson: compiledPrescriptionJson,
+                encounterSnapshotJson: encounterSnapshotJson,
+                overrideReason: overrideReason,
+                updatedAt: updatedAt,
+                version: version,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4132,6 +6509,7 @@ class $$PatientQueueTableTableTableManager
                 required int tokenNumber,
                 required String patientName,
                 required int age,
+                Value<DateTime?> dateOfBirth = const Value.absent(),
                 required String gender,
                 Value<String?> phone = const Value.absent(),
                 Value<String?> vitalsJson = const Value.absent(),
@@ -4144,6 +6522,11 @@ class $$PatientQueueTableTableTableManager
                 Value<DateTime?> consultationStartTime = const Value.absent(),
                 Value<DateTime?> completionTime = const Value.absent(),
                 Value<String?> compiledPrescriptionJson = const Value.absent(),
+                Value<String?> encounterSnapshotJson = const Value.absent(),
+                Value<String?> overrideReason = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PatientQueueTableCompanion.insert(
                 id: id,
@@ -4151,6 +6534,7 @@ class $$PatientQueueTableTableTableManager
                 tokenNumber: tokenNumber,
                 patientName: patientName,
                 age: age,
+                dateOfBirth: dateOfBirth,
                 gender: gender,
                 phone: phone,
                 vitalsJson: vitalsJson,
@@ -4163,6 +6547,11 @@ class $$PatientQueueTableTableTableManager
                 consultationStartTime: consultationStartTime,
                 completionTime: completionTime,
                 compiledPrescriptionJson: compiledPrescriptionJson,
+                encounterSnapshotJson: encounterSnapshotJson,
+                overrideReason: overrideReason,
+                updatedAt: updatedAt,
+                version: version,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -4199,6 +6588,9 @@ typedef $$ComorbiditiesTableTableCreateCompanionBuilder =
       required String id,
       required String name,
       required String contraindicatedDrugClasses,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 typedef $$ComorbiditiesTableTableUpdateCompanionBuilder =
@@ -4206,6 +6598,9 @@ typedef $$ComorbiditiesTableTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> name,
       Value<String> contraindicatedDrugClasses,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 
@@ -4230,6 +6625,21 @@ class $$ComorbiditiesTableTableFilterComposer
 
   ColumnFilters<String> get contraindicatedDrugClasses => $composableBuilder(
     column: $table.contraindicatedDrugClasses,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -4257,6 +6667,21 @@ class $$ComorbiditiesTableTableOrderingComposer
     column: $table.contraindicatedDrugClasses,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ComorbiditiesTableTableAnnotationComposer
@@ -4278,6 +6703,15 @@ class $$ComorbiditiesTableTableAnnotationComposer
     column: $table.contraindicatedDrugClasses,
     builder: (column) => column,
   );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 }
 
 class $$ComorbiditiesTableTableTableManager
@@ -4323,11 +6757,17 @@ class $$ComorbiditiesTableTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String> contraindicatedDrugClasses = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ComorbiditiesTableCompanion(
                 id: id,
                 name: name,
                 contraindicatedDrugClasses: contraindicatedDrugClasses,
+                updatedAt: updatedAt,
+                version: version,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4335,11 +6775,17 @@ class $$ComorbiditiesTableTableTableManager
                 required String id,
                 required String name,
                 required String contraindicatedDrugClasses,
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ComorbiditiesTableCompanion.insert(
                 id: id,
                 name: name,
                 contraindicatedDrugClasses: contraindicatedDrugClasses,
+                updatedAt: updatedAt,
+                version: version,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -4377,6 +6823,9 @@ typedef $$PresentingComplaintsTableTableCreateCompanionBuilder =
       required String name,
       required String category,
       Value<int> displayOrder,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 typedef $$PresentingComplaintsTableTableUpdateCompanionBuilder =
@@ -4385,6 +6834,9 @@ typedef $$PresentingComplaintsTableTableUpdateCompanionBuilder =
       Value<String> name,
       Value<String> category,
       Value<int> displayOrder,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 
@@ -4459,6 +6911,21 @@ class $$PresentingComplaintsTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> complaintSubQuestionsTableRefs(
     Expression<bool> Function($$ComplaintSubQuestionsTableTableFilterComposer f)
     f,
@@ -4515,6 +6982,21 @@ class $$PresentingComplaintsTableTableOrderingComposer
     column: $table.displayOrder,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PresentingComplaintsTableTableAnnotationComposer
@@ -4539,6 +7021,15 @@ class $$PresentingComplaintsTableTableAnnotationComposer
     column: $table.displayOrder,
     builder: (column) => column,
   );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 
   Expression<T> complaintSubQuestionsTableRefs<T extends Object>(
     Expression<T> Function(
@@ -4616,12 +7107,18 @@ class $$PresentingComplaintsTableTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String> category = const Value.absent(),
                 Value<int> displayOrder = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PresentingComplaintsTableCompanion(
                 id: id,
                 name: name,
                 category: category,
                 displayOrder: displayOrder,
+                updatedAt: updatedAt,
+                version: version,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4630,12 +7127,18 @@ class $$PresentingComplaintsTableTableTableManager
                 required String name,
                 required String category,
                 Value<int> displayOrder = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PresentingComplaintsTableCompanion.insert(
                 id: id,
                 name: name,
                 category: category,
                 displayOrder: displayOrder,
+                updatedAt: updatedAt,
+                version: version,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -4709,6 +7212,9 @@ typedef $$ComplaintSubQuestionsTableTableCreateCompanionBuilder =
       Value<String> sentenceTemplate,
       Value<bool> isMultiSelect,
       Value<int> sequenceOrder,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 typedef $$ComplaintSubQuestionsTableTableUpdateCompanionBuilder =
@@ -4720,6 +7226,9 @@ typedef $$ComplaintSubQuestionsTableTableUpdateCompanionBuilder =
       Value<String> sentenceTemplate,
       Value<bool> isMultiSelect,
       Value<int> sequenceOrder,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 
@@ -4798,6 +7307,21 @@ class $$ComplaintSubQuestionsTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$PresentingComplaintsTableTableFilterComposer get complaintId {
     final $$PresentingComplaintsTableTableFilterComposer composer =
         $composerBuilder(
@@ -4862,6 +7386,21 @@ class $$ComplaintSubQuestionsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$PresentingComplaintsTableTableOrderingComposer get complaintId {
     final $$PresentingComplaintsTableTableOrderingComposer composer =
         $composerBuilder(
@@ -4923,6 +7462,15 @@ class $$ComplaintSubQuestionsTableTableAnnotationComposer
     column: $table.sequenceOrder,
     builder: (column) => column,
   );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 
   $$PresentingComplaintsTableTableAnnotationComposer get complaintId {
     final $$PresentingComplaintsTableTableAnnotationComposer composer =
@@ -4998,6 +7546,9 @@ class $$ComplaintSubQuestionsTableTableTableManager
                 Value<String> sentenceTemplate = const Value.absent(),
                 Value<bool> isMultiSelect = const Value.absent(),
                 Value<int> sequenceOrder = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ComplaintSubQuestionsTableCompanion(
                 id: id,
@@ -5007,6 +7558,9 @@ class $$ComplaintSubQuestionsTableTableTableManager
                 sentenceTemplate: sentenceTemplate,
                 isMultiSelect: isMultiSelect,
                 sequenceOrder: sequenceOrder,
+                updatedAt: updatedAt,
+                version: version,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -5018,6 +7572,9 @@ class $$ComplaintSubQuestionsTableTableTableManager
                 Value<String> sentenceTemplate = const Value.absent(),
                 Value<bool> isMultiSelect = const Value.absent(),
                 Value<int> sequenceOrder = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ComplaintSubQuestionsTableCompanion.insert(
                 id: id,
@@ -5027,6 +7584,9 @@ class $$ComplaintSubQuestionsTableTableTableManager
                 sentenceTemplate: sentenceTemplate,
                 isMultiSelect: isMultiSelect,
                 sequenceOrder: sequenceOrder,
+                updatedAt: updatedAt,
+                version: version,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -5104,6 +7664,9 @@ typedef $$ExaminationSystemsTableTableCreateCompanionBuilder =
       required String systemName,
       required String defaultNormalText,
       required String abnormalFindingsJson,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 typedef $$ExaminationSystemsTableTableUpdateCompanionBuilder =
@@ -5112,6 +7675,9 @@ typedef $$ExaminationSystemsTableTableUpdateCompanionBuilder =
       Value<String> systemName,
       Value<String> defaultNormalText,
       Value<String> abnormalFindingsJson,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 
@@ -5141,6 +7707,21 @@ class $$ExaminationSystemsTableTableFilterComposer
 
   ColumnFilters<String> get abnormalFindingsJson => $composableBuilder(
     column: $table.abnormalFindingsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -5173,6 +7754,21 @@ class $$ExaminationSystemsTableTableOrderingComposer
     column: $table.abnormalFindingsJson,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ExaminationSystemsTableTableAnnotationComposer
@@ -5201,6 +7797,15 @@ class $$ExaminationSystemsTableTableAnnotationComposer
     column: $table.abnormalFindingsJson,
     builder: (column) => column,
   );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 }
 
 class $$ExaminationSystemsTableTableTableManager
@@ -5253,12 +7858,18 @@ class $$ExaminationSystemsTableTableTableManager
                 Value<String> systemName = const Value.absent(),
                 Value<String> defaultNormalText = const Value.absent(),
                 Value<String> abnormalFindingsJson = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ExaminationSystemsTableCompanion(
                 id: id,
                 systemName: systemName,
                 defaultNormalText: defaultNormalText,
                 abnormalFindingsJson: abnormalFindingsJson,
+                updatedAt: updatedAt,
+                version: version,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -5267,12 +7878,18 @@ class $$ExaminationSystemsTableTableTableManager
                 required String systemName,
                 required String defaultNormalText,
                 required String abnormalFindingsJson,
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ExaminationSystemsTableCompanion.insert(
                 id: id,
                 systemName: systemName,
                 defaultNormalText: defaultNormalText,
                 abnormalFindingsJson: abnormalFindingsJson,
+                updatedAt: updatedAt,
+                version: version,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -5310,6 +7927,9 @@ typedef $$DiagnosesTableTableCreateCompanionBuilder =
       required String name,
       Value<String?> icd10Code,
       required String linkedComplaintIds,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 typedef $$DiagnosesTableTableUpdateCompanionBuilder =
@@ -5318,6 +7938,9 @@ typedef $$DiagnosesTableTableUpdateCompanionBuilder =
       Value<String> name,
       Value<String?> icd10Code,
       Value<String> linkedComplaintIds,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 
@@ -5388,6 +8011,21 @@ class $$DiagnosesTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> prescriptionProtocolsTableRefs(
     Expression<bool> Function($$PrescriptionProtocolsTableTableFilterComposer f)
     f,
@@ -5444,6 +8082,21 @@ class $$DiagnosesTableTableOrderingComposer
     column: $table.linkedComplaintIds,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$DiagnosesTableTableAnnotationComposer
@@ -5468,6 +8121,15 @@ class $$DiagnosesTableTableAnnotationComposer
     column: $table.linkedComplaintIds,
     builder: (column) => column,
   );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 
   Expression<T> prescriptionProtocolsTableRefs<T extends Object>(
     Expression<T> Function(
@@ -5533,12 +8195,18 @@ class $$DiagnosesTableTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String?> icd10Code = const Value.absent(),
                 Value<String> linkedComplaintIds = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DiagnosesTableCompanion(
                 id: id,
                 name: name,
                 icd10Code: icd10Code,
                 linkedComplaintIds: linkedComplaintIds,
+                updatedAt: updatedAt,
+                version: version,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -5547,12 +8215,18 @@ class $$DiagnosesTableTableTableManager
                 required String name,
                 Value<String?> icd10Code = const Value.absent(),
                 required String linkedComplaintIds,
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DiagnosesTableCompanion.insert(
                 id: id,
                 name: name,
                 icd10Code: icd10Code,
                 linkedComplaintIds: linkedComplaintIds,
+                updatedAt: updatedAt,
+                version: version,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -5627,6 +8301,9 @@ typedef $$DrugsTableTableCreateCompanionBuilder =
       required String defaultFrequency,
       required String defaultDuration,
       required String defaultInstructions,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 typedef $$DrugsTableTableUpdateCompanionBuilder =
@@ -5640,6 +8317,9 @@ typedef $$DrugsTableTableUpdateCompanionBuilder =
       Value<String> defaultFrequency,
       Value<String> defaultDuration,
       Value<String> defaultInstructions,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 
@@ -5694,6 +8374,21 @@ class $$DrugsTableTableFilterComposer
 
   ColumnFilters<String> get defaultInstructions => $composableBuilder(
     column: $table.defaultInstructions,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -5751,6 +8446,21 @@ class $$DrugsTableTableOrderingComposer
     column: $table.defaultInstructions,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$DrugsTableTableAnnotationComposer
@@ -5800,6 +8510,15 @@ class $$DrugsTableTableAnnotationComposer
     column: $table.defaultInstructions,
     builder: (column) => column,
   );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 }
 
 class $$DrugsTableTableTableManager
@@ -5842,6 +8561,9 @@ class $$DrugsTableTableTableManager
                 Value<String> defaultFrequency = const Value.absent(),
                 Value<String> defaultDuration = const Value.absent(),
                 Value<String> defaultInstructions = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DrugsTableCompanion(
                 id: id,
@@ -5853,6 +8575,9 @@ class $$DrugsTableTableTableManager
                 defaultFrequency: defaultFrequency,
                 defaultDuration: defaultDuration,
                 defaultInstructions: defaultInstructions,
+                updatedAt: updatedAt,
+                version: version,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -5866,6 +8591,9 @@ class $$DrugsTableTableTableManager
                 required String defaultFrequency,
                 required String defaultDuration,
                 required String defaultInstructions,
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DrugsTableCompanion.insert(
                 id: id,
@@ -5877,6 +8605,9 @@ class $$DrugsTableTableTableManager
                 defaultFrequency: defaultFrequency,
                 defaultDuration: defaultDuration,
                 defaultInstructions: defaultInstructions,
+                updatedAt: updatedAt,
+                version: version,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -5907,6 +8638,9 @@ typedef $$PrescriptionProtocolsTableTableCreateCompanionBuilder =
       required String diagnosisId,
       required String protocolItemsJson,
       Value<String> generalAdvice,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 typedef $$PrescriptionProtocolsTableTableUpdateCompanionBuilder =
@@ -5915,6 +8649,9 @@ typedef $$PrescriptionProtocolsTableTableUpdateCompanionBuilder =
       Value<String> diagnosisId,
       Value<String> protocolItemsJson,
       Value<String> generalAdvice,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 
@@ -5978,6 +8715,21 @@ class $$PrescriptionProtocolsTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$DiagnosesTableTableFilterComposer get diagnosisId {
     final $$DiagnosesTableTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -6026,6 +8778,21 @@ class $$PrescriptionProtocolsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$DiagnosesTableTableOrderingComposer get diagnosisId {
     final $$DiagnosesTableTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -6071,6 +8838,15 @@ class $$PrescriptionProtocolsTableTableAnnotationComposer
     column: $table.generalAdvice,
     builder: (column) => column,
   );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 
   $$DiagnosesTableTableAnnotationComposer get diagnosisId {
     final $$DiagnosesTableTableAnnotationComposer composer = $composerBuilder(
@@ -6142,12 +8918,18 @@ class $$PrescriptionProtocolsTableTableTableManager
                 Value<String> diagnosisId = const Value.absent(),
                 Value<String> protocolItemsJson = const Value.absent(),
                 Value<String> generalAdvice = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PrescriptionProtocolsTableCompanion(
                 id: id,
                 diagnosisId: diagnosisId,
                 protocolItemsJson: protocolItemsJson,
                 generalAdvice: generalAdvice,
+                updatedAt: updatedAt,
+                version: version,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -6156,12 +8938,18 @@ class $$PrescriptionProtocolsTableTableTableManager
                 required String diagnosisId,
                 required String protocolItemsJson,
                 Value<String> generalAdvice = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PrescriptionProtocolsTableCompanion.insert(
                 id: id,
                 diagnosisId: diagnosisId,
                 protocolItemsJson: protocolItemsJson,
                 generalAdvice: generalAdvice,
+                updatedAt: updatedAt,
+                version: version,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -6233,6 +9021,503 @@ typedef $$PrescriptionProtocolsTableTableProcessedTableManager =
       PrescriptionProtocolEntry,
       PrefetchHooks Function({bool diagnosisId})
     >;
+typedef $$UnmappedTermsTableTableCreateCompanionBuilder =
+    UnmappedTermsTableCompanion Function({
+      required String id,
+      required String category,
+      required String term,
+      Value<String?> encounterId,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<DateTime?> deletedAt,
+      Value<int> rowid,
+    });
+typedef $$UnmappedTermsTableTableUpdateCompanionBuilder =
+    UnmappedTermsTableCompanion Function({
+      Value<String> id,
+      Value<String> category,
+      Value<String> term,
+      Value<String?> encounterId,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<DateTime?> deletedAt,
+      Value<int> rowid,
+    });
+
+class $$UnmappedTermsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $UnmappedTermsTableTable> {
+  $$UnmappedTermsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get term => $composableBuilder(
+    column: $table.term,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get encounterId => $composableBuilder(
+    column: $table.encounterId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$UnmappedTermsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $UnmappedTermsTableTable> {
+  $$UnmappedTermsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get term => $composableBuilder(
+    column: $table.term,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get encounterId => $composableBuilder(
+    column: $table.encounterId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$UnmappedTermsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $UnmappedTermsTableTable> {
+  $$UnmappedTermsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<String> get term =>
+      $composableBuilder(column: $table.term, builder: (column) => column);
+
+  GeneratedColumn<String> get encounterId => $composableBuilder(
+    column: $table.encounterId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+}
+
+class $$UnmappedTermsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $UnmappedTermsTableTable,
+          UnmappedTermEntry,
+          $$UnmappedTermsTableTableFilterComposer,
+          $$UnmappedTermsTableTableOrderingComposer,
+          $$UnmappedTermsTableTableAnnotationComposer,
+          $$UnmappedTermsTableTableCreateCompanionBuilder,
+          $$UnmappedTermsTableTableUpdateCompanionBuilder,
+          (
+            UnmappedTermEntry,
+            BaseReferences<
+              _$AppDatabase,
+              $UnmappedTermsTableTable,
+              UnmappedTermEntry
+            >,
+          ),
+          UnmappedTermEntry,
+          PrefetchHooks Function()
+        > {
+  $$UnmappedTermsTableTableTableManager(
+    _$AppDatabase db,
+    $UnmappedTermsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$UnmappedTermsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$UnmappedTermsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$UnmappedTermsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<String> term = const Value.absent(),
+                Value<String?> encounterId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => UnmappedTermsTableCompanion(
+                id: id,
+                category: category,
+                term: term,
+                encounterId: encounterId,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                version: version,
+                deletedAt: deletedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String category,
+                required String term,
+                Value<String?> encounterId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => UnmappedTermsTableCompanion.insert(
+                id: id,
+                category: category,
+                term: term,
+                encounterId: encounterId,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                version: version,
+                deletedAt: deletedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$UnmappedTermsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $UnmappedTermsTableTable,
+      UnmappedTermEntry,
+      $$UnmappedTermsTableTableFilterComposer,
+      $$UnmappedTermsTableTableOrderingComposer,
+      $$UnmappedTermsTableTableAnnotationComposer,
+      $$UnmappedTermsTableTableCreateCompanionBuilder,
+      $$UnmappedTermsTableTableUpdateCompanionBuilder,
+      (
+        UnmappedTermEntry,
+        BaseReferences<
+          _$AppDatabase,
+          $UnmappedTermsTableTable,
+          UnmappedTermEntry
+        >,
+      ),
+      UnmappedTermEntry,
+      PrefetchHooks Function()
+    >;
+typedef $$DrugUsageTableTableCreateCompanionBuilder =
+    DrugUsageTableCompanion Function({
+      required String drugId,
+      Value<int> usageCount,
+      Value<DateTime> lastUsedAt,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<DateTime?> deletedAt,
+      Value<int> rowid,
+    });
+typedef $$DrugUsageTableTableUpdateCompanionBuilder =
+    DrugUsageTableCompanion Function({
+      Value<String> drugId,
+      Value<int> usageCount,
+      Value<DateTime> lastUsedAt,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<DateTime?> deletedAt,
+      Value<int> rowid,
+    });
+
+class $$DrugUsageTableTableFilterComposer
+    extends Composer<_$AppDatabase, $DrugUsageTableTable> {
+  $$DrugUsageTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get drugId => $composableBuilder(
+    column: $table.drugId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get usageCount => $composableBuilder(
+    column: $table.usageCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastUsedAt => $composableBuilder(
+    column: $table.lastUsedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$DrugUsageTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $DrugUsageTableTable> {
+  $$DrugUsageTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get drugId => $composableBuilder(
+    column: $table.drugId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get usageCount => $composableBuilder(
+    column: $table.usageCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastUsedAt => $composableBuilder(
+    column: $table.lastUsedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DrugUsageTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DrugUsageTableTable> {
+  $$DrugUsageTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get drugId =>
+      $composableBuilder(column: $table.drugId, builder: (column) => column);
+
+  GeneratedColumn<int> get usageCount => $composableBuilder(
+    column: $table.usageCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastUsedAt => $composableBuilder(
+    column: $table.lastUsedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+}
+
+class $$DrugUsageTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DrugUsageTableTable,
+          DrugUsageEntry,
+          $$DrugUsageTableTableFilterComposer,
+          $$DrugUsageTableTableOrderingComposer,
+          $$DrugUsageTableTableAnnotationComposer,
+          $$DrugUsageTableTableCreateCompanionBuilder,
+          $$DrugUsageTableTableUpdateCompanionBuilder,
+          (
+            DrugUsageEntry,
+            BaseReferences<_$AppDatabase, $DrugUsageTableTable, DrugUsageEntry>,
+          ),
+          DrugUsageEntry,
+          PrefetchHooks Function()
+        > {
+  $$DrugUsageTableTableTableManager(
+    _$AppDatabase db,
+    $DrugUsageTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DrugUsageTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DrugUsageTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DrugUsageTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> drugId = const Value.absent(),
+                Value<int> usageCount = const Value.absent(),
+                Value<DateTime> lastUsedAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DrugUsageTableCompanion(
+                drugId: drugId,
+                usageCount: usageCount,
+                lastUsedAt: lastUsedAt,
+                updatedAt: updatedAt,
+                version: version,
+                deletedAt: deletedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String drugId,
+                Value<int> usageCount = const Value.absent(),
+                Value<DateTime> lastUsedAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DrugUsageTableCompanion.insert(
+                drugId: drugId,
+                usageCount: usageCount,
+                lastUsedAt: lastUsedAt,
+                updatedAt: updatedAt,
+                version: version,
+                deletedAt: deletedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$DrugUsageTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DrugUsageTableTable,
+      DrugUsageEntry,
+      $$DrugUsageTableTableFilterComposer,
+      $$DrugUsageTableTableOrderingComposer,
+      $$DrugUsageTableTableAnnotationComposer,
+      $$DrugUsageTableTableCreateCompanionBuilder,
+      $$DrugUsageTableTableUpdateCompanionBuilder,
+      (
+        DrugUsageEntry,
+        BaseReferences<_$AppDatabase, $DrugUsageTableTable, DrugUsageEntry>,
+      ),
+      DrugUsageEntry,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -6267,4 +9552,8 @@ class $AppDatabaseManager {
         _db,
         _db.prescriptionProtocolsTable,
       );
+  $$UnmappedTermsTableTableTableManager get unmappedTermsTable =>
+      $$UnmappedTermsTableTableTableManager(_db, _db.unmappedTermsTable);
+  $$DrugUsageTableTableTableManager get drugUsageTable =>
+      $$DrugUsageTableTableTableManager(_db, _db.drugUsageTable);
 }

@@ -10,10 +10,7 @@ import '../../application/encounter_notifier.dart';
 class A4LivePreviewPane extends ConsumerWidget {
   final VoidCallback onPrintedAndCompleted;
 
-  const A4LivePreviewPane({
-    super.key,
-    required this.onPrintedAndCompleted,
-  });
+  const A4LivePreviewPane({super.key, required this.onPrintedAndCompleted});
 
   static Future<void> showPreviewDialog(
     BuildContext context, {
@@ -24,7 +21,9 @@ class A4LivePreviewPane extends ConsumerWidget {
       builder: (context) {
         return Dialog(
           insetPadding: const EdgeInsets.all(24),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Container(
             width: 850,
             height: 900,
@@ -55,11 +54,18 @@ class A4LivePreviewPane extends ConsumerWidget {
           children: [
             Row(
               children: [
-                const Icon(LucideIcons.fileText, color: AppTheme.primaryBlue, size: 20),
+                const Icon(
+                  LucideIcons.fileText,
+                  color: AppTheme.primaryBlue,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'A4 Laser Prescription Preview • Token #${patient?.tokenNumber ?? ""}',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -94,7 +100,8 @@ class A4LivePreviewPane extends ConsumerWidget {
         // Live PDF Preview
         Expanded(
           child: PdfPreview(
-            build: (format) => A4LaserPrintService.buildA4Prescription(encounter),
+            build: (format) =>
+                A4LaserPrintService.buildA4Prescription(encounter),
             initialPageFormat: PdfPageFormat.a4,
             allowPrinting: true,
             allowSharing: true,

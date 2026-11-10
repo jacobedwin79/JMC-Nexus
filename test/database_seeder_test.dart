@@ -98,4 +98,3 @@ void main() {
     expect(overdueItem.waitMinutes(now), equals(50));
   });
 }
-
