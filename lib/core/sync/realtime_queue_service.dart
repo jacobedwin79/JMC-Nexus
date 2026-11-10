@@ -97,6 +97,7 @@ class RealtimeQueueService extends Notifier<SyncState> {
               if (record.isEmpty) return;
 
               final id = record['id'] as String;
+              final patientId = record['patient_id'] as String?;
               final tokenNumber = record['token_number'] as int;
               final patientName = record['patient_name'] as String;
               final age = record['age'] as int;
@@ -104,6 +105,9 @@ class RealtimeQueueService extends Notifier<SyncState> {
               final phone = record['phone'] as String?;
               final vitalsJson = record['vitals_json'] as String?;
               final comorbIds = record['initial_comorb_ids'] as String?;
+              final allergies = record['allergies'] as String?;
+              final lmp = record['lmp'] as String?;
+              final isPregnant = record['is_pregnant'] as bool? ?? false;
               final status = record['status'] as String;
               final entryTime = DateTime.parse(record['entry_time'] as String);
 
@@ -119,6 +123,7 @@ class RealtimeQueueService extends Notifier<SyncState> {
               await _db.into(_db.patientQueueTable).insertOnConflictUpdate(
                     PatientQueueTableCompanion.insert(
                       id: id,
+                      patientId: Value(patientId),
                       tokenNumber: tokenNumber,
                       patientName: patientName,
                       age: age,
@@ -126,6 +131,9 @@ class RealtimeQueueService extends Notifier<SyncState> {
                       phone: Value(phone),
                       vitalsJson: Value(vitalsJson),
                       initialComorbIds: Value(comorbIds),
+                      allergies: Value(allergies),
+                      lmp: Value(lmp),
+                      isPregnant: Value(isPregnant),
                       status: status,
                       entryTime: entryTime,
                       consultationStartTime: Value(consultTime),
@@ -146,6 +154,7 @@ class RealtimeQueueService extends Notifier<SyncState> {
   /// Pushes a local patient queue record up to Supabase
   Future<void> pushPatientQueueRecord({
     required String id,
+    String? patientId,
     required int tokenNumber,
     required String patientName,
     required int age,
@@ -153,6 +162,9 @@ class RealtimeQueueService extends Notifier<SyncState> {
     String? phone,
     String? vitalsJson,
     String? initialComorbIds,
+    String? allergies,
+    String? lmp,
+    bool isPregnant = false,
     required String status,
     required DateTime entryTime,
     DateTime? consultationStartTime,
@@ -164,6 +176,7 @@ class RealtimeQueueService extends Notifier<SyncState> {
     try {
       await _client!.from('patient_queue').upsert({
         'id': id,
+        'patient_id': patientId,
         'token_number': tokenNumber,
         'patient_name': patientName,
         'age': age,
@@ -171,6 +184,9 @@ class RealtimeQueueService extends Notifier<SyncState> {
         'phone': phone,
         'vitals_json': vitalsJson,
         'initial_comorb_ids': initialComorbIds,
+        'allergies': allergies,
+        'lmp': lmp,
+        'is_pregnant': isPregnant,
         'status': status,
         'entry_time': entryTime.toUtc().toIso8601String(),
         'consultation_start_time': consultationStartTime?.toUtc().toIso8601String(),

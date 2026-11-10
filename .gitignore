@@ -1,45 +1,141 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
-
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# -------------------------------------------------------------------------
+# Flutter & Dart Default Artifacts
+# -------------------------------------------------------------------------
 .dart_tool/
+.flutter-plugins
 .flutter-plugins-dependencies
+.packages
 .pub-cache/
 .pub/
 /build/
 /coverage/
+**/doc/api/
 
-# Symbolication related
+# Flutter web
+/build/web/
+
+# Symbolication & Obfuscation
 app.*.symbols
-
-# Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
+# -------------------------------------------------------------------------
+# Android Platform Artifacts
+# -------------------------------------------------------------------------
+**/android/**/gradle-wrapper.jar
+**/android/.gradle
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Keystore & Signing Secrets
+*.jks
+*.keystore
+key.properties
+
+# -------------------------------------------------------------------------
+# iOS & macOS Platform Artifacts
+# -------------------------------------------------------------------------
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.normal
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/project.xcworkspace/xcuserdata/
+**/ios/**/xcuserdata/
+**/ios/**/DerivedData/
+**/ios/**/Pods/
+**/ios/**/.symlinks/
+**/ios/**/profile
+**/ios/**/flutter_export_environment.sh
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+
+**/macos/**/*.mode1v3
+**/macos/**/*.mode2v3
+**/macos/**/*.normal
+**/macos/**/*.pbxuser
+**/macos/**/*.perspectivev3
+**/macos/**/project.xcworkspace/xcuserdata/
+**/macos/**/xcuserdata/
+**/macos/**/DerivedData/
+**/macos/**/Pods/
+**/macos/**/.symlinks/
+**/macos/Flutter/ephemeral/
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+
+# -------------------------------------------------------------------------
+# Windows & Linux Platform Artifacts
+# -------------------------------------------------------------------------
+**/windows/flutter/ephemeral/
+**/linux/flutter/ephemeral/
+
+# -------------------------------------------------------------------------
+# Local Databases & Secrets
+# -------------------------------------------------------------------------
+*.sqlite
+*.sqlite-journal
+*.sqlite-shm
+*.sqlite-wal
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Supabase / Firebase / Cloud credentials
+.env
+.env.*
+!.env.example
+google-services.json
+GoogleService-Info.plist
+
+# -------------------------------------------------------------------------
+# IDEs & Editor Configuration
+# -------------------------------------------------------------------------
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history
+.atom/
+.fleet/
+
+# -------------------------------------------------------------------------
+# Operating System & Cache Files
+# -------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+*~
+*.bak
+*.tmp
+*.log
+*.class
+*.pyc
+
+# -------------------------------------------------------------------------
+# Antigravity / AI Agent Scratch & Temp Directories
+# -------------------------------------------------------------------------
+migrate_working_dir/
+.system_generated/

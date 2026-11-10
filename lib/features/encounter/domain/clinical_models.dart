@@ -14,6 +14,8 @@ abstract class PatientVitals with _$PatientVitals {
     int? spo2,
     double? temp,
     double? weight,
+    int? rbs, // Random Blood Sugar in mg/dL
+    @Default(false) bool tempIsCelsius,
   }) = _PatientVitals;
 
   factory PatientVitals.fromJson(Map<String, dynamic> json) =>
@@ -27,7 +29,37 @@ abstract class PatientVitals with _$PatientVitals {
 
   String get pulseDisplay => pulse != null ? '$pulse bpm' : '--';
   String get spo2Display => spo2 != null ? '$spo2%' : '--';
-  String get tempDisplay => temp != null ? '$temp°F' : '--';
+  String get rbsDisplay => rbs != null ? '$rbs mg/dL' : '--';
+
+  double? get tempInFahrenheit {
+    if (temp == null) return null;
+    return tempIsCelsius ? ((temp! * 9 / 5) + 32) : temp;
+  }
+
+  double? get tempInCelsius {
+    if (temp == null) return null;
+    return tempIsCelsius ? temp : ((temp! - 32) * 5 / 9);
+  }
+
+  String get tempDisplay {
+    if (temp == null) return '--';
+    if (tempIsCelsius) {
+      return '${temp!.toStringAsFixed(1)}°C';
+    }
+    return '${temp!.toStringAsFixed(1)}°F';
+  }
+
+  String get tempDualDisplay {
+    if (temp == null) return '--';
+    if (tempIsCelsius) {
+      final f = ((temp! * 9 / 5) + 32).toStringAsFixed(1);
+      return '${temp!.toStringAsFixed(1)}°C ($f°F)';
+    } else {
+      final c = ((temp! - 32) * 5 / 9).toStringAsFixed(1);
+      return '${temp!.toStringAsFixed(1)}°F ($c°C)';
+    }
+  }
+
   String get weightDisplay => weight != null ? '$weight kg' : '--';
 
   bool get hasAnyVitals =>
@@ -36,13 +68,51 @@ abstract class PatientVitals with _$PatientVitals {
       pulse != null ||
       spo2 != null ||
       temp != null ||
-      weight != null;
+      weight != null ||
+      rbs != null;
 
+  // Age-stratified clinical threshold evaluation
+  bool isTachycardicForAge(int age) {
+    if (pulse == null) return false;
+    if (age < 1) return pulse! > 160;
+    if (age < 5) return pulse! > 140;
+    if (age < 12) return pulse! > 120;
+    return pulse! > 100;
+  }
+
+  bool isBradycardicForAge(int age) {
+    if (pulse == null) return false;
+    if (age < 1) return pulse! < 100;
+    if (age < 5) return pulse! < 80;
+    if (age < 12) return pulse! < 70;
+    if (age >= 65) return pulse! < 50;
+    return pulse! < 60;
+  }
+
+  bool isHypertensiveForAge(int age) {
+    if (bpSys == null && bpDia == null) return false;
+    if (age < 12) {
+      return (bpSys != null && bpSys! > 115) || (bpDia != null && bpDia! > 75);
+    }
+    return (bpSys != null && bpSys! >= 140) || (bpDia != null && bpDia! >= 90);
+  }
+
+  bool isHypotensiveForAge(int age) {
+    if (bpSys == null && bpDia == null) return false;
+    if (age < 1) return (bpSys != null && bpSys! < 65);
+    if (age < 5) return (bpSys != null && bpSys! < 75);
+    if (age < 12) return (bpSys != null && bpSys! < 85);
+    return (bpSys != null && bpSys! < 90) || (bpDia != null && bpDia! < 60);
+  }
+
+  // Adult defaults (for backwards compatibility)
   bool get isHypotensive => (bpSys != null && bpSys! < 90) || (bpDia != null && bpDia! < 60);
   bool get isHypertensive => (bpSys != null && bpSys! >= 140) || (bpDia != null && bpDia! >= 90);
   bool get isTachycardic => pulse != null && pulse! > 100;
   bool get isHypoxemic => spo2 != null && spo2! < 95;
-  bool get isFebrile => temp != null && temp! >= 99.5;
+  bool get isFebrile => (tempInFahrenheit ?? 0) >= 99.5;
+  bool get isHypoglycemic => rbs != null && rbs! < 70;
+  bool get isHyperglycemic => rbs != null && rbs! > 200;
 }
 
 @freezed

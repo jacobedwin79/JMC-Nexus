@@ -47,6 +47,7 @@ abstract class PatientQueueItem with _$PatientQueueItem {
 
   const factory PatientQueueItem({
     required String id,
+    String? patientId,
     required int tokenNumber,
     required String patientName,
     required int age,
@@ -54,6 +55,9 @@ abstract class PatientQueueItem with _$PatientQueueItem {
     String? phone,
     @Default({}) Map<String, dynamic> vitals,
     @Default([]) List<String> initialComorbIds,
+    @Default([]) List<String> allergies,
+    String? lmp,
+    @Default(false) bool isPregnant,
     @Default('WAITING') String status,
     required DateTime entryTime,
     DateTime? consultationStartTime,

@@ -17,7 +17,7 @@ class DatabaseSeeder {
           ComorbiditiesTableCompanion.insert(
             id: 'comorb_dm',
             name: 'Type 2 Diabetes Mellitus',
-            contraindicatedDrugClasses: jsonEncode(['Systemic Steroids']),
+            contraindicatedDrugClasses: jsonEncode(['Systemic Steroids', 'Corticosteroids']),
           ),
           ComorbiditiesTableCompanion.insert(
             id: 'comorb_htn',
@@ -49,6 +49,7 @@ class DatabaseSeeder {
             contraindicatedDrugClasses: jsonEncode([
               'NSAID',
               'Aspirin',
+              'Systemic Steroids',
               'Corticosteroids',
             ]),
           ),

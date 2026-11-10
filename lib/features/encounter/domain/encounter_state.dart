@@ -12,6 +12,9 @@ abstract class EncounterState with _$EncounterState {
   const factory EncounterState({
     PatientQueueItem? activePatient,
     @Default([]) List<String> selectedComorbidityIds,
+    @Default([]) List<String> allergies,
+    String? lmp,
+    @Default(false) bool isPregnant,
     @Default({}) Map<String, SelectedComplaintState> selectedComplaints,
     @Default({}) Map<String, ExamSystemState> examStates,
     @Default([]) List<String> selectedDiagnosisIds,
@@ -21,6 +24,7 @@ abstract class EncounterState with _$EncounterState {
     @Default([]) List<SafetyAlert> safetyAlerts,
     @Default(false) bool isLetterheadMode,
     @Default(false) bool isLoading,
+    DateTime? lastDraftSavedAt,
     String? errorMessage,
   }) = _EncounterState;
 
@@ -30,6 +34,9 @@ abstract class EncounterState with _$EncounterState {
   bool get hasActivePatient => activePatient != null;
   bool get hasCriticalSafetyAlert =>
       safetyAlerts.any((alert) => alert.severity == AlertSeverity.critical);
+
+  bool get isPaediatric => (activePatient?.age ?? 100) < 12;
+  bool get isGeriatric => (activePatient?.age ?? 0) >= 65;
 
   String get compiledComplaintsSummary {
     if (selectedComplaints.isEmpty) return 'No active complaints';

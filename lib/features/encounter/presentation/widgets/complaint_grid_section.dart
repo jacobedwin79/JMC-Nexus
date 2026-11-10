@@ -15,7 +15,7 @@ class DurationUnit {
   const DurationUnit({required this.label, required this.factor});
 }
 
-class ComplaintGridSection extends ConsumerWidget {
+class ComplaintGridSection extends ConsumerStatefulWidget {
   const ComplaintGridSection({super.key});
 
   /// Duration unit options for custom duration entry
@@ -26,10 +26,29 @@ class ComplaintGridSection extends ConsumerWidget {
   ];
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ComplaintGridSection> createState() =>
+      _ComplaintGridSectionState();
+}
+
+class _ComplaintGridSectionState extends ConsumerState<ComplaintGridSection> {
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  static const List<DurationUnit> _durationUnits =
+      ComplaintGridSection._durationUnits;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final complaintsAsync = ref.watch(complaintsCatalogProvider);
     final encounter = ref.watch(encounterProvider);
     final selectedComplaints = encounter.selectedComplaints;
+    final query = _searchQuery.trim().toLowerCase();
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -64,15 +83,58 @@ class ComplaintGridSection extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
 
+          // Search box for filtering presenting complaints
+          TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Search complaints (e.g. fever, cough)...',
+              prefixIcon: const Icon(LucideIcons.search, size: 18),
+              suffixIcon: _searchQuery.isEmpty
+                  ? null
+                  : IconButton(
+                      icon: const Icon(LucideIcons.x, size: 16),
+                      tooltip: 'Clear search',
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() => _searchQuery = '');
+                      },
+                    ),
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            ),
+            onChanged: (value) => setState(() => _searchQuery = value),
+          ),
+          const SizedBox(height: 12),
+
           // Complaints Chips Grid
           complaintsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (err, _) => Text('Error loading complaints: $err'),
             data: (complaints) {
+              // Always keep selected complaints visible, even if filtered out.
+              final filtered = query.isEmpty
+                  ? complaints
+                  : complaints
+                      .where((c) =>
+                          selectedComplaints.containsKey(c.id) ||
+                          c.name.toLowerCase().contains(query) ||
+                          c.category.toLowerCase().contains(query))
+                      .toList();
+
+              if (filtered.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    'No complaints match "$_searchQuery".',
+                    style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                  ),
+                );
+              }
+
               return Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: complaints.map((complaint) {
+                children: filtered.map((complaint) {
                   final isSelected = selectedComplaints.containsKey(complaint.id);
                   return ClinicalChip(
                     label: complaint.name,

@@ -52,6 +52,8 @@ class ClinicSettings {
   }
 }
 
+final sharedPreferencesProvider = Provider<SharedPreferences?>((ref) => null);
+
 class ClinicSettingsNotifier extends Notifier<ClinicSettings> {
   static const _kClinicName = 'clinic_name';
   static const _kClinicSubtitle = 'clinic_subtitle';
@@ -65,13 +67,16 @@ class ClinicSettingsNotifier extends Notifier<ClinicSettings> {
 
   @override
   ClinicSettings build() {
-    _loadFromPrefs();
+    final prefs = ref.watch(sharedPreferencesProvider);
+    if (prefs != null) {
+      return _fromPrefs(prefs);
+    }
+    _loadFromPrefsAsync();
     return const ClinicSettings();
   }
 
-  Future<void> _loadFromPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    state = ClinicSettings(
+  ClinicSettings _fromPrefs(SharedPreferences prefs) {
+    return ClinicSettings(
       clinicName: prefs.getString(_kClinicName) ?? 'JMC CLINICAL HEALTHCARE & OPD',
       clinicSubtitle: prefs.getString(_kClinicSubtitle) ?? 'Comprehensive Outpatient & Emergency Clinical Center',
       clinicContact: prefs.getString(_kClinicContact) ?? 'Phone: +91 98765 43210 | Email: care@jmchealth.org',
@@ -82,6 +87,11 @@ class ClinicSettingsNotifier extends Notifier<ClinicSettings> {
       supabaseUrl: prefs.getString(_kSupabaseUrl) ?? '',
       supabaseAnonKey: prefs.getString(_kSupabaseKey) ?? '',
     );
+  }
+
+  Future<void> _loadFromPrefsAsync() async {
+    final prefs = await SharedPreferences.getInstance();
+    state = _fromPrefs(prefs);
   }
 
   Future<void> updateSettings(ClinicSettings updated) async {

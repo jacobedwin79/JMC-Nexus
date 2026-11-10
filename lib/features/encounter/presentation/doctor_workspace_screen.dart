@@ -131,6 +131,31 @@ class _DoctorWorkspaceScreenState extends ConsumerState<DoctorWorkspaceScreen> {
           ),
           const SizedBox(width: 12),
 
+          // Autosave Indicator & Release Consultation Button
+          if (patient != null) ...[
+            TextButton.icon(
+              icon: const Icon(LucideIcons.undo2, size: 14, color: Colors.grey),
+              label: const Text('Release to Queue', style: TextStyle(fontSize: 12, color: Colors.grey)),
+              onPressed: () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Release Patient to Queue?'),
+                    content: Text('Token #${patient.tokenNumber} (${patient.patientName}) will be returned to the waiting queue with their draft saved.'),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Keep Consulting')),
+                      ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Release to Queue')),
+                    ],
+                  ),
+                );
+                if (confirm == true) {
+                  await ref.read(encounterProvider.notifier).clearEncounter(releaseToQueue: true);
+                }
+              },
+            ),
+            const SizedBox(width: 8),
+          ],
+
           // Switch to Reception
           ElevatedButton.icon(
             onPressed: widget.onSwitchToReception,

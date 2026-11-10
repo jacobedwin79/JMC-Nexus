@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'core/config/clinic_settings.dart';
 import 'core/database/database_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'features/encounter/presentation/doctor_workspace_screen.dart';
@@ -22,7 +24,15 @@ final activeRoleProvider =
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ProviderScope(child: JmcNexusApp()));
+  final prefs = await SharedPreferences.getInstance();
+  runApp(
+    ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+      ],
+      child: const JmcNexusApp(),
+    ),
+  );
 }
 
 class JmcNexusApp extends ConsumerStatefulWidget {
@@ -42,12 +52,17 @@ class _JmcNexusAppState extends ConsumerState<JmcNexusApp> {
   }
 
   Future<void> _initDatabase() async {
-    final db = ref.read(appDatabaseProvider);
-    await db.ensureSeeded();
-    if (mounted) {
-      setState(() {
-        _isInitialized = true;
-      });
+    try {
+      final db = ref.read(appDatabaseProvider);
+      await db.ensureSeeded();
+    } catch (e) {
+      debugPrint('Database initialization notice: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
     }
   }
 

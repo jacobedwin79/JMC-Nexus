@@ -3,6 +3,29 @@ import '../../../core/database/database_mappers.dart';
 import '../../../core/database/database_provider.dart';
 import '../domain/clinical_models.dart';
 
+/// Short, compact labels for built-in comorbidities shown in chip strips.
+/// Any comorbidity not listed here falls back to its full catalog name.
+const Map<String, String> comorbidityShortLabels = {
+  'comorb_dm': 'Type 2 DM',
+  'comorb_htn': 'HTN',
+  'comorb_asthma': 'Asthma',
+  'comorb_ckd': 'CKD',
+  'comorb_pregnant': 'Pregnancy',
+  'comorb_pud': 'PUD',
+  'comorb_cad': 'CAD',
+  'comorb_copd': 'COPD',
+};
+
+String comorbidityDisplayLabel(ComorbidityModel model) =>
+    comorbidityShortLabels[model.id] ?? model.name;
+
+final comorbiditiesCatalogProvider =
+    FutureProvider<List<ComorbidityModel>>((ref) async {
+  final db = ref.watch(appDatabaseProvider);
+  final comorbs = await db.getAllComorbidities();
+  return comorbs.map((c) => c.toDomain()).toList();
+});
+
 final complaintsCatalogProvider =
     FutureProvider<List<PresentingComplaintModel>>((ref) async {
   final db = ref.watch(appDatabaseProvider);

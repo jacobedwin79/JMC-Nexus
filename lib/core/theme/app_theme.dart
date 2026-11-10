@@ -5,6 +5,7 @@ class AppTheme {
   static const Color slaNormal = Color(0xFF10B981); // Green (<30m)
   static const Color slaWarning = Color(0xFFF59E0B); // Amber (30-45m)
   static const Color slaOverdue = Color(0xFFEF4444); // High-contrast Red (>45m)
+  static const Color emergencyRed = Color(0xFFEF4444); // High-contrast Alert/Allergy Red
 
   // Primary Clinical Palette
   static const Color primaryBlue = Color(0xFF0F766E); // Medical Deep Teal / Ocean

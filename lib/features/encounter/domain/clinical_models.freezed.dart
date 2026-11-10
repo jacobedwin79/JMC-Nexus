@@ -15,7 +15,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PatientVitals {
 
- int? get bpSys; int? get bpDia; int? get pulse; int? get spo2; double? get temp; double? get weight;
+ int? get bpSys; int? get bpDia; int? get pulse; int? get spo2; double? get temp; double? get weight; int? get rbs;// Random Blood Sugar in mg/dL
+ bool get tempIsCelsius;
 /// Create a copy of PatientVitals
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +29,16 @@ $PatientVitalsCopyWith<PatientVitals> get copyWith => _$PatientVitalsCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PatientVitals&&(identical(other.bpSys, bpSys) || other.bpSys == bpSys)&&(identical(other.bpDia, bpDia) || other.bpDia == bpDia)&&(identical(other.pulse, pulse) || other.pulse == pulse)&&(identical(other.spo2, spo2) || other.spo2 == spo2)&&(identical(other.temp, temp) || other.temp == temp)&&(identical(other.weight, weight) || other.weight == weight));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PatientVitals&&(identical(other.bpSys, bpSys) || other.bpSys == bpSys)&&(identical(other.bpDia, bpDia) || other.bpDia == bpDia)&&(identical(other.pulse, pulse) || other.pulse == pulse)&&(identical(other.spo2, spo2) || other.spo2 == spo2)&&(identical(other.temp, temp) || other.temp == temp)&&(identical(other.weight, weight) || other.weight == weight)&&(identical(other.rbs, rbs) || other.rbs == rbs)&&(identical(other.tempIsCelsius, tempIsCelsius) || other.tempIsCelsius == tempIsCelsius));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,bpSys,bpDia,pulse,spo2,temp,weight);
+int get hashCode => Object.hash(runtimeType,bpSys,bpDia,pulse,spo2,temp,weight,rbs,tempIsCelsius);
 
 @override
 String toString() {
-  return 'PatientVitals(bpSys: $bpSys, bpDia: $bpDia, pulse: $pulse, spo2: $spo2, temp: $temp, weight: $weight)';
+  return 'PatientVitals(bpSys: $bpSys, bpDia: $bpDia, pulse: $pulse, spo2: $spo2, temp: $temp, weight: $weight, rbs: $rbs, tempIsCelsius: $tempIsCelsius)';
 }
 
 
@@ -48,7 +49,7 @@ abstract mixin class $PatientVitalsCopyWith<$Res>  {
   factory $PatientVitalsCopyWith(PatientVitals value, $Res Function(PatientVitals) _then) = _$PatientVitalsCopyWithImpl;
 @useResult
 $Res call({
- int? bpSys, int? bpDia, int? pulse, int? spo2, double? temp, double? weight
+ int? bpSys, int? bpDia, int? pulse, int? spo2, double? temp, double? weight, int? rbs, bool tempIsCelsius
 });
 
 
@@ -65,7 +66,7 @@ class _$PatientVitalsCopyWithImpl<$Res>
 
 /// Create a copy of PatientVitals
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? bpSys = freezed,Object? bpDia = freezed,Object? pulse = freezed,Object? spo2 = freezed,Object? temp = freezed,Object? weight = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? bpSys = freezed,Object? bpDia = freezed,Object? pulse = freezed,Object? spo2 = freezed,Object? temp = freezed,Object? weight = freezed,Object? rbs = freezed,Object? tempIsCelsius = null,}) {
   return _then(_self.copyWith(
 bpSys: freezed == bpSys ? _self.bpSys : bpSys // ignore: cast_nullable_to_non_nullable
 as int?,bpDia: freezed == bpDia ? _self.bpDia : bpDia // ignore: cast_nullable_to_non_nullable
@@ -73,7 +74,9 @@ as int?,pulse: freezed == pulse ? _self.pulse : pulse // ignore: cast_nullable_t
 as int?,spo2: freezed == spo2 ? _self.spo2 : spo2 // ignore: cast_nullable_to_non_nullable
 as int?,temp: freezed == temp ? _self.temp : temp // ignore: cast_nullable_to_non_nullable
 as double?,weight: freezed == weight ? _self.weight : weight // ignore: cast_nullable_to_non_nullable
-as double?,
+as double?,rbs: freezed == rbs ? _self.rbs : rbs // ignore: cast_nullable_to_non_nullable
+as int?,tempIsCelsius: null == tempIsCelsius ? _self.tempIsCelsius : tempIsCelsius // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -158,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? bpSys,  int? bpDia,  int? pulse,  int? spo2,  double? temp,  double? weight)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? bpSys,  int? bpDia,  int? pulse,  int? spo2,  double? temp,  double? weight,  int? rbs,  bool tempIsCelsius)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PatientVitals() when $default != null:
-return $default(_that.bpSys,_that.bpDia,_that.pulse,_that.spo2,_that.temp,_that.weight);case _:
+return $default(_that.bpSys,_that.bpDia,_that.pulse,_that.spo2,_that.temp,_that.weight,_that.rbs,_that.tempIsCelsius);case _:
   return orElse();
 
 }
@@ -179,10 +182,10 @@ return $default(_that.bpSys,_that.bpDia,_that.pulse,_that.spo2,_that.temp,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? bpSys,  int? bpDia,  int? pulse,  int? spo2,  double? temp,  double? weight)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? bpSys,  int? bpDia,  int? pulse,  int? spo2,  double? temp,  double? weight,  int? rbs,  bool tempIsCelsius)  $default,) {final _that = this;
 switch (_that) {
 case _PatientVitals():
-return $default(_that.bpSys,_that.bpDia,_that.pulse,_that.spo2,_that.temp,_that.weight);case _:
+return $default(_that.bpSys,_that.bpDia,_that.pulse,_that.spo2,_that.temp,_that.weight,_that.rbs,_that.tempIsCelsius);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -199,10 +202,10 @@ return $default(_that.bpSys,_that.bpDia,_that.pulse,_that.spo2,_that.temp,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? bpSys,  int? bpDia,  int? pulse,  int? spo2,  double? temp,  double? weight)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? bpSys,  int? bpDia,  int? pulse,  int? spo2,  double? temp,  double? weight,  int? rbs,  bool tempIsCelsius)?  $default,) {final _that = this;
 switch (_that) {
 case _PatientVitals() when $default != null:
-return $default(_that.bpSys,_that.bpDia,_that.pulse,_that.spo2,_that.temp,_that.weight);case _:
+return $default(_that.bpSys,_that.bpDia,_that.pulse,_that.spo2,_that.temp,_that.weight,_that.rbs,_that.tempIsCelsius);case _:
   return null;
 
 }
@@ -214,7 +217,7 @@ return $default(_that.bpSys,_that.bpDia,_that.pulse,_that.spo2,_that.temp,_that.
 @JsonSerializable()
 
 class _PatientVitals extends PatientVitals {
-  const _PatientVitals({this.bpSys, this.bpDia, this.pulse, this.spo2, this.temp, this.weight}): super._();
+  const _PatientVitals({this.bpSys, this.bpDia, this.pulse, this.spo2, this.temp, this.weight, this.rbs, this.tempIsCelsius = false}): super._();
   factory _PatientVitals.fromJson(Map<String, dynamic> json) => _$PatientVitalsFromJson(json);
 
 @override final  int? bpSys;
@@ -223,6 +226,9 @@ class _PatientVitals extends PatientVitals {
 @override final  int? spo2;
 @override final  double? temp;
 @override final  double? weight;
+@override final  int? rbs;
+// Random Blood Sugar in mg/dL
+@override@JsonKey() final  bool tempIsCelsius;
 
 /// Create a copy of PatientVitals
 /// with the given fields replaced by the non-null parameter values.
@@ -237,16 +243,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PatientVitals&&(identical(other.bpSys, bpSys) || other.bpSys == bpSys)&&(identical(other.bpDia, bpDia) || other.bpDia == bpDia)&&(identical(other.pulse, pulse) || other.pulse == pulse)&&(identical(other.spo2, spo2) || other.spo2 == spo2)&&(identical(other.temp, temp) || other.temp == temp)&&(identical(other.weight, weight) || other.weight == weight));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PatientVitals&&(identical(other.bpSys, bpSys) || other.bpSys == bpSys)&&(identical(other.bpDia, bpDia) || other.bpDia == bpDia)&&(identical(other.pulse, pulse) || other.pulse == pulse)&&(identical(other.spo2, spo2) || other.spo2 == spo2)&&(identical(other.temp, temp) || other.temp == temp)&&(identical(other.weight, weight) || other.weight == weight)&&(identical(other.rbs, rbs) || other.rbs == rbs)&&(identical(other.tempIsCelsius, tempIsCelsius) || other.tempIsCelsius == tempIsCelsius));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,bpSys,bpDia,pulse,spo2,temp,weight);
+int get hashCode => Object.hash(runtimeType,bpSys,bpDia,pulse,spo2,temp,weight,rbs,tempIsCelsius);
 
 @override
 String toString() {
-  return 'PatientVitals(bpSys: $bpSys, bpDia: $bpDia, pulse: $pulse, spo2: $spo2, temp: $temp, weight: $weight)';
+  return 'PatientVitals(bpSys: $bpSys, bpDia: $bpDia, pulse: $pulse, spo2: $spo2, temp: $temp, weight: $weight, rbs: $rbs, tempIsCelsius: $tempIsCelsius)';
 }
 
 
@@ -257,7 +263,7 @@ abstract mixin class _$PatientVitalsCopyWith<$Res> implements $PatientVitalsCopy
   factory _$PatientVitalsCopyWith(_PatientVitals value, $Res Function(_PatientVitals) _then) = __$PatientVitalsCopyWithImpl;
 @override @useResult
 $Res call({
- int? bpSys, int? bpDia, int? pulse, int? spo2, double? temp, double? weight
+ int? bpSys, int? bpDia, int? pulse, int? spo2, double? temp, double? weight, int? rbs, bool tempIsCelsius
 });
 
 
@@ -274,7 +280,7 @@ class __$PatientVitalsCopyWithImpl<$Res>
 
 /// Create a copy of PatientVitals
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? bpSys = freezed,Object? bpDia = freezed,Object? pulse = freezed,Object? spo2 = freezed,Object? temp = freezed,Object? weight = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? bpSys = freezed,Object? bpDia = freezed,Object? pulse = freezed,Object? spo2 = freezed,Object? temp = freezed,Object? weight = freezed,Object? rbs = freezed,Object? tempIsCelsius = null,}) {
   return _then(_PatientVitals(
 bpSys: freezed == bpSys ? _self.bpSys : bpSys // ignore: cast_nullable_to_non_nullable
 as int?,bpDia: freezed == bpDia ? _self.bpDia : bpDia // ignore: cast_nullable_to_non_nullable
@@ -282,7 +288,9 @@ as int?,pulse: freezed == pulse ? _self.pulse : pulse // ignore: cast_nullable_t
 as int?,spo2: freezed == spo2 ? _self.spo2 : spo2 // ignore: cast_nullable_to_non_nullable
 as int?,temp: freezed == temp ? _self.temp : temp // ignore: cast_nullable_to_non_nullable
 as double?,weight: freezed == weight ? _self.weight : weight // ignore: cast_nullable_to_non_nullable
-as double?,
+as double?,rbs: freezed == rbs ? _self.rbs : rbs // ignore: cast_nullable_to_non_nullable
+as int?,tempIsCelsius: null == tempIsCelsius ? _self.tempIsCelsius : tempIsCelsius // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

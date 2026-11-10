@@ -18,6 +18,17 @@ class $PatientQueueTableTable extends PatientQueueTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _patientIdMeta = const VerificationMeta(
+    'patientId',
+  );
+  @override
+  late final GeneratedColumn<String> patientId = GeneratedColumn<String>(
+    'patient_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _tokenNumberMeta = const VerificationMeta(
     'tokenNumber',
   );
@@ -89,6 +100,41 @@ class $PatientQueueTableTable extends PatientQueueTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _allergiesMeta = const VerificationMeta(
+    'allergies',
+  );
+  @override
+  late final GeneratedColumn<String> allergies = GeneratedColumn<String>(
+    'allergies',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lmpMeta = const VerificationMeta('lmp');
+  @override
+  late final GeneratedColumn<String> lmp = GeneratedColumn<String>(
+    'lmp',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isPregnantMeta = const VerificationMeta(
+    'isPregnant',
+  );
+  @override
+  late final GeneratedColumn<bool> isPregnant = GeneratedColumn<bool>(
+    'is_pregnant',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_pregnant" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumn<String> status = GeneratedColumn<String>(
@@ -146,6 +192,7 @@ class $PatientQueueTableTable extends PatientQueueTable
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    patientId,
     tokenNumber,
     patientName,
     age,
@@ -153,6 +200,9 @@ class $PatientQueueTableTable extends PatientQueueTable
     phone,
     vitalsJson,
     initialComorbIds,
+    allergies,
+    lmp,
+    isPregnant,
     status,
     entryTime,
     consultationStartTime,
@@ -175,6 +225,12 @@ class $PatientQueueTableTable extends PatientQueueTable
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
+    }
+    if (data.containsKey('patient_id')) {
+      context.handle(
+        _patientIdMeta,
+        patientId.isAcceptableOrUnknown(data['patient_id']!, _patientIdMeta),
+      );
     }
     if (data.containsKey('token_number')) {
       context.handle(
@@ -235,6 +291,24 @@ class $PatientQueueTableTable extends PatientQueueTable
         ),
       );
     }
+    if (data.containsKey('allergies')) {
+      context.handle(
+        _allergiesMeta,
+        allergies.isAcceptableOrUnknown(data['allergies']!, _allergiesMeta),
+      );
+    }
+    if (data.containsKey('lmp')) {
+      context.handle(
+        _lmpMeta,
+        lmp.isAcceptableOrUnknown(data['lmp']!, _lmpMeta),
+      );
+    }
+    if (data.containsKey('is_pregnant')) {
+      context.handle(
+        _isPregnantMeta,
+        isPregnant.isAcceptableOrUnknown(data['is_pregnant']!, _isPregnantMeta),
+      );
+    }
     if (data.containsKey('status')) {
       context.handle(
         _statusMeta,
@@ -291,6 +365,10 @@ class $PatientQueueTableTable extends PatientQueueTable
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
+      patientId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}patient_id'],
+      ),
       tokenNumber: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}token_number'],
@@ -319,6 +397,18 @@ class $PatientQueueTableTable extends PatientQueueTable
         DriftSqlType.string,
         data['${effectivePrefix}initial_comorb_ids'],
       ),
+      allergies: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}allergies'],
+      ),
+      lmp: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}lmp'],
+      ),
+      isPregnant: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_pregnant'],
+      )!,
       status: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}status'],
@@ -351,6 +441,9 @@ class $PatientQueueTableTable extends PatientQueueTable
 class PatientQueueEntry extends DataClass
     implements Insertable<PatientQueueEntry> {
   final String id;
+
+  /// Persistent patient identifier (UHID / MRN) reused across visits.
+  final String? patientId;
   final int tokenNumber;
   final String patientName;
   final int age;
@@ -358,6 +451,9 @@ class PatientQueueEntry extends DataClass
   final String? phone;
   final String? vitalsJson;
   final String? initialComorbIds;
+  final String? allergies;
+  final String? lmp;
+  final bool isPregnant;
   final String status;
   final DateTime entryTime;
   final DateTime? consultationStartTime;
@@ -365,6 +461,7 @@ class PatientQueueEntry extends DataClass
   final String? compiledPrescriptionJson;
   const PatientQueueEntry({
     required this.id,
+    this.patientId,
     required this.tokenNumber,
     required this.patientName,
     required this.age,
@@ -372,6 +469,9 @@ class PatientQueueEntry extends DataClass
     this.phone,
     this.vitalsJson,
     this.initialComorbIds,
+    this.allergies,
+    this.lmp,
+    required this.isPregnant,
     required this.status,
     required this.entryTime,
     this.consultationStartTime,
@@ -382,6 +482,9 @@ class PatientQueueEntry extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
+    if (!nullToAbsent || patientId != null) {
+      map['patient_id'] = Variable<String>(patientId);
+    }
     map['token_number'] = Variable<int>(tokenNumber);
     map['patient_name'] = Variable<String>(patientName);
     map['age'] = Variable<int>(age);
@@ -395,6 +498,13 @@ class PatientQueueEntry extends DataClass
     if (!nullToAbsent || initialComorbIds != null) {
       map['initial_comorb_ids'] = Variable<String>(initialComorbIds);
     }
+    if (!nullToAbsent || allergies != null) {
+      map['allergies'] = Variable<String>(allergies);
+    }
+    if (!nullToAbsent || lmp != null) {
+      map['lmp'] = Variable<String>(lmp);
+    }
+    map['is_pregnant'] = Variable<bool>(isPregnant);
     map['status'] = Variable<String>(status);
     map['entry_time'] = Variable<DateTime>(entryTime);
     if (!nullToAbsent || consultationStartTime != null) {
@@ -416,6 +526,9 @@ class PatientQueueEntry extends DataClass
   PatientQueueTableCompanion toCompanion(bool nullToAbsent) {
     return PatientQueueTableCompanion(
       id: Value(id),
+      patientId: patientId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(patientId),
       tokenNumber: Value(tokenNumber),
       patientName: Value(patientName),
       age: Value(age),
@@ -429,6 +542,11 @@ class PatientQueueEntry extends DataClass
       initialComorbIds: initialComorbIds == null && nullToAbsent
           ? const Value.absent()
           : Value(initialComorbIds),
+      allergies: allergies == null && nullToAbsent
+          ? const Value.absent()
+          : Value(allergies),
+      lmp: lmp == null && nullToAbsent ? const Value.absent() : Value(lmp),
+      isPregnant: Value(isPregnant),
       status: Value(status),
       entryTime: Value(entryTime),
       consultationStartTime: consultationStartTime == null && nullToAbsent
@@ -450,6 +568,7 @@ class PatientQueueEntry extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return PatientQueueEntry(
       id: serializer.fromJson<String>(json['id']),
+      patientId: serializer.fromJson<String?>(json['patientId']),
       tokenNumber: serializer.fromJson<int>(json['tokenNumber']),
       patientName: serializer.fromJson<String>(json['patientName']),
       age: serializer.fromJson<int>(json['age']),
@@ -457,6 +576,9 @@ class PatientQueueEntry extends DataClass
       phone: serializer.fromJson<String?>(json['phone']),
       vitalsJson: serializer.fromJson<String?>(json['vitalsJson']),
       initialComorbIds: serializer.fromJson<String?>(json['initialComorbIds']),
+      allergies: serializer.fromJson<String?>(json['allergies']),
+      lmp: serializer.fromJson<String?>(json['lmp']),
+      isPregnant: serializer.fromJson<bool>(json['isPregnant']),
       status: serializer.fromJson<String>(json['status']),
       entryTime: serializer.fromJson<DateTime>(json['entryTime']),
       consultationStartTime: serializer.fromJson<DateTime?>(
@@ -473,6 +595,7 @@ class PatientQueueEntry extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
+      'patientId': serializer.toJson<String?>(patientId),
       'tokenNumber': serializer.toJson<int>(tokenNumber),
       'patientName': serializer.toJson<String>(patientName),
       'age': serializer.toJson<int>(age),
@@ -480,6 +603,9 @@ class PatientQueueEntry extends DataClass
       'phone': serializer.toJson<String?>(phone),
       'vitalsJson': serializer.toJson<String?>(vitalsJson),
       'initialComorbIds': serializer.toJson<String?>(initialComorbIds),
+      'allergies': serializer.toJson<String?>(allergies),
+      'lmp': serializer.toJson<String?>(lmp),
+      'isPregnant': serializer.toJson<bool>(isPregnant),
       'status': serializer.toJson<String>(status),
       'entryTime': serializer.toJson<DateTime>(entryTime),
       'consultationStartTime': serializer.toJson<DateTime?>(
@@ -494,6 +620,7 @@ class PatientQueueEntry extends DataClass
 
   PatientQueueEntry copyWith({
     String? id,
+    Value<String?> patientId = const Value.absent(),
     int? tokenNumber,
     String? patientName,
     int? age,
@@ -501,6 +628,9 @@ class PatientQueueEntry extends DataClass
     Value<String?> phone = const Value.absent(),
     Value<String?> vitalsJson = const Value.absent(),
     Value<String?> initialComorbIds = const Value.absent(),
+    Value<String?> allergies = const Value.absent(),
+    Value<String?> lmp = const Value.absent(),
+    bool? isPregnant,
     String? status,
     DateTime? entryTime,
     Value<DateTime?> consultationStartTime = const Value.absent(),
@@ -508,6 +638,7 @@ class PatientQueueEntry extends DataClass
     Value<String?> compiledPrescriptionJson = const Value.absent(),
   }) => PatientQueueEntry(
     id: id ?? this.id,
+    patientId: patientId.present ? patientId.value : this.patientId,
     tokenNumber: tokenNumber ?? this.tokenNumber,
     patientName: patientName ?? this.patientName,
     age: age ?? this.age,
@@ -517,6 +648,9 @@ class PatientQueueEntry extends DataClass
     initialComorbIds: initialComorbIds.present
         ? initialComorbIds.value
         : this.initialComorbIds,
+    allergies: allergies.present ? allergies.value : this.allergies,
+    lmp: lmp.present ? lmp.value : this.lmp,
+    isPregnant: isPregnant ?? this.isPregnant,
     status: status ?? this.status,
     entryTime: entryTime ?? this.entryTime,
     consultationStartTime: consultationStartTime.present
@@ -532,6 +666,7 @@ class PatientQueueEntry extends DataClass
   PatientQueueEntry copyWithCompanion(PatientQueueTableCompanion data) {
     return PatientQueueEntry(
       id: data.id.present ? data.id.value : this.id,
+      patientId: data.patientId.present ? data.patientId.value : this.patientId,
       tokenNumber: data.tokenNumber.present
           ? data.tokenNumber.value
           : this.tokenNumber,
@@ -547,6 +682,11 @@ class PatientQueueEntry extends DataClass
       initialComorbIds: data.initialComorbIds.present
           ? data.initialComorbIds.value
           : this.initialComorbIds,
+      allergies: data.allergies.present ? data.allergies.value : this.allergies,
+      lmp: data.lmp.present ? data.lmp.value : this.lmp,
+      isPregnant: data.isPregnant.present
+          ? data.isPregnant.value
+          : this.isPregnant,
       status: data.status.present ? data.status.value : this.status,
       entryTime: data.entryTime.present ? data.entryTime.value : this.entryTime,
       consultationStartTime: data.consultationStartTime.present
@@ -565,6 +705,7 @@ class PatientQueueEntry extends DataClass
   String toString() {
     return (StringBuffer('PatientQueueEntry(')
           ..write('id: $id, ')
+          ..write('patientId: $patientId, ')
           ..write('tokenNumber: $tokenNumber, ')
           ..write('patientName: $patientName, ')
           ..write('age: $age, ')
@@ -572,6 +713,9 @@ class PatientQueueEntry extends DataClass
           ..write('phone: $phone, ')
           ..write('vitalsJson: $vitalsJson, ')
           ..write('initialComorbIds: $initialComorbIds, ')
+          ..write('allergies: $allergies, ')
+          ..write('lmp: $lmp, ')
+          ..write('isPregnant: $isPregnant, ')
           ..write('status: $status, ')
           ..write('entryTime: $entryTime, ')
           ..write('consultationStartTime: $consultationStartTime, ')
@@ -584,6 +728,7 @@ class PatientQueueEntry extends DataClass
   @override
   int get hashCode => Object.hash(
     id,
+    patientId,
     tokenNumber,
     patientName,
     age,
@@ -591,6 +736,9 @@ class PatientQueueEntry extends DataClass
     phone,
     vitalsJson,
     initialComorbIds,
+    allergies,
+    lmp,
+    isPregnant,
     status,
     entryTime,
     consultationStartTime,
@@ -602,6 +750,7 @@ class PatientQueueEntry extends DataClass
       identical(this, other) ||
       (other is PatientQueueEntry &&
           other.id == this.id &&
+          other.patientId == this.patientId &&
           other.tokenNumber == this.tokenNumber &&
           other.patientName == this.patientName &&
           other.age == this.age &&
@@ -609,6 +758,9 @@ class PatientQueueEntry extends DataClass
           other.phone == this.phone &&
           other.vitalsJson == this.vitalsJson &&
           other.initialComorbIds == this.initialComorbIds &&
+          other.allergies == this.allergies &&
+          other.lmp == this.lmp &&
+          other.isPregnant == this.isPregnant &&
           other.status == this.status &&
           other.entryTime == this.entryTime &&
           other.consultationStartTime == this.consultationStartTime &&
@@ -618,6 +770,7 @@ class PatientQueueEntry extends DataClass
 
 class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
   final Value<String> id;
+  final Value<String?> patientId;
   final Value<int> tokenNumber;
   final Value<String> patientName;
   final Value<int> age;
@@ -625,6 +778,9 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
   final Value<String?> phone;
   final Value<String?> vitalsJson;
   final Value<String?> initialComorbIds;
+  final Value<String?> allergies;
+  final Value<String?> lmp;
+  final Value<bool> isPregnant;
   final Value<String> status;
   final Value<DateTime> entryTime;
   final Value<DateTime?> consultationStartTime;
@@ -633,6 +789,7 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
   final Value<int> rowid;
   const PatientQueueTableCompanion({
     this.id = const Value.absent(),
+    this.patientId = const Value.absent(),
     this.tokenNumber = const Value.absent(),
     this.patientName = const Value.absent(),
     this.age = const Value.absent(),
@@ -640,6 +797,9 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
     this.phone = const Value.absent(),
     this.vitalsJson = const Value.absent(),
     this.initialComorbIds = const Value.absent(),
+    this.allergies = const Value.absent(),
+    this.lmp = const Value.absent(),
+    this.isPregnant = const Value.absent(),
     this.status = const Value.absent(),
     this.entryTime = const Value.absent(),
     this.consultationStartTime = const Value.absent(),
@@ -649,6 +809,7 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
   });
   PatientQueueTableCompanion.insert({
     required String id,
+    this.patientId = const Value.absent(),
     required int tokenNumber,
     required String patientName,
     required int age,
@@ -656,6 +817,9 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
     this.phone = const Value.absent(),
     this.vitalsJson = const Value.absent(),
     this.initialComorbIds = const Value.absent(),
+    this.allergies = const Value.absent(),
+    this.lmp = const Value.absent(),
+    this.isPregnant = const Value.absent(),
     required String status,
     required DateTime entryTime,
     this.consultationStartTime = const Value.absent(),
@@ -671,6 +835,7 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
        entryTime = Value(entryTime);
   static Insertable<PatientQueueEntry> custom({
     Expression<String>? id,
+    Expression<String>? patientId,
     Expression<int>? tokenNumber,
     Expression<String>? patientName,
     Expression<int>? age,
@@ -678,6 +843,9 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
     Expression<String>? phone,
     Expression<String>? vitalsJson,
     Expression<String>? initialComorbIds,
+    Expression<String>? allergies,
+    Expression<String>? lmp,
+    Expression<bool>? isPregnant,
     Expression<String>? status,
     Expression<DateTime>? entryTime,
     Expression<DateTime>? consultationStartTime,
@@ -687,6 +855,7 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (patientId != null) 'patient_id': patientId,
       if (tokenNumber != null) 'token_number': tokenNumber,
       if (patientName != null) 'patient_name': patientName,
       if (age != null) 'age': age,
@@ -694,6 +863,9 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
       if (phone != null) 'phone': phone,
       if (vitalsJson != null) 'vitals_json': vitalsJson,
       if (initialComorbIds != null) 'initial_comorb_ids': initialComorbIds,
+      if (allergies != null) 'allergies': allergies,
+      if (lmp != null) 'lmp': lmp,
+      if (isPregnant != null) 'is_pregnant': isPregnant,
       if (status != null) 'status': status,
       if (entryTime != null) 'entry_time': entryTime,
       if (consultationStartTime != null)
@@ -707,6 +879,7 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
 
   PatientQueueTableCompanion copyWith({
     Value<String>? id,
+    Value<String?>? patientId,
     Value<int>? tokenNumber,
     Value<String>? patientName,
     Value<int>? age,
@@ -714,6 +887,9 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
     Value<String?>? phone,
     Value<String?>? vitalsJson,
     Value<String?>? initialComorbIds,
+    Value<String?>? allergies,
+    Value<String?>? lmp,
+    Value<bool>? isPregnant,
     Value<String>? status,
     Value<DateTime>? entryTime,
     Value<DateTime?>? consultationStartTime,
@@ -723,6 +899,7 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
   }) {
     return PatientQueueTableCompanion(
       id: id ?? this.id,
+      patientId: patientId ?? this.patientId,
       tokenNumber: tokenNumber ?? this.tokenNumber,
       patientName: patientName ?? this.patientName,
       age: age ?? this.age,
@@ -730,6 +907,9 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
       phone: phone ?? this.phone,
       vitalsJson: vitalsJson ?? this.vitalsJson,
       initialComorbIds: initialComorbIds ?? this.initialComorbIds,
+      allergies: allergies ?? this.allergies,
+      lmp: lmp ?? this.lmp,
+      isPregnant: isPregnant ?? this.isPregnant,
       status: status ?? this.status,
       entryTime: entryTime ?? this.entryTime,
       consultationStartTime:
@@ -746,6 +926,9 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<String>(id.value);
+    }
+    if (patientId.present) {
+      map['patient_id'] = Variable<String>(patientId.value);
     }
     if (tokenNumber.present) {
       map['token_number'] = Variable<int>(tokenNumber.value);
@@ -767,6 +950,15 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
     }
     if (initialComorbIds.present) {
       map['initial_comorb_ids'] = Variable<String>(initialComorbIds.value);
+    }
+    if (allergies.present) {
+      map['allergies'] = Variable<String>(allergies.value);
+    }
+    if (lmp.present) {
+      map['lmp'] = Variable<String>(lmp.value);
+    }
+    if (isPregnant.present) {
+      map['is_pregnant'] = Variable<bool>(isPregnant.value);
     }
     if (status.present) {
       map['status'] = Variable<String>(status.value);
@@ -797,6 +989,7 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
   String toString() {
     return (StringBuffer('PatientQueueTableCompanion(')
           ..write('id: $id, ')
+          ..write('patientId: $patientId, ')
           ..write('tokenNumber: $tokenNumber, ')
           ..write('patientName: $patientName, ')
           ..write('age: $age, ')
@@ -804,6 +997,9 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
           ..write('phone: $phone, ')
           ..write('vitalsJson: $vitalsJson, ')
           ..write('initialComorbIds: $initialComorbIds, ')
+          ..write('allergies: $allergies, ')
+          ..write('lmp: $lmp, ')
+          ..write('isPregnant: $isPregnant, ')
           ..write('status: $status, ')
           ..write('entryTime: $entryTime, ')
           ..write('consultationStartTime: $consultationStartTime, ')
@@ -3544,6 +3740,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 typedef $$PatientQueueTableTableCreateCompanionBuilder =
     PatientQueueTableCompanion Function({
       required String id,
+      Value<String?> patientId,
       required int tokenNumber,
       required String patientName,
       required int age,
@@ -3551,6 +3748,9 @@ typedef $$PatientQueueTableTableCreateCompanionBuilder =
       Value<String?> phone,
       Value<String?> vitalsJson,
       Value<String?> initialComorbIds,
+      Value<String?> allergies,
+      Value<String?> lmp,
+      Value<bool> isPregnant,
       required String status,
       required DateTime entryTime,
       Value<DateTime?> consultationStartTime,
@@ -3561,6 +3761,7 @@ typedef $$PatientQueueTableTableCreateCompanionBuilder =
 typedef $$PatientQueueTableTableUpdateCompanionBuilder =
     PatientQueueTableCompanion Function({
       Value<String> id,
+      Value<String?> patientId,
       Value<int> tokenNumber,
       Value<String> patientName,
       Value<int> age,
@@ -3568,6 +3769,9 @@ typedef $$PatientQueueTableTableUpdateCompanionBuilder =
       Value<String?> phone,
       Value<String?> vitalsJson,
       Value<String?> initialComorbIds,
+      Value<String?> allergies,
+      Value<String?> lmp,
+      Value<bool> isPregnant,
       Value<String> status,
       Value<DateTime> entryTime,
       Value<DateTime?> consultationStartTime,
@@ -3587,6 +3791,11 @@ class $$PatientQueueTableTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get patientId => $composableBuilder(
+    column: $table.patientId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3622,6 +3831,21 @@ class $$PatientQueueTableTableFilterComposer
 
   ColumnFilters<String> get initialComorbIds => $composableBuilder(
     column: $table.initialComorbIds,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get allergies => $composableBuilder(
+    column: $table.allergies,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lmp => $composableBuilder(
+    column: $table.lmp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPregnant => $composableBuilder(
+    column: $table.isPregnant,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3665,6 +3889,11 @@ class $$PatientQueueTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get patientId => $composableBuilder(
+    column: $table.patientId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get tokenNumber => $composableBuilder(
     column: $table.tokenNumber,
     builder: (column) => ColumnOrderings(column),
@@ -3697,6 +3926,21 @@ class $$PatientQueueTableTableOrderingComposer
 
   ColumnOrderings<String> get initialComorbIds => $composableBuilder(
     column: $table.initialComorbIds,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get allergies => $composableBuilder(
+    column: $table.allergies,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lmp => $composableBuilder(
+    column: $table.lmp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isPregnant => $composableBuilder(
+    column: $table.isPregnant,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -3738,6 +3982,9 @@ class $$PatientQueueTableTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
+  GeneratedColumn<String> get patientId =>
+      $composableBuilder(column: $table.patientId, builder: (column) => column);
+
   GeneratedColumn<int> get tokenNumber => $composableBuilder(
     column: $table.tokenNumber,
     builder: (column) => column,
@@ -3764,6 +4011,17 @@ class $$PatientQueueTableTableAnnotationComposer
 
   GeneratedColumn<String> get initialComorbIds => $composableBuilder(
     column: $table.initialComorbIds,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get allergies =>
+      $composableBuilder(column: $table.allergies, builder: (column) => column);
+
+  GeneratedColumn<String> get lmp =>
+      $composableBuilder(column: $table.lmp, builder: (column) => column);
+
+  GeneratedColumn<bool> get isPregnant => $composableBuilder(
+    column: $table.isPregnant,
     builder: (column) => column,
   );
 
@@ -3830,6 +4088,7 @@ class $$PatientQueueTableTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
+                Value<String?> patientId = const Value.absent(),
                 Value<int> tokenNumber = const Value.absent(),
                 Value<String> patientName = const Value.absent(),
                 Value<int> age = const Value.absent(),
@@ -3837,6 +4096,9 @@ class $$PatientQueueTableTableTableManager
                 Value<String?> phone = const Value.absent(),
                 Value<String?> vitalsJson = const Value.absent(),
                 Value<String?> initialComorbIds = const Value.absent(),
+                Value<String?> allergies = const Value.absent(),
+                Value<String?> lmp = const Value.absent(),
+                Value<bool> isPregnant = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<DateTime> entryTime = const Value.absent(),
                 Value<DateTime?> consultationStartTime = const Value.absent(),
@@ -3845,6 +4107,7 @@ class $$PatientQueueTableTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => PatientQueueTableCompanion(
                 id: id,
+                patientId: patientId,
                 tokenNumber: tokenNumber,
                 patientName: patientName,
                 age: age,
@@ -3852,6 +4115,9 @@ class $$PatientQueueTableTableTableManager
                 phone: phone,
                 vitalsJson: vitalsJson,
                 initialComorbIds: initialComorbIds,
+                allergies: allergies,
+                lmp: lmp,
+                isPregnant: isPregnant,
                 status: status,
                 entryTime: entryTime,
                 consultationStartTime: consultationStartTime,
@@ -3862,6 +4128,7 @@ class $$PatientQueueTableTableTableManager
           createCompanionCallback:
               ({
                 required String id,
+                Value<String?> patientId = const Value.absent(),
                 required int tokenNumber,
                 required String patientName,
                 required int age,
@@ -3869,6 +4136,9 @@ class $$PatientQueueTableTableTableManager
                 Value<String?> phone = const Value.absent(),
                 Value<String?> vitalsJson = const Value.absent(),
                 Value<String?> initialComorbIds = const Value.absent(),
+                Value<String?> allergies = const Value.absent(),
+                Value<String?> lmp = const Value.absent(),
+                Value<bool> isPregnant = const Value.absent(),
                 required String status,
                 required DateTime entryTime,
                 Value<DateTime?> consultationStartTime = const Value.absent(),
@@ -3877,6 +4147,7 @@ class $$PatientQueueTableTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => PatientQueueTableCompanion.insert(
                 id: id,
+                patientId: patientId,
                 tokenNumber: tokenNumber,
                 patientName: patientName,
                 age: age,
@@ -3884,6 +4155,9 @@ class $$PatientQueueTableTableTableManager
                 phone: phone,
                 vitalsJson: vitalsJson,
                 initialComorbIds: initialComorbIds,
+                allergies: allergies,
+                lmp: lmp,
+                isPregnant: isPregnant,
                 status: status,
                 entryTime: entryTime,
                 consultationStartTime: consultationStartTime,

@@ -19,6 +19,9 @@ class PatientQueueTable extends Table {
   TextColumn get phone => text().nullable()();
   TextColumn get vitalsJson => text().nullable()();
   TextColumn get initialComorbIds => text().nullable()();
+  TextColumn get allergies => text().nullable()(); // JSON Array e.g. ["Penicillin", "NSAID"]
+  TextColumn get lmp => text().nullable()(); // Last Menstrual Period
+  BoolColumn get isPregnant => boolean().withDefault(const Constant(false))();
   TextColumn get status => text()();
   DateTimeColumn get entryTime => dateTime()();
   DateTimeColumn get consultationStartTime => dateTime().nullable()();
@@ -220,10 +223,79 @@ class AppDatabase extends _$AppDatabase {
     return (select(patientQueueTable)..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
+  /// Searches historical queue entries by patient ID, phone, or name.
+  /// Used by reception to quickly reload a returning patient.
+  Future<List<PatientQueueEntry>> searchPreviousPatients(
+    String query, {
+    int limit = 20,
+  }) async {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return const [];
+
+    final like = '%${trimmed.toLowerCase()}%';
+    final rows = await customSelect(
+      'SELECT * FROM ${patientQueueTable.actualTableName} '
+      'WHERE LOWER(patient_name) LIKE ?1 '
+      "OR LOWER(COALESCE(phone, '')) LIKE ?1 "
+      "OR LOWER(COALESCE(patient_id, '')) LIKE ?1 "
+      'ORDER BY entry_time DESC LIMIT ?2',
+      variables: [
+        Variable.withString(like),
+        Variable.withInt(limit),
+      ],
+      readsFrom: {patientQueueTable},
+    ).get();
+
+    return rows.map((row) => patientQueueTable.map(row.data)).toList();
+  }
+
+  /// Returns the latest visit recorded for a given persistent patient ID.
+  Future<PatientQueueEntry?> getLatestVisitForPatientId(String patientId) {
+    return (select(patientQueueTable)
+          ..where((t) => t.patientId.equals(patientId))
+          ..orderBy([(t) => OrderingTerm(expression: t.entryTime, mode: OrderingMode.desc)])
+          ..limit(1))
+        .getSingleOrNull();
+  }
+
+  /// Returns all completed visits recorded for a given persistent patient ID (visit history).
+  Future<List<PatientQueueEntry>> getVisitHistoryForPatient(String patientId) {
+    return (select(patientQueueTable)
+          ..where((t) => t.patientId.equals(patientId) & t.status.equals('COMPLETED'))
+          ..orderBy([(t) => OrderingTerm(expression: t.completionTime, mode: OrderingMode.desc)]))
+        .get();
+  }
+
+  /// Saves autosaved in-memory consultation draft into the database row.
+  Future<void> saveEncounterDraft({
+    required String id,
+    required String draftJson,
+  }) async {
+    await (update(patientQueueTable)..where((t) => t.id.equals(id))).write(
+      PatientQueueTableCompanion(
+        compiledPrescriptionJson: Value(draftJson),
+      ),
+    );
+  }
+
+  /// Releases a consultation back to the waiting queue (e.g. if cancelled or abandoned).
+  Future<void> releaseConsultation(String id) async {
+    await (update(patientQueueTable)..where((t) => t.id.equals(id))).write(
+      const PatientQueueTableCompanion(
+        status: Value('WAITING'),
+        consultationStartTime: Value(null),
+      ),
+    );
+  }
+
   // --- CATALOG QUERIES ---
 
   Future<List<ComorbidityEntry>> getAllComorbidities() {
     return (select(comorbiditiesTable)..orderBy([(t) => OrderingTerm.asc(t.name)])).get();
+  }
+
+  Future<void> insertComorbidity(ComorbiditiesTableCompanion entry) {
+    return into(comorbiditiesTable).insert(entry, mode: InsertMode.insertOrReplace);
   }
 
   Future<List<PresentingComplaintEntry>> getAllComplaints() {

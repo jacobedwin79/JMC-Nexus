@@ -19,8 +19,16 @@ extension PatientQueueEntryMapper on PatientQueueEntry {
       } catch (_) {}
     }
 
+    List<String> patientAllergies = [];
+    if (allergies != null && allergies!.isNotEmpty) {
+      try {
+        patientAllergies = (jsonDecode(allergies!) as List).cast<String>();
+      } catch (_) {}
+    }
+
     return PatientQueueItem(
       id: id,
+      patientId: patientId,
       tokenNumber: tokenNumber,
       patientName: patientName,
       age: age,
@@ -28,6 +36,9 @@ extension PatientQueueEntryMapper on PatientQueueEntry {
       phone: phone,
       vitals: vitalsMap,
       initialComorbIds: comorbs,
+      allergies: patientAllergies,
+      lmp: lmp,
+      isPregnant: isPregnant,
       status: status,
       entryTime: entryTime,
       consultationStartTime: consultationStartTime,

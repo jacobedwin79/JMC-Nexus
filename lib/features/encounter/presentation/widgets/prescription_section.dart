@@ -374,12 +374,63 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
           const Divider(color: AppTheme.borderLight),
           const SizedBox(height: 8),
 
-          // General Advice Field
-          const Text(
-            'General Advice / Dietary Instructions',
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+          // General Advice Field with Kerala Malayalam Presets & Voice Dictation
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'General Advice / Dietary Instructions',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+              ),
+              InkWell(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Voice Dictation ready. Connect Gemini API key in settings for real-time clinical speech parsing.'),
+                      backgroundColor: AppTheme.primaryBlue,
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                },
+                borderRadius: BorderRadius.circular(6),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(LucideIcons.mic, size: 13, color: AppTheme.primaryBlue),
+                      SizedBox(width: 4),
+                      Text(
+                        'Voice Dictate (AI)',
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryBlue),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 6),
+
+          // Malayalam Quick Presets for Kerala OPD
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildAdviceChip('ധാരാളം വെള്ളം കുടിക്കുക (Plenty of fluids)'),
+                _buildAdviceChip('ഭക്ഷണത്തിന് ശേഷം മരുന്ന് (Take after food)'),
+                _buildAdviceChip('എണ്ണയും എരിവും ഒഴിവാക്കുക (Avoid oil/spice)'),
+                _buildAdviceChip('3 ദിവസത്തിന് ശേഷം കാണിക്കുക (Review in 3d)'),
+                _buildAdviceChip('പനി കൂടിയാൽ ഉടൻ വരിക (Emergency if fever spikes)'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 6),
+
           TextField(
             controller: _adviceController,
             maxLines: 2,
@@ -600,6 +651,26 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
           },
         );
       },
+    );
+  }
+
+  Widget _buildAdviceChip(String adviceText) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 6.0),
+      child: ActionChip(
+        label: Text(
+          adviceText,
+          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+        ),
+        backgroundColor: Colors.teal.shade50,
+        side: BorderSide(color: Colors.teal.shade200),
+        onPressed: () {
+          final current = _adviceController.text.trim();
+          final updated = current.isEmpty ? adviceText : '$current; $adviceText';
+          _adviceController.text = updated;
+          ref.read(encounterProvider.notifier).setGeneralAdvice(updated);
+        },
+      ),
     );
   }
 }

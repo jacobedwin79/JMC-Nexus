@@ -28,14 +28,37 @@ class A4LaserPrintService {
     );
 
     final patient = encounter.activePatient;
+    final patientIdLabel =
+        (patient?.patientId != null && patient!.patientId!.trim().isNotEmpty)
+            ? ' [ID: ${patient.patientId}]'
+            : '';
     final now = DateTime.now();
     final dateFormat = DateFormat('dd MMM yyyy');
     final timeFormat = DateFormat('h:mm a');
 
     final vitals = patient != null ? PatientVitals.fromJson(patient.vitals) : const PatientVitals();
 
+    pw.Font? malayalamFont;
+    pw.Font? malayalamBoldFont;
+    try {
+      malayalamFont = await PdfGoogleFonts.notoSansMalayalamRegular();
+      malayalamBoldFont = await PdfGoogleFonts.notoSansMalayalamBold();
+    } catch (_) {
+      // Offline or testing fallback
+    }
+
+    final theme = pw.ThemeData.withFont(
+      base: pw.Font.helvetica(),
+      bold: pw.Font.helveticaBold(),
+      fontFallback: [
+        if (malayalamFont != null) malayalamFont,
+        if (malayalamBoldFont != null) malayalamBoldFont,
+      ],
+    );
+
     pdf.addPage(
       pw.Page(
+        theme: theme,
         pageFormat: pageFormat,
         build: (pw.Context context) {
           return pw.Column(
@@ -122,7 +145,7 @@ class A4LaserPrintService {
                       style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900),
                     ),
                     pw.Text(
-                      'Patient: ${patient?.patientName ?? "Unknown"} (${patient?.age ?? "--"}Y / ${patient?.gender ?? "--"})',
+                      'Patient: ${patient?.patientName ?? "Unknown"}$patientIdLabel (${patient?.age ?? "--"}Y / ${patient?.gender ?? "--"})',
                       style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
                     ),
                     pw.Text(
@@ -197,6 +220,29 @@ class A4LaserPrintService {
                               ),
                             ),
                           ],
+
+                          // Drug Allergies
+                          _buildPdfSectionHeader('Drug Allergies'),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.only(bottom: 8),
+                            child: pw.Container(
+                              padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+                              decoration: pw.BoxDecoration(
+                                color: encounter.allergies.isNotEmpty ? PdfColors.red50 : PdfColors.grey100,
+                                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(3)),
+                              ),
+                              child: pw.Text(
+                                encounter.allergies.isNotEmpty
+                                    ? 'ALLERGIC: ${encounter.allergies.join(", ").toUpperCase()}'
+                                    : 'NKDA (Nil Known Drug Allergies)',
+                                style: pw.TextStyle(
+                                  fontSize: 8,
+                                  fontWeight: encounter.allergies.isNotEmpty ? pw.FontWeight.bold : pw.FontWeight.normal,
+                                  color: encounter.allergies.isNotEmpty ? PdfColors.red900 : PdfColors.grey700,
+                                ),
+                              ),
+                            ),
+                          ),
 
                           // Presenting Complaints
                           _buildPdfSectionHeader('Chief Complaints'),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../../../../core/database/database_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/wait_timer_badge.dart';
 import '../../application/encounter_notifier.dart';
@@ -198,6 +199,84 @@ class LiveQueueDrawer extends ConsumerWidget {
                 ],
               ),
             ),
+          ],
+
+          // In-Consultation (Active / Resumable) Strip
+          if (queueState.inConsultationPatients.isNotEmpty) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              color: Colors.amber.shade50,
+              child: Row(
+                children: [
+                  const Icon(LucideIcons.stethoscope, size: 13, color: Colors.amber),
+                  const SizedBox(width: 6),
+                  Text(
+                    'IN CONSULTATION (${queueState.inConsultationPatients.length})',
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.amber.shade900),
+                  ),
+                ],
+              ),
+            ),
+            ...queueState.inConsultationPatients.map((patient) {
+              final isSelected = activePatient?.id == patient.id;
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isSelected ? AppTheme.primaryBlue.withValues(alpha: 0.08) : Colors.amber.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: isSelected ? AppTheme.primaryBlue : Colors.amber.shade300),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade800,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '#${patient.tokenNumber}',
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        patient.patientName,
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () => ref.read(encounterProvider.notifier).loadPatient(patient),
+                      child: Text(
+                        isSelected ? 'Active' : 'Resume',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected ? AppTheme.primaryBlue : Colors.amber.shade900,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(LucideIcons.undo2, size: 14, color: Colors.grey),
+                      tooltip: 'Release back to Waiting queue',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () async {
+                        await ref.read(appDatabaseProvider).releaseConsultation(patient.id);
+                        if (isSelected) {
+                          ref.read(encounterProvider.notifier).clearEncounter(releaseToQueue: false);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              );
+            }),
+            const Divider(height: 1, color: AppTheme.borderLight),
           ],
 
           // Patient Token List

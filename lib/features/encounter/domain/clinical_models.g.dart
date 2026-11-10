@@ -14,6 +14,8 @@ _PatientVitals _$PatientVitalsFromJson(Map<String, dynamic> json) =>
       spo2: (json['spo2'] as num?)?.toInt(),
       temp: (json['temp'] as num?)?.toDouble(),
       weight: (json['weight'] as num?)?.toDouble(),
+      rbs: (json['rbs'] as num?)?.toInt(),
+      tempIsCelsius: json['tempIsCelsius'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$PatientVitalsToJson(_PatientVitals instance) =>
@@ -24,6 +26,8 @@ Map<String, dynamic> _$PatientVitalsToJson(_PatientVitals instance) =>
       'spo2': instance.spo2,
       'temp': instance.temp,
       'weight': instance.weight,
+      'rbs': instance.rbs,
+      'tempIsCelsius': instance.tempIsCelsius,
     };
 
 _ComorbidityModel _$ComorbidityModelFromJson(Map<String, dynamic> json) =>

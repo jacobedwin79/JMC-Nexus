@@ -1,29 +1,172 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../../../../core/database/database_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/clinical_chip.dart';
 import '../../../../core/widgets/wait_timer_badge.dart';
+import '../../application/clinical_catalog_providers.dart';
 import '../../application/encounter_notifier.dart';
 import '../../domain/clinical_models.dart';
 
 class PatientHeaderBar extends ConsumerWidget {
   const PatientHeaderBar({super.key});
 
-  static const List<Map<String, String>> _commonComorbidities = [
-    {'id': 'comorb_dm', 'label': 'Type 2 DM'},
-    {'id': 'comorb_htn', 'label': 'HTN'},
-    {'id': 'comorb_asthma', 'label': 'Asthma'},
-    {'id': 'comorb_ckd', 'label': 'CKD'},
-    {'id': 'comorb_pregnant', 'label': 'Pregnancy'},
-    {'id': 'comorb_pud', 'label': 'PUD'},
-    {'id': 'comorb_cad', 'label': 'CAD'},
-  ];
+  Future<void> _showVisitHistorySheet(
+    BuildContext context,
+    WidgetRef ref,
+    String patientId,
+  ) async {
+    final db = ref.read(appDatabaseProvider);
+    final history = await db.getVisitHistoryForPatient(patientId);
+
+    if (!context.mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          maxChildSize: 0.9,
+          minChildSize: 0.4,
+          expand: false,
+          builder: (context, scrollController) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(LucideIcons.history, color: AppTheme.primaryBlue),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Past Visit History ($patientId)',
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        icon: const Icon(LucideIcons.x),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  if (history.isEmpty)
+                    const Expanded(
+                      child: Center(
+                        child: Text('No previous completed visits found for this patient.'),
+                      ),
+                    )
+                  else
+                    Expanded(
+                      child: ListView.builder(
+                        controller: scrollController,
+                        itemCount: history.length,
+                        itemBuilder: (context, index) {
+                          final item = history[index];
+                          final completedAt = item.completionTime != null
+                              ? DateFormat('dd MMM yyyy, h:mm a').format(item.completionTime!.toLocal())
+                              : 'Date unknown';
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Visit #Token ${item.tokenNumber}',
+                                        style: const TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(
+                                        completedAt,
+                                        style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 6),
+                                  if (item.compiledPrescriptionJson != null)
+                                    Text(
+                                      'Prescription Snapshot: ${item.compiledPrescriptionJson!}',
+                                      maxLines: 4,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _showAddCustomComorbidityDialog(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final controller = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Add Custom Comorbidity'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            textCapitalization: TextCapitalization.words,
+            decoration: const InputDecoration(
+              labelText: 'Comorbidity name',
+              hintText: 'e.g. Hypothyroidism',
+            ),
+            onSubmitted: (value) => Navigator.pop(context, value),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, controller.text),
+              child: const Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (name != null && name.trim().isNotEmpty) {
+      await ref.read(encounterProvider.notifier).addCustomComorbidity(name);
+      ref.invalidate(comorbiditiesCatalogProvider);
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final encounter = ref.watch(encounterProvider);
     final patient = encounter.activePatient;
+    final comorbiditiesAsync = ref.watch(comorbiditiesCatalogProvider);
 
     if (patient == null) {
       return Container(
@@ -112,7 +255,34 @@ class PatientHeaderBar extends ConsumerWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 8),
+                          if (patient.age < 12)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: Colors.blue.shade300),
+                              ),
+                              child: const Text(
+                                'Paediatric',
+                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.blue),
+                              ),
+                            )
+                          else if (patient.age >= 65)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.purple.shade50,
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: Colors.purple.shade300),
+                              ),
+                              child: const Text(
+                                'Geriatric',
+                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.purple),
+                              ),
+                            ),
+                          const SizedBox(width: 8),
                           WaitTimerBadge(
                             entryTime: patient.entryTime,
                             compact: true,
@@ -120,29 +290,104 @@ class PatientHeaderBar extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        '${patient.age} Yrs • ${patient.gender == "M" ? "Male" : (patient.gender == "F" ? "Female" : "Other")}${patient.phone != null ? " • ${patient.phone}" : ""}',
-                        style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
+                      Row(
+                        children: [
+                          Text(
+                            '${patient.patientId != null && patient.patientId!.trim().isNotEmpty ? "MRN: ${patient.patientId} • " : ""}${patient.age} Yrs • ${patient.gender == "M" ? "Male" : (patient.gender == "F" ? "Female" : "Other")}${patient.phone != null ? " • ${patient.phone}" : ""}',
+                            style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
+                          ),
+                          if (patient.patientId != null && patient.patientId!.trim().isNotEmpty) ...[
+                            const SizedBox(width: 8),
+                            InkWell(
+                              onTap: () => _showVisitHistorySheet(context, ref, patient.patientId!),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(LucideIcons.history, size: 12, color: AppTheme.primaryBlue),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      'Past Rx',
+                                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.primaryBlue),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ],
                   ),
                 ),
 
-                // Vitals Strip
+                // Vitals Strip (Evaluated against Age)
                 if (vitals.hasAnyVitals) ...[
                   Row(
                     children: [
                       if (vitals.bpSys != null)
-                        _buildVitalCard('BP', vitals.bpDisplay, vitals.isHypertensive),
+                        _buildVitalCard('BP', vitals.bpDisplay, vitals.isHypertensiveForAge(patient.age)),
                       if (vitals.pulse != null)
-                        _buildVitalCard('Pulse', vitals.pulseDisplay, vitals.isTachycardic),
+                        _buildVitalCard('Pulse', vitals.pulseDisplay, vitals.isTachycardicForAge(patient.age) || vitals.isBradycardicForAge(patient.age)),
                       if (vitals.spo2 != null)
                         _buildVitalCard('SpO2', vitals.spo2Display, vitals.isHypoxemic),
                       if (vitals.temp != null)
                         _buildVitalCard('Temp', vitals.tempDisplay, vitals.isFebrile),
+                      if (vitals.rbs != null)
+                        _buildVitalCard('RBS', vitals.rbsDisplay, vitals.isHypoglycemic || vitals.isHyperglycemic),
                       if (vitals.weight != null)
                         _buildVitalCard('Weight', vitals.weightDisplay, false),
                     ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          // Allergies & Pregnancy Alert Strip
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6.0),
+            color: encounter.allergies.isNotEmpty
+                ? AppTheme.emergencyRed.withValues(alpha: 0.1)
+                : Colors.grey.shade50,
+            child: Row(
+              children: [
+                Icon(
+                  LucideIcons.shieldAlert,
+                  size: 15,
+                  color: encounter.allergies.isNotEmpty ? AppTheme.emergencyRed : Colors.grey.shade600,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    encounter.allergies.isNotEmpty
+                        ? 'ALLERGIES: ${encounter.allergies.join(", ")}'
+                        : 'ALLERGIES: No Known Drug Allergies (NKDA)',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: encounter.allergies.isNotEmpty ? AppTheme.emergencyRed : Colors.grey.shade700,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (encounter.isPregnant || encounter.lmp != null) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.purple.shade100,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      'Pregnant ${encounter.lmp != null ? "• LMP: ${encounter.lmp}" : ""}',
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.purple.shade800),
+                    ),
                   ),
                 ],
               ],
@@ -170,19 +415,68 @@ class PatientHeaderBar extends ConsumerWidget {
                 Expanded(
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: _commonComorbidities.map((c) {
-                        final isSelected = encounter.selectedComorbidityIds.contains(c['id']);
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 6.0),
-                          child: ClinicalChip(
-                            label: c['label']!,
-                            isSelected: isSelected,
-                            onTap: () => ref.read(encounterProvider.notifier).toggleComorbidity(c['id']!),
-                            activeColor: AppTheme.primaryAccent,
-                          ),
+                    child: comorbiditiesAsync.when(
+                      loading: () => const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      error: (err, _) => Text(
+                        'Could not load comorbidities',
+                        style: TextStyle(fontSize: 12, color: AppTheme.slaOverdue),
+                      ),
+                      data: (comorbidities) {
+                        return Row(
+                          children: [
+                            ...comorbidities.map((c) {
+                              final isSelected =
+                                  encounter.selectedComorbidityIds.contains(c.id);
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 6.0),
+                                child: ClinicalChip(
+                                  label: comorbidityDisplayLabel(c),
+                                  isSelected: isSelected,
+                                  onTap: () => ref
+                                      .read(encounterProvider.notifier)
+                                      .toggleComorbidity(c.id),
+                                  activeColor: AppTheme.primaryAccent,
+                                ),
+                              );
+                            }),
+                            InkWell(
+                              onTap: () => _showAddCustomComorbidityDialog(context, ref),
+                              borderRadius: BorderRadius.circular(20),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: AppTheme.primaryAccent),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: const [
+                                    Icon(LucideIcons.plus,
+                                        size: 12, color: AppTheme.primaryAccent),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      'Custom',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppTheme.primaryAccent,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         );
-                      }).toList(),
+                      },
                     ),
                   ),
                 ),

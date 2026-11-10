@@ -9,6 +9,7 @@ part of 'patient_queue_item.dart';
 _PatientQueueItem _$PatientQueueItemFromJson(Map<String, dynamic> json) =>
     _PatientQueueItem(
       id: json['id'] as String,
+      patientId: json['patientId'] as String?,
       tokenNumber: (json['tokenNumber'] as num).toInt(),
       patientName: json['patientName'] as String,
       age: (json['age'] as num).toInt(),
@@ -20,6 +21,13 @@ _PatientQueueItem _$PatientQueueItemFromJson(Map<String, dynamic> json) =>
               ?.map((e) => e as String)
               .toList() ??
           const [],
+      allergies:
+          (json['allergies'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      lmp: json['lmp'] as String?,
+      isPregnant: json['isPregnant'] as bool? ?? false,
       status: json['status'] as String? ?? 'WAITING',
       entryTime: DateTime.parse(json['entryTime'] as String),
       consultationStartTime: json['consultationStartTime'] == null
@@ -35,6 +43,7 @@ Map<String, dynamic> _$PatientQueueItemToJson(
   _PatientQueueItem instance,
 ) => <String, dynamic>{
   'id': instance.id,
+  'patientId': instance.patientId,
   'tokenNumber': instance.tokenNumber,
   'patientName': instance.patientName,
   'age': instance.age,
@@ -42,6 +51,9 @@ Map<String, dynamic> _$PatientQueueItemToJson(
   'phone': instance.phone,
   'vitals': instance.vitals,
   'initialComorbIds': instance.initialComorbIds,
+  'allergies': instance.allergies,
+  'lmp': instance.lmp,
+  'isPregnant': instance.isPregnant,
   'status': instance.status,
   'entryTime': instance.entryTime.toIso8601String(),
   'consultationStartTime': instance.consultationStartTime?.toIso8601String(),

@@ -312,6 +312,17 @@ class _ReceptionQueueListState extends ConsumerState<ReceptionQueueList> {
                           color: AppTheme.textMuted,
                         ),
                       ),
+                      if (patient.patientId != null && patient.patientId!.isNotEmpty) ...[
+                        const SizedBox(width: 8),
+                        Text(
+                          '•  ID: ${patient.patientId}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.textMuted,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                       if (patient.phone != null && patient.phone!.isNotEmpty) ...[
                         const SizedBox(width: 8),
                         Text(

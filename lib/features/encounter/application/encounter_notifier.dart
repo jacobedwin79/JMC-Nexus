@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/database/database_mappers.dart';
 import '../../../core/database/database_provider.dart';
@@ -9,6 +10,8 @@ import '../domain/patient_queue_item.dart';
 import 'safety_engine.dart';
 
 class EncounterNotifier extends Notifier<EncounterState> {
+  static const _uuid = Uuid();
+
   AppDatabase get _db => ref.read(appDatabaseProvider);
 
   List<ComorbidityModel> _comorbiditiesCatalog = [];
@@ -36,9 +39,8 @@ class EncounterNotifier extends Notifier<EncounterState> {
   Future<void> loadPatient(PatientQueueItem patient) async {
     state = state.copyWith(isLoading: true);
 
-    if (_comorbiditiesCatalog.isEmpty || _drugsCatalog.isEmpty) {
-      await _loadCatalogs();
-    }
+    // Always refresh catalogs so recent edits in Catalog Manager take immediate effect
+    await _loadCatalogs();
 
     // Update status in DB to IN_CONSULTATION with consultationStartTime
     final now = DateTime.now();
@@ -60,8 +62,40 @@ class EncounterNotifier extends Notifier<EncounterState> {
       );
     }
 
-    // Pre-populate patient comorbidity IDs
+    // Pre-populate patient comorbidity IDs, allergies, LMP & Pregnancy
     final initialComorbs = List<String>.from(patient.initialComorbIds);
+    final initialAllergies = List<String>.from(patient.allergies);
+    final isPregnant = patient.isPregnant || initialComorbs.contains('comorb_pregnant');
+
+    // Attempt to restore autosaved draft if present
+    Map<String, SelectedComplaintState> restoredComplaints = {};
+    Map<String, ExamSystemState> restoredExams = defaultExamStates;
+    List<String> restoredDiagnoses = [];
+    List<PrescriptionItemModel> restoredRx = [];
+    String restoredAdvice = '';
+    int? restoredFollowUp = 3;
+
+    if (patient.compiledPrescriptionJson != null && patient.compiledPrescriptionJson!.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(patient.compiledPrescriptionJson!) as Map<String, dynamic>;
+        if (decoded['isDraft'] == true) {
+          if (decoded['diagnoses'] is List) {
+            restoredDiagnoses = (decoded['diagnoses'] as List).cast<String>();
+          }
+          if (decoded['prescription'] is List) {
+            restoredRx = (decoded['prescription'] as List)
+                .map((item) => PrescriptionItemModel.fromJson(item as Map<String, dynamic>))
+                .toList();
+          }
+          if (decoded['advice'] is String) {
+            restoredAdvice = decoded['advice'] as String;
+          }
+          if (decoded['followUpDays'] is int) {
+            restoredFollowUp = decoded['followUpDays'] as int;
+          }
+        }
+      } catch (_) {}
+    }
 
     state = EncounterState(
       activePatient: patient.copyWith(
@@ -69,18 +103,54 @@ class EncounterNotifier extends Notifier<EncounterState> {
         consultationStartTime: now,
       ),
       selectedComorbidityIds: initialComorbs,
-      selectedComplaints: const {},
-      examStates: defaultExamStates,
-      selectedDiagnosisIds: const [],
-      activePrescription: const [],
-      generalAdvice: '',
-      followUpDays: 3,
+      allergies: initialAllergies,
+      lmp: patient.lmp,
+      isPregnant: isPregnant,
+      selectedComplaints: restoredComplaints,
+      examStates: restoredExams,
+      selectedDiagnosisIds: restoredDiagnoses,
+      activePrescription: restoredRx,
+      generalAdvice: restoredAdvice,
+      followUpDays: restoredFollowUp,
       safetyAlerts: const [],
       isLetterheadMode: false,
       isLoading: false,
     );
 
     _runSafetyCheck();
+  }
+
+  void toggleAllergy(String allergy) {
+    final current = List<String>.from(state.allergies);
+    final trimmed = allergy.trim();
+    if (trimmed.isEmpty) return;
+
+    if (current.contains(trimmed)) {
+      current.remove(trimmed);
+    } else {
+      current.add(trimmed);
+    }
+
+    state = state.copyWith(allergies: current);
+    _runSafetyCheck();
+    autosaveDraft();
+  }
+
+  void setLmp(String? lmp) {
+    final trimmed = lmp?.trim();
+    final hasLmp = trimmed != null && trimmed.isNotEmpty;
+    state = state.copyWith(
+      lmp: trimmed,
+      isPregnant: hasLmp ? true : state.isPregnant,
+    );
+    _runSafetyCheck();
+    autosaveDraft();
+  }
+
+  void setIsPregnant(bool val) {
+    state = state.copyWith(isPregnant: val);
+    _runSafetyCheck();
+    autosaveDraft();
   }
 
   /// 2. Toggle patient comorbidity & run safety checks
@@ -93,6 +163,50 @@ class EncounterNotifier extends Notifier<EncounterState> {
     }
 
     state = state.copyWith(selectedComorbidityIds: current);
+    _runSafetyCheck();
+  }
+
+  /// Adds a user-defined comorbidity to the local catalog and selects it.
+  /// Custom comorbidities carry no built-in contraindications (empty list),
+  /// so they are purely informational until curated later.
+  Future<ComorbidityModel?> addCustomComorbidity(String name) async {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return null;
+
+    // Avoid duplicate names (case-insensitive).
+    final existing = _comorbiditiesCatalog
+        .where((c) => c.name.toLowerCase() == trimmed.toLowerCase())
+        .firstOrNull;
+    if (existing != null) {
+      if (!state.selectedComorbidityIds.contains(existing.id)) {
+        toggleComorbidity(existing.id);
+      }
+      return existing;
+    }
+
+    final id = 'comorb_custom_${_uuid.v4()}';
+    final model = ComorbidityModel(
+      id: id,
+      name: trimmed,
+      contraindicatedDrugClasses: const [],
+    );
+
+    await _db.insertComorbidity(
+      ComorbiditiesTableCompanion.insert(
+        id: id,
+        name: trimmed,
+        contraindicatedDrugClasses: jsonEncode(const <String>[]),
+      ),
+    );
+
+    _comorbiditiesCatalog = [..._comorbiditiesCatalog, model];
+    toggleComorbidity(id);
+    return model;
+  }
+
+  /// Reloads the clinical catalogs (e.g. after a custom comorbidity is added).
+  Future<void> reloadCatalogs() async {
+    await _loadCatalogs();
     _runSafetyCheck();
   }
 
@@ -325,7 +439,32 @@ class EncounterNotifier extends Notifier<EncounterState> {
     state = state.copyWith(isLetterheadMode: !state.isLetterheadMode);
   }
 
-  void clearEncounter() {
+  Future<void> autosaveDraft() async {
+    final patient = state.activePatient;
+    if (patient == null) return;
+
+    try {
+      final draftSnapshot = jsonEncode({
+        'isDraft': true,
+        'diagnoses': state.selectedDiagnosisIds,
+        'prescription': state.activePrescription.map((p) => p.toJson()).toList(),
+        'advice': state.generalAdvice,
+        'followUpDays': state.followUpDays,
+        'savedAt': DateTime.now().toIso8601String(),
+      });
+
+      await _db.saveEncounterDraft(id: patient.id, draftJson: draftSnapshot);
+      state = state.copyWith(lastDraftSavedAt: DateTime.now());
+    } catch (_) {}
+  }
+
+  Future<void> clearEncounter({bool releaseToQueue = true}) async {
+    final patient = state.activePatient;
+    if (releaseToQueue &&
+        patient != null &&
+        patient.status == QueueStatus.inConsultation.dbValue) {
+      await _db.releaseConsultation(patient.id);
+    }
     state = const EncounterState();
   }
 
@@ -354,14 +493,19 @@ class EncounterNotifier extends Notifier<EncounterState> {
       compiledPrescriptionJson: compiledSnapshot,
     );
 
-    clearEncounter();
+    await clearEncounter(releaseToQueue: false);
   }
 
   void _runSafetyCheck() {
+    final vitals = PatientVitals.fromJson(state.activePatient?.vitals ?? {});
     final alerts = SafetyEngine.evaluate(
       selectedComorbidityIds: state.selectedComorbidityIds,
       activePrescription: state.activePrescription,
       comorbiditiesCatalog: _comorbiditiesCatalog,
+      allergies: state.allergies,
+      patientAge: state.activePatient?.age,
+      patientWeight: vitals.weight,
+      isPregnant: state.isPregnant,
     );
     state = state.copyWith(safetyAlerts: alerts);
   }
