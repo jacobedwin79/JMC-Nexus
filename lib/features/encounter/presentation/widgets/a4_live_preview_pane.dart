@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
+import '../../../../core/config/clinic_settings.dart';
 import '../../../../core/printing/a4_laser_print_service.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../application/encounter_notifier.dart';
@@ -43,6 +44,7 @@ class A4LivePreviewPane extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final encounter = ref.watch(encounterProvider);
+    final settings = ref.watch(clinicSettingsProvider);
     final patient = encounter.activePatient;
 
     return Column(
@@ -79,7 +81,7 @@ class A4LivePreviewPane extends ConsumerWidget {
                 const SizedBox(width: 10),
                 ElevatedButton.icon(
                   onPressed: () async {
-                    await A4LaserPrintService.printA4Prescription(encounter);
+                    await A4LaserPrintService.printA4Prescription(encounter, settings);
                     onPrintedAndCompleted();
                   },
                   icon: const Icon(LucideIcons.printer, size: 16),
@@ -101,7 +103,7 @@ class A4LivePreviewPane extends ConsumerWidget {
         Expanded(
           child: PdfPreview(
             build: (format) =>
-                A4LaserPrintService.buildA4Prescription(encounter),
+                A4LaserPrintService.buildA4Prescription(encounter, settings),
             initialPageFormat: PdfPageFormat.a4,
             allowPrinting: true,
             allowSharing: true,

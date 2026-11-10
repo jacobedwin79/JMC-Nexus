@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
+import '../../../core/config/clinic_settings.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/database/database_mappers.dart';
 import '../../../core/database/database_provider.dart';
@@ -22,6 +23,8 @@ class ReceptionFormState {
   final List<String> selectedAllergies;
   final String? lmp;
   final bool isPregnant;
+  final bool isRevisit;
+  final double? consultationFee;
   final bool isSubmitting;
   final String? errorMessage;
   final String? lastGeneratedTokenMessage;
@@ -39,6 +42,8 @@ class ReceptionFormState {
     this.selectedAllergies = const [],
     this.lmp,
     this.isPregnant = false,
+    this.isRevisit = false,
+    this.consultationFee,
     this.isSubmitting = false,
     this.errorMessage,
     this.lastGeneratedTokenMessage,
@@ -87,6 +92,8 @@ class ReceptionFormState {
     List<String>? selectedAllergies,
     String? lmp,
     bool? isPregnant,
+    bool? isRevisit,
+    double? consultationFee,
     bool? isSubmitting,
     String? errorMessage,
     String? lastGeneratedTokenMessage,
@@ -96,6 +103,7 @@ class ReceptionFormState {
     bool clearPhone = false,
     bool clearLmp = false,
     bool clearDob = false,
+    bool clearConsultationFee = false,
   }) {
     return ReceptionFormState(
       nextTokenNumber: nextTokenNumber ?? this.nextTokenNumber,
@@ -110,6 +118,10 @@ class ReceptionFormState {
       selectedAllergies: selectedAllergies ?? this.selectedAllergies,
       lmp: clearLmp ? null : (lmp ?? this.lmp),
       isPregnant: isPregnant ?? this.isPregnant,
+      isRevisit: isRevisit ?? this.isRevisit,
+      consultationFee: clearConsultationFee
+          ? null
+          : (consultationFee ?? this.consultationFee),
       isSubmitting: isSubmitting ?? this.isSubmitting,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       lastGeneratedTokenMessage: clearLastGenerated
@@ -301,8 +313,24 @@ class ReceptionNotifier extends Notifier<ReceptionFormState> {
     return results;
   }
 
+  void setIsRevisit(bool val) {
+    final settings = ref.read(clinicSettingsProvider);
+    state = state.copyWith(
+      isRevisit: val,
+      consultationFee: val ? settings.revisitFee : settings.consultationFee,
+    );
+  }
+
+  void setConsultationFee(double? fee) {
+    state = state.copyWith(
+      consultationFee: fee,
+      clearConsultationFee: fee == null,
+    );
+  }
+
   /// Pre-fills the registration form from a previous visit record.
   void prefillFromPreviousPatient(PatientQueueItem patient) {
+    final settings = ref.read(clinicSettingsProvider);
     state = ReceptionFormState(
       nextTokenNumber: state.nextTokenNumber,
       patientId: patient.patientId,
@@ -316,6 +344,8 @@ class ReceptionNotifier extends Notifier<ReceptionFormState> {
       selectedAllergies: List<String>.from(patient.allergies),
       lmp: patient.lmp,
       isPregnant: patient.isPregnant,
+      isRevisit: true,
+      consultationFee: settings.revisitFee,
     );
   }
 
@@ -393,6 +423,10 @@ class ReceptionNotifier extends Notifier<ReceptionFormState> {
       final effectiveDob =
           state.dateOfBirth ?? AgeCalculator.dobFromAgeInYears(effectiveAge);
 
+      final settings = ref.read(clinicSettingsProvider);
+      final finalFee = state.consultationFee ??
+          (state.isRevisit ? settings.revisitFee : settings.consultationFee);
+
       await _db.insertPatientQueue(
         PatientQueueTableCompanion.insert(
           id: id,
@@ -410,6 +444,8 @@ class ReceptionNotifier extends Notifier<ReceptionFormState> {
           isPregnant: drift.Value(state.isPregnant),
           status: 'WAITING',
           entryTime: now,
+          consultationFee: drift.Value(finalFee),
+          isRevisit: drift.Value(state.isRevisit),
         ),
       );
 

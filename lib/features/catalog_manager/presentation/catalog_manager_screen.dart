@@ -138,7 +138,7 @@ class _DrugsFormularyTabState extends ConsumerState<_DrugsFormularyTab> {
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        value: selectedDrugClass,
+                        initialValue: selectedDrugClass,
                         decoration: const InputDecoration(
                           labelText: 'Controlled Drug Class *',
                         ),
@@ -214,8 +214,9 @@ class _DrugsFormularyTabState extends ConsumerState<_DrugsFormularyTab> {
                 ElevatedButton(
                   onPressed: () async {
                     if (brandController.text.trim().isEmpty ||
-                        genericController.text.trim().isEmpty)
+                        genericController.text.trim().isEmpty) {
                       return;
+                    }
                     final db = ref.read(appDatabaseProvider);
                     await db
                         .into(db.drugsTable)
@@ -294,7 +295,7 @@ class _DrugsFormularyTabState extends ConsumerState<_DrugsFormularyTab> {
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        value: selectedDrugClass,
+                        initialValue: selectedDrugClass,
                         decoration: const InputDecoration(
                           labelText: 'Controlled Drug Class *',
                         ),
@@ -370,8 +371,9 @@ class _DrugsFormularyTabState extends ConsumerState<_DrugsFormularyTab> {
                 ElevatedButton(
                   onPressed: () async {
                     if (brandController.text.trim().isEmpty ||
-                        genericController.text.trim().isEmpty)
+                        genericController.text.trim().isEmpty) {
                       return;
+                    }
                     final db = ref.read(appDatabaseProvider);
                     await db.updateDrug(
                       id: drug.id,
@@ -690,24 +692,33 @@ class _ClinicSettingsTab extends ConsumerStatefulWidget {
 
 class _ClinicSettingsTabState extends ConsumerState<_ClinicSettingsTab> {
   final _clinicNameController = TextEditingController();
+  final _clinicSubtitleController = TextEditingController();
+  final _clinicContactController = TextEditingController();
   final _doctorNameController = TextEditingController();
   final _qualsController = TextEditingController();
   final _regController = TextEditingController();
   final _marginController = TextEditingController();
+  final _consultationFeeController = TextEditingController();
+  final _revisitFeeController = TextEditingController();
   final _supabaseUrlController = TextEditingController();
   final _supabaseKeyController = TextEditingController();
   final _geminiApiKeyController = TextEditingController();
   bool _obscureGeminiKey = true;
+  String _selectedGeminiModel = 'gemini-2.0-flash';
 
   bool _isLoaded = false;
 
   @override
   void dispose() {
     _clinicNameController.dispose();
+    _clinicSubtitleController.dispose();
+    _clinicContactController.dispose();
     _doctorNameController.dispose();
     _qualsController.dispose();
     _regController.dispose();
     _marginController.dispose();
+    _consultationFeeController.dispose();
+    _revisitFeeController.dispose();
     _supabaseUrlController.dispose();
     _supabaseKeyController.dispose();
     _geminiApiKeyController.dispose();
@@ -717,13 +728,19 @@ class _ClinicSettingsTabState extends ConsumerState<_ClinicSettingsTab> {
   void _loadValues(ClinicSettings settings) {
     if (!_isLoaded) {
       _clinicNameController.text = settings.clinicName;
+      _clinicSubtitleController.text = settings.clinicSubtitle;
+      _clinicContactController.text = settings.clinicContact;
       _doctorNameController.text = settings.doctorName;
       _qualsController.text = settings.doctorQualifications;
       _regController.text = settings.registrationNumber;
       _marginController.text = settings.letterheadTopMarginMm.toString();
+      _consultationFeeController.text =
+          settings.consultationFee.toStringAsFixed(0);
+      _revisitFeeController.text = settings.revisitFee.toStringAsFixed(0);
       _supabaseUrlController.text = settings.supabaseUrl;
       _supabaseKeyController.text = settings.supabaseAnonKey;
       _geminiApiKeyController.text = settings.geminiApiKey;
+      _selectedGeminiModel = settings.geminiModel;
       _isLoaded = true;
     }
   }
@@ -760,6 +777,24 @@ class _ClinicSettingsTabState extends ConsumerState<_ClinicSettingsTab> {
                   controller: _clinicNameController,
                   decoration: const InputDecoration(
                     labelText: 'Clinic / Hospital Name',
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _clinicSubtitleController,
+                  decoration: const InputDecoration(
+                    labelText: 'Clinic Subtitle / Tagline',
+                    hintText:
+                        'e.g. Comprehensive Outpatient & Emergency Clinical Center',
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _clinicContactController,
+                  decoration: const InputDecoration(
+                    labelText: 'Contact Information / Address / Email',
+                    hintText:
+                        'e.g. Phone: +91 98765 43210 | Email: care@jmchealth.org',
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -803,6 +838,36 @@ class _ClinicSettingsTabState extends ConsumerState<_ClinicSettingsTab> {
                     helperText:
                         'Standard physical letterhead margin to keep printed content strictly below pre-printed graphics.',
                   ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _consultationFeeController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: const InputDecoration(
+                          labelText: 'Standard Consultation Fee (₹)',
+                          prefixText: '₹ ',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextField(
+                        controller: _revisitFeeController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: const InputDecoration(
+                          labelText: 'Revisit / Follow-up Fee (₹)',
+                          prefixText: '₹ ',
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -950,6 +1015,44 @@ class _ClinicSettingsTabState extends ConsumerState<_ClinicSettingsTab> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedGeminiModel,
+                  decoration: const InputDecoration(
+                    labelText: 'Gemini Model',
+                    helperText:
+                        'gemini-2.0-flash is recommended for ultra-fast OPD audio scribing',
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'gemini-2.0-flash',
+                      child: Text('gemini-2.0-flash (Recommended • Fast & Audio native)'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'gemini-1.5-flash',
+                      child: Text('gemini-1.5-flash (Standard)'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'gemini-1.5-flash-8b',
+                      child: Text('gemini-1.5-flash-8b (Lightweight / High Quota)'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'gemini-2.0-flash-exp',
+                      child: Text('gemini-2.0-flash-exp (Experimental)'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'gemini-1.5-pro',
+                      child: Text('gemini-1.5-pro (High Reasoning)'),
+                    ),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) {
+                      setState(() {
+                        _selectedGeminiModel = val;
+                      });
+                    }
+                  },
+                ),
               ],
             ),
           ),
@@ -960,14 +1063,21 @@ class _ClinicSettingsTabState extends ConsumerState<_ClinicSettingsTab> {
             onPressed: () async {
               final updated = settings.copyWith(
                 clinicName: _clinicNameController.text.trim(),
+                clinicSubtitle: _clinicSubtitleController.text.trim(),
+                clinicContact: _clinicContactController.text.trim(),
                 doctorName: _doctorNameController.text.trim(),
                 doctorQualifications: _qualsController.text.trim(),
                 registrationNumber: _regController.text.trim(),
                 letterheadTopMarginMm:
                     double.tryParse(_marginController.text) ?? 45.0,
+                consultationFee:
+                    double.tryParse(_consultationFeeController.text) ?? 200.0,
+                revisitFee:
+                    double.tryParse(_revisitFeeController.text) ?? 150.0,
                 supabaseUrl: _supabaseUrlController.text.trim(),
                 supabaseAnonKey: _supabaseKeyController.text.trim(),
                 geminiApiKey: _geminiApiKeyController.text.trim(),
+                geminiModel: _selectedGeminiModel,
               );
 
               await ref

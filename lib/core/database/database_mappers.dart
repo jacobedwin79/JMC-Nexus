@@ -46,6 +46,8 @@ extension PatientQueueEntryMapper on PatientQueueEntry {
       completionTime: completionTime,
       compiledPrescriptionJson: compiledPrescriptionJson,
       overrideReason: overrideReason,
+      consultationFee: consultationFee,
+      isRevisit: isRevisit,
     );
   }
 }

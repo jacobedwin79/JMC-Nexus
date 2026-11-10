@@ -41,6 +41,8 @@ _PatientQueueItem _$PatientQueueItemFromJson(Map<String, dynamic> json) =>
           : DateTime.parse(json['completionTime'] as String),
       compiledPrescriptionJson: json['compiledPrescriptionJson'] as String?,
       overrideReason: json['overrideReason'] as String?,
+      consultationFee: (json['consultationFee'] as num?)?.toDouble() ?? 0.0,
+      isRevisit: json['isRevisit'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$PatientQueueItemToJson(
@@ -65,4 +67,6 @@ Map<String, dynamic> _$PatientQueueItemToJson(
   'completionTime': instance.completionTime?.toIso8601String(),
   'compiledPrescriptionJson': instance.compiledPrescriptionJson,
   'overrideReason': instance.overrideReason,
+  'consultationFee': instance.consultationFee,
+  'isRevisit': instance.isRevisit,
 };

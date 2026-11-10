@@ -222,6 +222,33 @@ class $PatientQueueTableTable extends PatientQueueTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _consultationFeeMeta = const VerificationMeta(
+    'consultationFee',
+  );
+  @override
+  late final GeneratedColumn<double> consultationFee = GeneratedColumn<double>(
+    'consultation_fee',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _isRevisitMeta = const VerificationMeta(
+    'isRevisit',
+  );
+  @override
+  late final GeneratedColumn<bool> isRevisit = GeneratedColumn<bool>(
+    'is_revisit',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_revisit" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
   );
@@ -279,6 +306,8 @@ class $PatientQueueTableTable extends PatientQueueTable
     compiledPrescriptionJson,
     encounterSnapshotJson,
     overrideReason,
+    consultationFee,
+    isRevisit,
     updatedAt,
     version,
     deletedAt,
@@ -453,6 +482,21 @@ class $PatientQueueTableTable extends PatientQueueTable
         ),
       );
     }
+    if (data.containsKey('consultation_fee')) {
+      context.handle(
+        _consultationFeeMeta,
+        consultationFee.isAcceptableOrUnknown(
+          data['consultation_fee']!,
+          _consultationFeeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_revisit')) {
+      context.handle(
+        _isRevisitMeta,
+        isRevisit.isAcceptableOrUnknown(data['is_revisit']!, _isRevisitMeta),
+      );
+    }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
@@ -560,6 +604,14 @@ class $PatientQueueTableTable extends PatientQueueTable
         DriftSqlType.string,
         data['${effectivePrefix}override_reason'],
       ),
+      consultationFee: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}consultation_fee'],
+      )!,
+      isRevisit: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_revisit'],
+      )!,
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
@@ -605,6 +657,8 @@ class PatientQueueEntry extends DataClass
   final String? compiledPrescriptionJson;
   final String? encounterSnapshotJson;
   final String? overrideReason;
+  final double consultationFee;
+  final bool isRevisit;
   final DateTime updatedAt;
   final int version;
   final DateTime? deletedAt;
@@ -629,6 +683,8 @@ class PatientQueueEntry extends DataClass
     this.compiledPrescriptionJson,
     this.encounterSnapshotJson,
     this.overrideReason,
+    required this.consultationFee,
+    required this.isRevisit,
     required this.updatedAt,
     required this.version,
     this.deletedAt,
@@ -684,6 +740,8 @@ class PatientQueueEntry extends DataClass
     if (!nullToAbsent || overrideReason != null) {
       map['override_reason'] = Variable<String>(overrideReason);
     }
+    map['consultation_fee'] = Variable<double>(consultationFee);
+    map['is_revisit'] = Variable<bool>(isRevisit);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     map['version'] = Variable<int>(version);
     if (!nullToAbsent || deletedAt != null) {
@@ -736,6 +794,8 @@ class PatientQueueEntry extends DataClass
       overrideReason: overrideReason == null && nullToAbsent
           ? const Value.absent()
           : Value(overrideReason),
+      consultationFee: Value(consultationFee),
+      isRevisit: Value(isRevisit),
       updatedAt: Value(updatedAt),
       version: Value(version),
       deletedAt: deletedAt == null && nullToAbsent
@@ -776,6 +836,8 @@ class PatientQueueEntry extends DataClass
         json['encounterSnapshotJson'],
       ),
       overrideReason: serializer.fromJson<String?>(json['overrideReason']),
+      consultationFee: serializer.fromJson<double>(json['consultationFee']),
+      isRevisit: serializer.fromJson<bool>(json['isRevisit']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       version: serializer.fromJson<int>(json['version']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -811,6 +873,8 @@ class PatientQueueEntry extends DataClass
         encounterSnapshotJson,
       ),
       'overrideReason': serializer.toJson<String?>(overrideReason),
+      'consultationFee': serializer.toJson<double>(consultationFee),
+      'isRevisit': serializer.toJson<bool>(isRevisit),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'version': serializer.toJson<int>(version),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -838,6 +902,8 @@ class PatientQueueEntry extends DataClass
     Value<String?> compiledPrescriptionJson = const Value.absent(),
     Value<String?> encounterSnapshotJson = const Value.absent(),
     Value<String?> overrideReason = const Value.absent(),
+    double? consultationFee,
+    bool? isRevisit,
     DateTime? updatedAt,
     int? version,
     Value<DateTime?> deletedAt = const Value.absent(),
@@ -874,6 +940,8 @@ class PatientQueueEntry extends DataClass
     overrideReason: overrideReason.present
         ? overrideReason.value
         : this.overrideReason,
+    consultationFee: consultationFee ?? this.consultationFee,
+    isRevisit: isRevisit ?? this.isRevisit,
     updatedAt: updatedAt ?? this.updatedAt,
     version: version ?? this.version,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -922,6 +990,10 @@ class PatientQueueEntry extends DataClass
       overrideReason: data.overrideReason.present
           ? data.overrideReason.value
           : this.overrideReason,
+      consultationFee: data.consultationFee.present
+          ? data.consultationFee.value
+          : this.consultationFee,
+      isRevisit: data.isRevisit.present ? data.isRevisit.value : this.isRevisit,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       version: data.version.present ? data.version.value : this.version,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -951,6 +1023,8 @@ class PatientQueueEntry extends DataClass
           ..write('compiledPrescriptionJson: $compiledPrescriptionJson, ')
           ..write('encounterSnapshotJson: $encounterSnapshotJson, ')
           ..write('overrideReason: $overrideReason, ')
+          ..write('consultationFee: $consultationFee, ')
+          ..write('isRevisit: $isRevisit, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('version: $version, ')
           ..write('deletedAt: $deletedAt')
@@ -980,6 +1054,8 @@ class PatientQueueEntry extends DataClass
     compiledPrescriptionJson,
     encounterSnapshotJson,
     overrideReason,
+    consultationFee,
+    isRevisit,
     updatedAt,
     version,
     deletedAt,
@@ -1008,6 +1084,8 @@ class PatientQueueEntry extends DataClass
           other.compiledPrescriptionJson == this.compiledPrescriptionJson &&
           other.encounterSnapshotJson == this.encounterSnapshotJson &&
           other.overrideReason == this.overrideReason &&
+          other.consultationFee == this.consultationFee &&
+          other.isRevisit == this.isRevisit &&
           other.updatedAt == this.updatedAt &&
           other.version == this.version &&
           other.deletedAt == this.deletedAt);
@@ -1034,6 +1112,8 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
   final Value<String?> compiledPrescriptionJson;
   final Value<String?> encounterSnapshotJson;
   final Value<String?> overrideReason;
+  final Value<double> consultationFee;
+  final Value<bool> isRevisit;
   final Value<DateTime> updatedAt;
   final Value<int> version;
   final Value<DateTime?> deletedAt;
@@ -1059,6 +1139,8 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
     this.compiledPrescriptionJson = const Value.absent(),
     this.encounterSnapshotJson = const Value.absent(),
     this.overrideReason = const Value.absent(),
+    this.consultationFee = const Value.absent(),
+    this.isRevisit = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.version = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -1085,6 +1167,8 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
     this.compiledPrescriptionJson = const Value.absent(),
     this.encounterSnapshotJson = const Value.absent(),
     this.overrideReason = const Value.absent(),
+    this.consultationFee = const Value.absent(),
+    this.isRevisit = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.version = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -1117,6 +1201,8 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
     Expression<String>? compiledPrescriptionJson,
     Expression<String>? encounterSnapshotJson,
     Expression<String>? overrideReason,
+    Expression<double>? consultationFee,
+    Expression<bool>? isRevisit,
     Expression<DateTime>? updatedAt,
     Expression<int>? version,
     Expression<DateTime>? deletedAt,
@@ -1146,6 +1232,8 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
       if (encounterSnapshotJson != null)
         'encounter_snapshot_json': encounterSnapshotJson,
       if (overrideReason != null) 'override_reason': overrideReason,
+      if (consultationFee != null) 'consultation_fee': consultationFee,
+      if (isRevisit != null) 'is_revisit': isRevisit,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (version != null) 'version': version,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -1174,6 +1262,8 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
     Value<String?>? compiledPrescriptionJson,
     Value<String?>? encounterSnapshotJson,
     Value<String?>? overrideReason,
+    Value<double>? consultationFee,
+    Value<bool>? isRevisit,
     Value<DateTime>? updatedAt,
     Value<int>? version,
     Value<DateTime?>? deletedAt,
@@ -1203,6 +1293,8 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
       encounterSnapshotJson:
           encounterSnapshotJson ?? this.encounterSnapshotJson,
       overrideReason: overrideReason ?? this.overrideReason,
+      consultationFee: consultationFee ?? this.consultationFee,
+      isRevisit: isRevisit ?? this.isRevisit,
       updatedAt: updatedAt ?? this.updatedAt,
       version: version ?? this.version,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -1279,6 +1371,12 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
     if (overrideReason.present) {
       map['override_reason'] = Variable<String>(overrideReason.value);
     }
+    if (consultationFee.present) {
+      map['consultation_fee'] = Variable<double>(consultationFee.value);
+    }
+    if (isRevisit.present) {
+      map['is_revisit'] = Variable<bool>(isRevisit.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -1317,6 +1415,8 @@ class PatientQueueTableCompanion extends UpdateCompanion<PatientQueueEntry> {
           ..write('compiledPrescriptionJson: $compiledPrescriptionJson, ')
           ..write('encounterSnapshotJson: $encounterSnapshotJson, ')
           ..write('overrideReason: $overrideReason, ')
+          ..write('consultationFee: $consultationFee, ')
+          ..write('isRevisit: $isRevisit, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('version: $version, ')
           ..write('deletedAt: $deletedAt, ')
@@ -6028,6 +6128,8 @@ typedef $$PatientQueueTableTableCreateCompanionBuilder =
       Value<String?> compiledPrescriptionJson,
       Value<String?> encounterSnapshotJson,
       Value<String?> overrideReason,
+      Value<double> consultationFee,
+      Value<bool> isRevisit,
       Value<DateTime> updatedAt,
       Value<int> version,
       Value<DateTime?> deletedAt,
@@ -6055,6 +6157,8 @@ typedef $$PatientQueueTableTableUpdateCompanionBuilder =
       Value<String?> compiledPrescriptionJson,
       Value<String?> encounterSnapshotJson,
       Value<String?> overrideReason,
+      Value<double> consultationFee,
+      Value<bool> isRevisit,
       Value<DateTime> updatedAt,
       Value<int> version,
       Value<DateTime?> deletedAt,
@@ -6167,6 +6271,16 @@ class $$PatientQueueTableTableFilterComposer
 
   ColumnFilters<String> get overrideReason => $composableBuilder(
     column: $table.overrideReason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get consultationFee => $composableBuilder(
+    column: $table.consultationFee,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isRevisit => $composableBuilder(
+    column: $table.isRevisit,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6295,6 +6409,16 @@ class $$PatientQueueTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get consultationFee => $composableBuilder(
+    column: $table.consultationFee,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isRevisit => $composableBuilder(
+    column: $table.isRevisit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
@@ -6402,6 +6526,14 @@ class $$PatientQueueTableTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<double> get consultationFee => $composableBuilder(
+    column: $table.consultationFee,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isRevisit =>
+      $composableBuilder(column: $table.isRevisit, builder: (column) => column);
+
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
@@ -6472,6 +6604,8 @@ class $$PatientQueueTableTableTableManager
                 Value<String?> compiledPrescriptionJson = const Value.absent(),
                 Value<String?> encounterSnapshotJson = const Value.absent(),
                 Value<String?> overrideReason = const Value.absent(),
+                Value<double> consultationFee = const Value.absent(),
+                Value<bool> isRevisit = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> version = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -6497,6 +6631,8 @@ class $$PatientQueueTableTableTableManager
                 compiledPrescriptionJson: compiledPrescriptionJson,
                 encounterSnapshotJson: encounterSnapshotJson,
                 overrideReason: overrideReason,
+                consultationFee: consultationFee,
+                isRevisit: isRevisit,
                 updatedAt: updatedAt,
                 version: version,
                 deletedAt: deletedAt,
@@ -6524,6 +6660,8 @@ class $$PatientQueueTableTableTableManager
                 Value<String?> compiledPrescriptionJson = const Value.absent(),
                 Value<String?> encounterSnapshotJson = const Value.absent(),
                 Value<String?> overrideReason = const Value.absent(),
+                Value<double> consultationFee = const Value.absent(),
+                Value<bool> isRevisit = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> version = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -6549,6 +6687,8 @@ class $$PatientQueueTableTableTableManager
                 compiledPrescriptionJson: compiledPrescriptionJson,
                 encounterSnapshotJson: encounterSnapshotJson,
                 overrideReason: overrideReason,
+                consultationFee: consultationFee,
+                isRevisit: isRevisit,
                 updatedAt: updatedAt,
                 version: version,
                 deletedAt: deletedAt,

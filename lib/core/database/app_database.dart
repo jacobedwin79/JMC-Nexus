@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
@@ -33,6 +32,10 @@ class PatientQueueTable extends Table {
   TextColumn get compiledPrescriptionJson => text().nullable()();
   TextColumn get encounterSnapshotJson => text().nullable()();
   TextColumn get overrideReason => text().nullable()();
+
+  // Financial & Visit Audit
+  RealColumn get consultationFee => real().withDefault(const Constant(0.0))();
+  BoolColumn get isRevisit => boolean().withDefault(const Constant(false))();
 
   // Audit & Sync Fields
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
@@ -228,7 +231,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -317,6 +320,10 @@ class AppDatabase extends _$AppDatabase {
 
         await m.createTable(unmappedTermsTable);
         await m.createTable(drugUsageTable);
+      }
+      if (from < 4) {
+        await m.addColumn(patientQueueTable, patientQueueTable.consultationFee);
+        await m.addColumn(patientQueueTable, patientQueueTable.isRevisit);
       }
     },
   );
@@ -495,6 +502,42 @@ class AppDatabase extends _$AppDatabase {
             ),
           ]))
         .get();
+  }
+
+  /// Watches all non-deleted patient queue entries, optionally filtered by date range.
+  Stream<List<PatientQueueEntry>> watchAllPatientQueueEntries({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) {
+    final query = select(patientQueueTable)..where((t) => t.deletedAt.isNull());
+    if (startDate != null) {
+      query.where((t) => t.entryTime.isBiggerOrEqualValue(startDate));
+    }
+    if (endDate != null) {
+      query.where((t) => t.entryTime.isSmallerOrEqualValue(endDate));
+    }
+    query.orderBy([
+      (t) => OrderingTerm(expression: t.entryTime, mode: OrderingMode.desc),
+    ]);
+    return query.watch();
+  }
+
+  /// Gets all patient queue entries in a date range.
+  Future<List<PatientQueueEntry>> getPatientQueueForDateRange({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) {
+    final query = select(patientQueueTable)..where((t) => t.deletedAt.isNull());
+    if (startDate != null) {
+      query.where((t) => t.entryTime.isBiggerOrEqualValue(startDate));
+    }
+    if (endDate != null) {
+      query.where((t) => t.entryTime.isSmallerOrEqualValue(endDate));
+    }
+    query.orderBy([
+      (t) => OrderingTerm(expression: t.entryTime, mode: OrderingMode.desc),
+    ]);
+    return query.get();
   }
 
   /// Saves autosaved in-memory consultation draft into the database row.

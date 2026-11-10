@@ -154,7 +154,7 @@ class GeminiScribeNotifier extends Notifier<GeminiScribeState> {
     } catch (e) {
       state = state.copyWith(
         isProcessing: false,
-        errorMessage: 'Failed to process voice note: $e',
+        errorMessage: _cleanErrorMessage(e),
       );
     }
   }
@@ -167,7 +167,7 @@ class GeminiScribeNotifier extends Notifier<GeminiScribeState> {
     if (!settings.hasGeminiApiKey) {
       state = state.copyWith(
         errorMessage:
-            'Gemini API key is required. Please configure it in Clinical Catalog & Settings.',
+            'Gemini API key is required. Please configure it in Settings.',
       );
       return;
     }
@@ -182,9 +182,20 @@ class GeminiScribeNotifier extends Notifier<GeminiScribeState> {
     } catch (e) {
       state = state.copyWith(
         isProcessing: false,
-        errorMessage: 'Failed to process dictation: $e',
+        errorMessage: _cleanErrorMessage(e),
       );
     }
+  }
+
+  static String _cleanErrorMessage(dynamic e) {
+    var str = e.toString();
+    if (str.startsWith('Bad state: ')) {
+      str = str.substring('Bad state: '.length);
+    }
+    if (str.startsWith('Exception: ')) {
+      str = str.substring('Exception: '.length);
+    }
+    return str;
   }
 
   Future<void> _processWithGemini({
@@ -202,7 +213,7 @@ class GeminiScribeNotifier extends Notifier<GeminiScribeState> {
 
     final scribeService = GeminiScribeService(
       apiKey: settings.geminiApiKey,
-      modelName: 'gemini-1.5-flash',
+      modelName: settings.geminiModel,
     );
 
     final result = await scribeService.processClinicalDictation(

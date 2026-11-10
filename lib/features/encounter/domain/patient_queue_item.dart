@@ -67,6 +67,8 @@ abstract class PatientQueueItem with _$PatientQueueItem {
     DateTime? completionTime,
     String? compiledPrescriptionJson,
     String? overrideReason,
+    @Default(0.0) double consultationFee,
+    @Default(false) bool isRevisit,
   }) = _PatientQueueItem;
 
   factory PatientQueueItem.fromJson(Map<String, dynamic> json) =>

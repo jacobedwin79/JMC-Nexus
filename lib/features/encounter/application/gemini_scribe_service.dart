@@ -35,15 +35,6 @@ class GeminiScribeService {
       throw ArgumentError('Either audioBytes or textDictation must be provided.');
     }
 
-    final model = GenerativeModel(
-      model: modelName,
-      apiKey: apiKey,
-      generationConfig: GenerationConfig(
-        responseMimeType: 'application/json',
-        temperature: 0.2,
-      ),
-    );
-
     final patient = currentState.activePatient;
     final patientInfo = StringBuffer();
     if (patient != null) {
@@ -169,9 +160,64 @@ Return strictly a JSON object matching this schema:
     }
     contentParts.add(TextPart(promptText));
 
-    final response = await model.generateContent([
-      Content.multi(contentParts),
-    ]);
+    final candidateModels = {
+      if (modelName.trim().isNotEmpty) modelName,
+      'gemini-2.0-flash',
+      'gemini-1.5-flash-8b',
+      'gemini-1.5-flash',
+      'gemini-2.0-flash-exp',
+      'gemini-1.5-pro',
+    }.toList();
+
+    GenerateContentResponse? response;
+    dynamic lastError;
+
+    for (final candidate in candidateModels) {
+      try {
+        final model = GenerativeModel(
+          model: candidate,
+          apiKey: apiKey,
+          generationConfig: GenerationConfig(
+            responseMimeType: 'application/json',
+            temperature: 0.2,
+          ),
+        );
+
+        final res = await model.generateContent([
+          Content.multi(contentParts),
+        ]);
+
+        if (res.text != null && res.text!.trim().isNotEmpty) {
+          response = res;
+          break;
+        }
+      } catch (e) {
+        lastError = e;
+        final errStr = e.toString().toLowerCase();
+        debugPrint('Gemini attempt with $candidate failed: $e');
+
+        if (errStr.contains('402') || errStr.contains('payment required')) {
+          throw StateError(
+            'Google AI API (HTTP 402): Payment/Billing required or free quota exhausted on this project. Visit https://aistudio.google.com to verify your tier or billing.',
+          );
+        }
+
+        // If not found (404) or unsupported on v1beta, proceed to next candidate
+        if (errStr.contains('not found') ||
+            errStr.contains('not supported') ||
+            errStr.contains('404')) {
+          continue;
+        }
+      }
+    }
+
+    if (response == null ||
+        response.text == null ||
+        response.text!.trim().isEmpty) {
+      throw StateError(
+        'Gemini failed on candidate models. Last error: $lastError',
+      );
+    }
 
     final rawText = response.text;
     if (rawText == null || rawText.trim().isEmpty) {

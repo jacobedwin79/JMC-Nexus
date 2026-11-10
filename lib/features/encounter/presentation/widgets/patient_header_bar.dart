@@ -333,7 +333,10 @@ class PatientHeaderBar extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: 4),
-                      Row(
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 4,
                         children: [
                           Text(
                             '${patient.patientId != null && patient.patientId!.trim().isNotEmpty ? "MRN: ${patient.patientId} • " : ""}${patient.dynamicAgeDisplay} • ${patient.gender == "M" ? "Male" : (patient.gender == "F" ? "Female" : "Other")}${patient.phone != null ? " • ${patient.phone}" : ""}',
@@ -344,8 +347,7 @@ class PatientHeaderBar extends ConsumerWidget {
                             ),
                           ),
                           if (patient.patientId != null &&
-                              patient.patientId!.trim().isNotEmpty) ...[
-                            const SizedBox(width: 8),
+                              patient.patientId!.trim().isNotEmpty)
                             InkWell(
                               onTap: () => _showVisitHistorySheet(
                                 context,
@@ -384,7 +386,6 @@ class PatientHeaderBar extends ConsumerWidget {
                                 ),
                               ),
                             ),
-                          ],
                         ],
                       ),
                     ],

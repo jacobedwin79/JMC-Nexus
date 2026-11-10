@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 /// Centralized service providing server-synchronized timestamps.

@@ -2,19 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../../../core/config/clinic_settings.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../catalog_manager/presentation/catalog_manager_screen.dart';
 import '../../encounter/application/queue_monitor_notifier.dart';
 import 'widgets/quick_reg_form.dart';
 import 'widgets/reception_queue_list.dart';
 
 class ReceptionScreen extends ConsumerWidget {
   final VoidCallback onSwitchToDoctor;
+  final VoidCallback? onSwitchToAdmin;
 
-  const ReceptionScreen({super.key, required this.onSwitchToDoctor});
+  const ReceptionScreen({
+    super.key,
+    required this.onSwitchToDoctor,
+    this.onSwitchToAdmin,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final queueState = ref.watch(queueMonitorProvider);
+    final clinicSettings = ref.watch(clinicSettingsProvider);
     final todayDate = DateFormat('EEEE, d MMMM yyyy').format(DateTime.now());
 
     return Scaffold(
@@ -34,22 +42,31 @@ class ReceptionScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'JMC Nexus • Reception Terminal',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-                ),
-                Text(
-                  todayDate,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppTheme.textSecondary,
-                    fontWeight: FontWeight.normal,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    clinicSettings.clinicName == 'JMC CLINICAL HEALTHCARE & OPD'
+                        ? 'JMC Nexus • Reception Terminal'
+                        : '${clinicSettings.clinicName} • Reception',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                  Text(
+                    todayDate,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppTheme.textSecondary,
+                      fontWeight: FontWeight.normal,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -94,6 +111,37 @@ class ReceptionScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(width: 12),
+
+          // Clinic Settings & Catalogs
+          IconButton(
+            tooltip: 'Clinic Settings & Catalogs',
+            icon: const Icon(LucideIcons.settings, size: 18),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CatalogManagerScreen()),
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+
+          // Admin Panel Switcher
+          if (onSwitchToAdmin != null) ...[
+            OutlinedButton.icon(
+              onPressed: onSwitchToAdmin,
+              icon: const Icon(LucideIcons.shieldCheck, size: 14),
+              label: const Text('Admin Panel'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppTheme.textPrimary,
+                side: BorderSide(color: Colors.grey.shade300),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
 
           // Terminal Mode Switcher
           ElevatedButton.icon(

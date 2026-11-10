@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../../../../core/config/clinic_settings.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/clinical_chip.dart';
 import '../../../encounter/application/clinical_catalog_providers.dart';
@@ -24,11 +25,11 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
   final _ageController = TextEditingController();
   final _dobController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _feeController = TextEditingController();
 
   final _searchController = TextEditingController();
   Timer? _searchDebounce;
   List<PatientQueueItem> _searchResults = const [];
-  bool _showSearch = false;
   bool _isSearching = false;
 
   final _bpSysController = TextEditingController();
@@ -48,6 +49,7 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
     _ageController.dispose();
     _dobController.dispose();
     _phoneController.dispose();
+    _feeController.dispose();
     _searchController.dispose();
     _searchDebounce?.cancel();
     _bpSysController.dispose();
@@ -66,6 +68,7 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
     _ageController.clear();
     _dobController.clear();
     _phoneController.clear();
+    _feeController.clear();
     _searchController.clear();
     _bpSysController.clear();
     _bpDiaController.clear();
@@ -76,7 +79,6 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
     _rbsController.clear();
     setState(() {
       _searchResults = const [];
-      _showSearch = false;
     });
   }
 
@@ -117,6 +119,8 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
       _dobController.clear();
     }
     _phoneController.text = patient.phone ?? '';
+    final clinicSettings = ref.read(clinicSettingsProvider);
+    _feeController.text = clinicSettings.revisitFee.toStringAsFixed(0);
     _bpSysController.text = vitals.bpSys?.toString() ?? '';
     _bpDiaController.text = vitals.bpDia?.toString() ?? '';
     _pulseController.text = vitals.pulse?.toString() ?? '';
@@ -128,7 +132,6 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
     ref.read(receptionProvider.notifier).prefillFromPreviousPatient(patient);
 
     setState(() {
-      _showSearch = false;
       _searchResults = const [];
       _searchController.clear();
       _showVitals = vitals.hasAnyVitals;
@@ -136,10 +139,10 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          'Loaded previous record for ${patient.patientName} (${patient.allergies.isNotEmpty ? "${patient.allergies.length} allergies recorded" : "No allergies"})',
-        ),
-        backgroundColor: AppTheme.primaryBlue,
+        content: Text('Loaded record for ${patient.patientName}'),
+        backgroundColor: Colors.grey.shade900,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -151,25 +154,39 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Add Drug Allergy'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Add Drug Allergy',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+          ),
           content: TextField(
             controller: controller,
             autofocus: true,
             textCapitalization: TextCapitalization.words,
-            decoration: const InputDecoration(
-              labelText: 'Allergen / Drug Name',
-              hintText: 'e.g. Ciprofloxacin, Amoxicillin',
-            ),
+            decoration: _minimalInputDecoration('Allergen / Drug Name', null),
             onSubmitted: (val) => Navigator.of(context).pop(val),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: AppTheme.emergencyRed,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               onPressed: () => Navigator.of(context).pop(controller.text),
-              child: const Text('Add Allergy'),
+              child: const Text('Add'),
             ),
           ],
         );
@@ -187,23 +204,37 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Add Custom Comorbidity'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Add Comorbidity',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+          ),
           content: TextField(
             controller: controller,
             autofocus: true,
             textCapitalization: TextCapitalization.words,
-            decoration: const InputDecoration(
-              labelText: 'Comorbidity name',
-              hintText: 'e.g. Hypothyroidism',
-            ),
+            decoration: _minimalInputDecoration('Comorbidity name', null),
             onSubmitted: (value) => Navigator.pop(context, value),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: AppTheme.primaryBlue,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               onPressed: () => Navigator.pop(context, controller.text),
               child: const Text('Add'),
             ),
@@ -226,17 +257,15 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
       _clearFields();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.white, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                'Issued Token #$token successfully!',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
+          content: Text(
+            'Token #$token issued successfully',
+            style: const TextStyle(fontWeight: FontWeight.w500),
           ),
-          backgroundColor: AppTheme.primaryBlue,
+          backgroundColor: Colors.grey.shade900,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -262,266 +291,227 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
         );
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Simulated Patient Mohan Lal (52m wait) added! Overdue alert triggered.',
+        SnackBar(
+          content: const Text(
+            'Simulated Patient added. Overdue alert triggered.',
           ),
           backgroundColor: AppTheme.slaOverdue,
-          duration: Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 3),
         ),
       );
     }
   }
 
+  // MINIMAL DESIGN SYSTEM HELPER
+  InputDecoration _minimalInputDecoration(
+    String label,
+    IconData? icon, {
+    Widget? suffixIcon,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+      prefixIcon: icon != null
+          ? Icon(icon, size: 18, color: Colors.grey.shade500)
+          : null,
+      suffixIcon: suffixIcon,
+      filled: true,
+      fillColor: Colors.grey.shade50,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: AppTheme.primaryBlue.withValues(alpha: 0.5),
+          width: 1,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final formState = ref.watch(receptionProvider);
+    final settings = ref.watch(clinicSettingsProvider);
     final comorbiditiesAsync = ref.watch(comorbiditiesCatalogProvider);
 
+    if (_feeController.text.isEmpty) {
+      _feeController.text = (formState.consultationFee ??
+              (formState.isRevisit ? settings.revisitFee : settings.consultationFee))
+          .toStringAsFixed(0);
+    }
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Next Token Display Card
+          // Minimal Next Token Header
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppTheme.primaryBlue, AppTheme.primaryAccent],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.primaryBlue.withValues(alpha: 0.25),
-                  blurRadius: 8,
-                  offset: const Offset(0, 3),
-                ),
-              ],
+              color: AppTheme.primaryBlue.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'NEXT TOKEN',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.0,
-                        ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'NEXT TOKEN',
+                      style: TextStyle(
+                        color: AppTheme.primaryBlue.withValues(alpha: 0.8),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.2,
                       ),
-                      Text(
-                        'TOKEN #${formState.nextTokenNumber}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.5,
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '#${formState.nextTokenNumber}',
+                      style: const TextStyle(
+                        color: AppTheme.primaryBlue,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w300,
+                        height: 1.0,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                ElevatedButton.icon(
+                IconButton(
                   onPressed: _seedDemoOverduePatient,
-                  icon: const Icon(
-                    LucideIcons.alertTriangle,
-                    size: 12,
-                    color: AppTheme.slaOverdue,
-                  ),
-                  label: const Text(
-                    '>45m Test',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
+                  tooltip: 'Add >45m Test Patient',
+                  icon: const Icon(LucideIcons.flaskConical, size: 20),
+                  color: AppTheme.textSecondary,
+                  style: IconButton.styleFrom(
                     backgroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 6,
-                    ),
-                    elevation: 0,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
 
-          // Load Previous Patient (UHID / Phone / Name search)
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppTheme.borderLight),
+          // Integrated Search (Seamless)
+          TextField(
+            controller: _searchController,
+            onChanged: _onSearchChanged,
+            decoration: _minimalInputDecoration(
+              'Search previous patient...',
+              LucideIcons.search,
+              suffixIcon: _isSearching
+                  ? const Padding(
+                      padding: EdgeInsets.all(14),
+                      child: SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(LucideIcons.x, size: 16),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {
+                          _searchResults = const [];
+                          _isSearching = false;
+                        });
+                      },
+                    )
+                  : null,
             ),
-            child: Column(
-              children: [
-                InkWell(
-                  onTap: () => setState(() => _showSearch = !_showSearch),
-                  borderRadius: BorderRadius.circular(8),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          LucideIcons.history,
-                          size: 18,
-                          color: AppTheme.primaryBlue,
-                        ),
-                        const SizedBox(width: 8),
-                        const Expanded(
-                          child: Text(
-                            'Load Previous Patient',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.primaryBlue,
-                            ),
-                          ),
-                        ),
-                        Icon(
-                          _showSearch
-                              ? LucideIcons.chevronUp
-                              : LucideIcons.chevronDown,
-                          size: 18,
-                          color: AppTheme.textSecondary,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (_showSearch) ...[
-                  const Divider(height: 1, color: AppTheme.borderLight),
-                  Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        TextField(
-                          controller: _searchController,
-                          autofocus: true,
-                          onChanged: _onSearchChanged,
-                          decoration: InputDecoration(
-                            hintText: 'Search by UHID, phone, or name...',
-                            prefixIcon: const Icon(
-                              LucideIcons.search,
-                              size: 18,
-                            ),
-                            suffixIcon: _isSearching
-                                ? const Padding(
-                                    padding: EdgeInsets.all(12),
-                                    child: SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    ),
-                                  )
-                                : null,
-                          ),
-                        ),
-                        if (_searchResults.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          Container(
-                            constraints: const BoxConstraints(maxHeight: 220),
-                            decoration: BoxDecoration(
-                              color: AppTheme.surfaceBackground,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: AppTheme.borderLight),
-                            ),
-                            child: ListView.separated(
-                              shrinkWrap: true,
-                              itemCount: _searchResults.length,
-                              separatorBuilder: (_, __) =>
-                                  const Divider(height: 1),
-                              itemBuilder: (context, index) {
-                                final p = _searchResults[index];
-                                final dateLabel = DateFormat(
-                                  'd MMM yyyy',
-                                ).format(p.entryTime.toLocal());
-                                return ListTile(
-                                  dense: true,
-                                  leading: const Icon(
-                                    LucideIcons.userCheck,
-                                    size: 18,
-                                  ),
-                                  title: Text(
-                                    p.patientName,
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    '${p.age}Y ${p.gender}'
-                                    '${p.patientId != null && p.patientId!.isNotEmpty ? " • ${p.patientId}" : ""}'
-                                    '${p.phone != null && p.phone!.isNotEmpty ? " • ${p.phone}" : ""}'
-                                    ' • $dateLabel',
-                                    style: const TextStyle(fontSize: 11),
-                                  ),
-                                  trailing: const Icon(
-                                    LucideIcons.arrowRight,
-                                    size: 16,
-                                  ),
-                                  onTap: () => _loadPreviousPatient(p),
-                                );
-                              },
-                            ),
-                          ),
-                        ] else if (_searchController.text.trim().length >= 2 &&
-                            !_isSearching) ...[
-                          const SizedBox(height: 8),
-                          const Text(
-                            'No matching previous patients found.',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppTheme.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
+          ),
+
+          if (_searchResults.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Container(
+              constraints: const BoxConstraints(maxHeight: 250),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
                   ),
                 ],
-              ],
+              ),
+              child: ListView.separated(
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                itemCount: _searchResults.length,
+                separatorBuilder: (_, __) =>
+                    Divider(height: 1, color: Colors.grey.shade100),
+                itemBuilder: (context, index) {
+                  final p = _searchResults[index];
+                  final dateLabel = DateFormat(
+                    'MMM d, yyyy',
+                  ).format(p.entryTime.toLocal());
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
+                    title: Text(
+                      p.patientName,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: Text(
+                      '${p.age}Y ${p.gender} • $dateLabel',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    trailing: const Icon(
+                      LucideIcons.chevronRight,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
+                    onTap: () => _loadPreviousPatient(p),
+                  );
+                },
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
+          ],
+          const SizedBox(height: 24),
 
-          // Error banner if any
+          // Error banner minimal
           if (formState.errorMessage != null) ...[
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.only(bottom: 20),
               decoration: BoxDecoration(
-                color: AppTheme.slaOverdue.withValues(alpha: 0.1),
-                border: Border.all(color: AppTheme.slaOverdue),
-                borderRadius: BorderRadius.circular(8),
+                color: AppTheme.slaOverdue.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
                   const Icon(
-                    LucideIcons.alertCircle,
+                    LucideIcons.info,
                     color: AppTheme.slaOverdue,
-                    size: 18,
+                    size: 16,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -530,129 +520,44 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                       style: const TextStyle(
                         color: AppTheme.slaOverdue,
                         fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 14),
           ],
 
-          // Patient ID / UHID (Optional but recommended for repeat visits)
-          TextField(
-            controller: _patientIdController,
-            onChanged: (val) =>
-                ref.read(receptionProvider.notifier).setPatientId(val),
-            decoration: const InputDecoration(
-              labelText: 'Patient ID / UHID (Optional)',
-              hintText: 'e.g. JMC-10234',
-              prefixIcon: Icon(LucideIcons.badge, size: 18),
+          // Core Info Section
+          const Text(
+            'PATIENT DETAILS',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+              letterSpacing: 0.8,
             ),
           ),
           const SizedBox(height: 12),
 
-          // Patient Name
           TextField(
             controller: _nameController,
             textCapitalization: TextCapitalization.words,
             onChanged: (val) =>
                 ref.read(receptionProvider.notifier).setPatientName(val),
-            decoration: const InputDecoration(
-              labelText: 'Patient Full Name *',
-              hintText: 'e.g. Rajesh Kumar',
-              prefixIcon: Icon(LucideIcons.user, size: 18),
+            decoration: _minimalInputDecoration(
+              'Patient Full Name *',
+              LucideIcons.user,
             ),
           ),
           const SizedBox(height: 12),
 
-          // Date of Birth & Age Row with Dynamic Age Formatting
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Date of Birth Picker / Input
               Expanded(
                 flex: 3,
-                child: TextField(
-                  controller: _dobController,
-                  readOnly: true,
-                  onTap: () async {
-                    final now = DateTime.now();
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate:
-                          formState.dateOfBirth ??
-                          DateTime(
-                            now.year - (formState.age ?? 25),
-                            now.month,
-                            now.day,
-                          ),
-                      firstDate: DateTime(1900),
-                      lastDate: now,
-                    );
-                    if (picked != null) {
-                      ref
-                          .read(receptionProvider.notifier)
-                          .setDateOfBirth(picked);
-                      _dobController.text = DateFormat(
-                        'dd/MM/yyyy',
-                      ).format(picked);
-                      _ageController.text =
-                          (ref.read(receptionProvider).effectiveAgeInYears ?? 0)
-                              .toString();
-                      if (ref.read(receptionProvider).isPaediatric) {
-                        setState(() => _showVitals = true);
-                      }
-                    }
-                  },
-                  decoration: InputDecoration(
-                    labelText: 'Date of Birth (DOB)',
-                    hintText: 'DD/MM/YYYY',
-                    prefixIcon: const Icon(LucideIcons.calendarDays, size: 18),
-                    suffixIcon: IconButton(
-                      icon: const Icon(LucideIcons.calendar, size: 16),
-                      onPressed: () async {
-                        final now = DateTime.now();
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate:
-                              formState.dateOfBirth ??
-                              DateTime(
-                                now.year - (formState.age ?? 25),
-                                now.month,
-                                now.day,
-                              ),
-                          firstDate: DateTime(1900),
-                          lastDate: now,
-                        );
-                        if (picked != null) {
-                          ref
-                              .read(receptionProvider.notifier)
-                              .setDateOfBirth(picked);
-                          _dobController.text = DateFormat(
-                            'dd/MM/yyyy',
-                          ).format(picked);
-                          _ageController.text =
-                              (ref
-                                          .read(receptionProvider)
-                                          .effectiveAgeInYears ??
-                                      0)
-                                  .toString();
-                          if (ref.read(receptionProvider).isPaediatric) {
-                            setState(() => _showVitals = true);
-                          }
-                        }
-                      },
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-
-              // Age (Years) Input
-              Expanded(
-                flex: 2,
                 child: TextField(
                   controller: _ageController,
                   keyboardType: TextInputType.number,
@@ -660,237 +565,285 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
                   onChanged: (val) {
                     final age = int.tryParse(val);
                     ref.read(receptionProvider.notifier).setAge(age);
-                    final state = ref.read(receptionProvider);
-                    if (state.dateOfBirth != null) {
-                      _dobController.text = DateFormat(
-                        'dd/MM/yyyy',
-                      ).format(state.dateOfBirth!);
-                    }
-                    if (state.isPaediatric) {
+                    if (ref.read(receptionProvider).isPaediatric) {
                       setState(() => _showVitals = true);
                     }
                   },
-                  decoration: const InputDecoration(
-                    labelText: 'Age (Yrs) *',
-                    hintText: 'Yrs',
-                    prefixIcon: Icon(LucideIcons.userCheck, size: 18),
+                  decoration: _minimalInputDecoration(
+                    'Age *',
+                    LucideIcons.calendar,
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-
-              // Gender Selector Segment
+              const SizedBox(width: 12),
               Expanded(
-                flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Sex',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: ['M', 'F', 'O'].map((g) {
-                        final isSelected = formState.gender == g;
-                        return Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 1.5,
+                flex: 4,
+                child: Container(
+                  height: 52, // Match TextField height
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: ['M', 'F', 'O'].map((g) {
+                      final isSelected = formState.gender == g;
+                      return Expanded(
+                        child: GestureDetector(
+                          onTap: () =>
+                              ref.read(receptionProvider.notifier).setGender(g),
+                          child: Container(
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.05,
+                                        ),
+                                        blurRadius: 4,
+                                      ),
+                                    ]
+                                  : null,
                             ),
-                            child: InkWell(
-                              onTap: () => ref
-                                  .read(receptionProvider.notifier)
-                                  .setGender(g),
-                              borderRadius: BorderRadius.circular(8),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10,
-                                ),
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? AppTheme.primaryBlue
-                                      : Colors.white,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? AppTheme.primaryBlue
-                                        : AppTheme.borderLight,
-                                  ),
-                                ),
-                                child: Text(
-                                  g == 'M'
-                                      ? 'Male'
-                                      : (g == 'F' ? 'Female' : 'Other'),
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: isSelected
-                                        ? FontWeight.w700
-                                        : FontWeight.w500,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : AppTheme.textPrimary,
-                                  ),
-                                ),
+                            margin: const EdgeInsets.all(4),
+                            child: Text(
+                              g == 'M'
+                                  ? 'Male'
+                                  : (g == 'F' ? 'Female' : 'Other'),
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
+                                color: isSelected
+                                    ? AppTheme.textPrimary
+                                    : Colors.grey.shade600,
                               ),
                             ),
                           ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
             ],
           ),
+
           if (formState.dynamicAgeDisplay.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: formState.isPaediatric
-                    ? Colors.amber.shade50
-                    : AppTheme.primaryBlue.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0, left: 4.0),
+              child: Text(
+                'Clinical Age: ${formState.dynamicAgeDisplay}${formState.isPaediatric ? " (Weight Req.)" : ""}',
+                style: TextStyle(
+                  fontSize: 11,
                   color: formState.isPaediatric
-                      ? Colors.amber.shade400
-                      : AppTheme.primaryBlue.withValues(alpha: 0.2),
+                      ? Colors.amber.shade700
+                      : Colors.grey.shade600,
                 ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    formState.isPaediatric
-                        ? LucideIcons.baby
-                        : LucideIcons.clock,
-                    size: 14,
-                    color: formState.isPaediatric
-                        ? Colors.amber.shade900
-                        : AppTheme.primaryBlue,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Calculated Clinical Age: ${formState.dynamicAgeDisplay}${formState.isPaediatric ? " (Paediatric - Weight Required)" : ""}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: formState.isPaediatric
-                          ? Colors.amber.shade900
-                          : AppTheme.primaryBlue,
-                    ),
-                  ),
-                ],
               ),
             ),
           ],
           const SizedBox(height: 12),
 
-          // Reproductive Screen & Pregnancy (Inferred for reproductive age females)
+          TextField(
+            controller: _phoneController,
+            keyboardType: TextInputType.phone,
+            onChanged: (val) {
+              ref.read(receptionProvider.notifier).setPhone(val);
+              if (val.trim().length >= 4) _onSearchChanged(val);
+            },
+            decoration: _minimalInputDecoration(
+              'Phone Number',
+              LucideIcons.phone,
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Visit Type & Consultation Fee
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Container(
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade200),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            ref
+                                .read(receptionProvider.notifier)
+                                .setIsRevisit(false);
+                            _feeController.text =
+                                settings.consultationFee.toStringAsFixed(0);
+                          },
+                          child: Container(
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: !formState.isRevisit
+                                  ? Colors.white
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: !formState.isRevisit
+                                  ? [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.05,
+                                        ),
+                                        blurRadius: 4,
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            margin: const EdgeInsets.all(4),
+                            child: Text(
+                              'New Patient',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: !formState.isRevisit
+                                    ? FontWeight.w700
+                                    : FontWeight.w400,
+                                color: !formState.isRevisit
+                                    ? AppTheme.primaryBlue
+                                    : Colors.grey.shade600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            ref
+                                .read(receptionProvider.notifier)
+                                .setIsRevisit(true);
+                            _feeController.text =
+                                settings.revisitFee.toStringAsFixed(0);
+                          },
+                          child: Container(
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: formState.isRevisit
+                                  ? Colors.white
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: formState.isRevisit
+                                  ? [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.05,
+                                        ),
+                                        blurRadius: 4,
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            margin: const EdgeInsets.all(4),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  LucideIcons.repeat,
+                                  size: 12,
+                                  color: AppTheme.slaNormal,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Revisit',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: formState.isRevisit
+                                        ? FontWeight.w700
+                                        : FontWeight.w400,
+                                    color: formState.isRevisit
+                                        ? AppTheme.slaNormal
+                                        : Colors.grey.shade600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 2,
+                child: TextField(
+                  controller: _feeController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  onChanged: (val) {
+                    final fee = double.tryParse(val);
+                    ref
+                        .read(receptionProvider.notifier)
+                        .setConsultationFee(fee);
+                  },
+                  decoration: _minimalInputDecoration(
+                    'Fee (₹)',
+                    LucideIcons.indianRupee,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          // Clinical Info Section
+          const Text(
+            'CLINICAL PROFILE',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+              letterSpacing: 0.8,
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Reproductive Screen (Minimal)
           if (formState.gender == 'F' &&
               formState.age != null &&
               formState.age! >= 12 &&
               formState.age! <= 55) ...[
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.purple.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.purple.shade200),
+                color: Colors.purple.shade50.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        LucideIcons.heartHandshake,
-                        size: 16,
-                        color: Colors.purple,
+                  const Icon(LucideIcons.baby, size: 18, color: Colors.purple),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'Pregnancy Screen',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                       ),
-                      const SizedBox(width: 6),
-                      const Expanded(
-                        child: Text(
-                          'Reproductive & Pregnancy Screen',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.purple,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Checkbox(
-                        value: formState.isPregnant,
-                        activeColor: Colors.purple,
-                        onChanged: (val) {
-                          ref
-                              .read(receptionProvider.notifier)
-                              .setIsPregnant(val ?? false);
-                        },
-                      ),
-                      const Text(
-                        'Pregnant',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          icon: const Icon(LucideIcons.calendar, size: 14),
-                          label: Text(
-                            formState.lmp != null
-                                ? 'LMP: ${formState.lmp}'
-                                : 'Set Last Menstrual Period (LMP)',
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          onPressed: () async {
-                            final now = DateTime.now();
-                            final picked = await showDatePicker(
-                              context: context,
-                              initialDate: now.subtract(
-                                const Duration(days: 30),
-                              ),
-                              firstDate: now.subtract(
-                                const Duration(days: 300),
-                              ),
-                              lastDate: now,
-                            );
-                            if (picked != null) {
-                              final formatted = DateFormat(
-                                'dd MMM yyyy',
-                              ).format(picked);
-                              ref
-                                  .read(receptionProvider.notifier)
-                                  .setLmp(formatted);
-                            }
-                          },
-                        ),
-                      ),
-                      if (formState.lmp != null) ...[
-                        const SizedBox(width: 8),
-                        IconButton(
-                          icon: const Icon(
-                            LucideIcons.x,
-                            size: 16,
-                            color: Colors.grey,
-                          ),
-                          onPressed: () =>
-                              ref.read(receptionProvider.notifier).setLmp(null),
-                        ),
-                      ],
-                    ],
+                  Switch.adaptive(
+                    value: formState.isPregnant,
+                    activeTrackColor: Colors.purple,
+                    onChanged: (val) =>
+                        ref.read(receptionProvider.notifier).setIsPregnant(val),
                   ),
                 ],
               ),
@@ -898,267 +851,153 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
             const SizedBox(height: 12),
           ],
 
-          // Phone Field (Optional, auto-searches returning patients)
-          TextField(
-            controller: _phoneController,
-            keyboardType: TextInputType.phone,
-            onChanged: (val) {
-              ref.read(receptionProvider.notifier).setPhone(val);
-              if (val.trim().length >= 4) {
-                _onSearchChanged(val);
-              }
-            },
-            decoration: const InputDecoration(
-              labelText: 'Phone Number (Auto-lookup returning patients)',
-              hintText: '10-digit mobile number',
-              prefixIcon: Icon(LucideIcons.phone, size: 18),
+          // Comorbidities
+          const Text(
+            'Comorbidities',
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 8),
+          comorbiditiesAsync.when(
+            loading: () => const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
             ),
-          ),
-          const SizedBox(height: 14),
-
-          // Comorbidities Quick Selector
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Known Comorbidities (Optional)',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 6),
-              comorbiditiesAsync.when(
-                loading: () => const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8),
-                  child: SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-                error: (err, _) => Text(
-                  'Could not load comorbidities: $err',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppTheme.slaOverdue,
-                  ),
-                ),
-                data: (comorbidities) {
-                  return Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      ...comorbidities.map((c) {
-                        final isSelected = formState.selectedComorbIds.contains(
-                          c.id,
-                        );
-                        return ClinicalChip(
-                          label: comorbidityDisplayLabel(c),
-                          isSelected: isSelected,
-                          onTap: () => ref
-                              .read(receptionProvider.notifier)
-                              .toggleComorbidity(c.id),
-                          activeColor: AppTheme.primaryAccent,
-                        );
-                      }),
-                      InkWell(
-                        onTap: _showAddCustomComorbidityDialog,
-                        borderRadius: BorderRadius.circular(20),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: AppTheme.primaryAccent,
-                              style: BorderStyle.solid,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Icon(
-                                LucideIcons.plus,
-                                size: 12,
-                                color: AppTheme.primaryAccent,
-                              ),
-                              SizedBox(width: 4),
-                              Text(
-                                'Custom',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppTheme.primaryAccent,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-
-          // Allergies Quick Selector
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: const [
-                  Icon(
-                    LucideIcons.shieldAlert,
-                    size: 14,
-                    color: AppTheme.emergencyRed,
-                  ),
-                  SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      'Documented Drug Allergies (CRITICAL SAFETY)',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.emergencyRed,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Wrap(
+            error: (err, _) => Text(
+              'Error: $err',
+              style: const TextStyle(fontSize: 12, color: AppTheme.slaOverdue),
+            ),
+            data: (comorbidities) {
+              return Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  ...[
-                    'Penicillin',
-                    'Sulfa',
-                    'NSAIDs / Aspirin',
-                    'Paracetamol',
-                    'Cephalosporins',
-                    'Fluoroquinolones',
-                    'Macrolides',
-                  ].map((allergy) {
-                    final isSelected = formState.selectedAllergies.contains(
-                      allergy,
+                  ...comorbidities.map((c) {
+                    final isSelected = formState.selectedComorbIds.contains(
+                      c.id,
                     );
                     return ClinicalChip(
-                      label: allergy,
+                      label: comorbidityDisplayLabel(c),
                       isSelected: isSelected,
                       onTap: () => ref
                           .read(receptionProvider.notifier)
-                          .toggleAllergy(allergy),
-                      activeColor: AppTheme.emergencyRed,
+                          .toggleComorbidity(c.id),
+                      activeColor: AppTheme.textPrimary,
                     );
                   }),
-                  ...formState.selectedAllergies
-                      .where(
-                        (a) => ![
-                          'Penicillin',
-                          'Sulfa',
-                          'NSAIDs / Aspirin',
-                          'Paracetamol',
-                          'Cephalosporins',
-                          'Fluoroquinolones',
-                          'Macrolides',
-                        ].contains(a),
-                      )
-                      .map((customAllergy) {
-                        return ClinicalChip(
-                          label: customAllergy,
-                          isSelected: true,
-                          onTap: () => ref
-                              .read(receptionProvider.notifier)
-                              .toggleAllergy(customAllergy),
-                          activeColor: AppTheme.emergencyRed,
-                        );
-                      }),
-                  InkWell(
-                    onTap: _showAddCustomAllergyDialog,
-                    borderRadius: BorderRadius.circular(20),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppTheme.emergencyRed),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            LucideIcons.plus,
-                            size: 12,
-                            color: AppTheme.emergencyRed,
-                          ),
-                          const SizedBox(width: 4),
-                          const Text(
-                            '+ Allergy',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.emergencyRed,
-                            ),
-                          ),
-                        ],
-                      ),
+                  ActionChip(
+                    label: const Text(
+                      '+ Custom',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    onPressed: _showAddCustomComorbidityDialog,
+                    backgroundColor: Colors.grey.shade100,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide.none,
                     ),
                   ),
                 ],
+              );
+            },
+          ),
+          const SizedBox(height: 20),
+
+          // Allergies
+          const Text(
+            'Allergies',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: AppTheme.emergencyRed,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ...['Penicillin', 'Sulfa', 'NSAIDs / Aspirin', 'Paracetamol'].map(
+                (allergy) {
+                  final isSelected = formState.selectedAllergies.contains(
+                    allergy,
+                  );
+                  return ClinicalChip(
+                    label: allergy,
+                    isSelected: isSelected,
+                    onTap: () => ref
+                        .read(receptionProvider.notifier)
+                        .toggleAllergy(allergy),
+                    activeColor: AppTheme.emergencyRed,
+                  );
+                },
+              ),
+              ...formState.selectedAllergies
+                  .where(
+                    (a) => ![
+                      'Penicillin',
+                      'Sulfa',
+                      'NSAIDs / Aspirin',
+                      'Paracetamol',
+                    ].contains(a),
+                  )
+                  .map((customAllergy) {
+                    return ClinicalChip(
+                      label: customAllergy,
+                      isSelected: true,
+                      onTap: () => ref
+                          .read(receptionProvider.notifier)
+                          .toggleAllergy(customAllergy),
+                      activeColor: AppTheme.emergencyRed,
+                    );
+                  }),
+              ActionChip(
+                label: const Text(
+                  '+ Add',
+                  style: TextStyle(fontSize: 12, color: AppTheme.emergencyRed),
+                ),
+                onPressed: _showAddCustomAllergyDialog,
+                backgroundColor: AppTheme.emergencyRed.withValues(alpha: 0.1),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide.none,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 24),
 
-          // Quick Vitals Toggle Accordion
+          // Vitals Toggle (Minimal)
           InkWell(
             onTap: () => setState(() => _showVitals = !_showVitals),
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppTheme.borderLight),
-              ),
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     LucideIcons.activity,
-                    size: 18,
-                    color: AppTheme.primaryBlue,
+                    size: 16,
+                    color: _showVitals ? AppTheme.primaryBlue : Colors.grey,
                   ),
                   const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _showVitals
-                          ? 'Hide Entry Vitals'
-                          : '+ Entry Vitals (BP, Pulse, SpO2, RBS)',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.primaryBlue,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+                  Text(
+                    'Vitals (Optional)',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: _showVitals
+                          ? AppTheme.primaryBlue
+                          : AppTheme.textPrimary,
                     ),
                   ),
+                  const Spacer(),
                   Icon(
                     _showVitals
                         ? LucideIcons.chevronUp
                         : LucideIcons.chevronDown,
-                    size: 18,
-                    color: AppTheme.textSecondary,
+                    size: 16,
+                    color: Colors.grey,
                   ),
                 ],
               ),
@@ -1167,215 +1006,99 @@ class _QuickRegFormState extends ConsumerState<QuickRegForm> {
 
           if (_showVitals) ...[
             const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppTheme.borderLight),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _bpSysController,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            labelText: 'BP Sys',
-                            hintText: '120',
-                          ),
-                          onChanged: (val) => ref
-                              .read(receptionProvider.notifier)
-                              .setBpSys(int.tryParse(val)),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: _bpDiaController,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            labelText: 'BP Dia',
-                            hintText: '80',
-                          ),
-                          onChanged: (val) => ref
-                              .read(receptionProvider.notifier)
-                              .setBpDia(int.tryParse(val)),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: _pulseController,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            labelText: 'Pulse',
-                            hintText: '72',
-                          ),
-                          onChanged: (val) => ref
-                              .read(receptionProvider.notifier)
-                              .setPulse(int.tryParse(val)),
-                        ),
-                      ),
-                    ],
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _bpSysController,
+                    keyboardType: TextInputType.number,
+                    decoration: _minimalInputDecoration('BP Sys', null),
+                    onChanged: (val) => ref
+                        .read(receptionProvider.notifier)
+                        .setBpSys(int.tryParse(val)),
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _spo2Controller,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            labelText: 'SpO2 %',
-                            hintText: '98',
-                          ),
-                          onChanged: (val) => ref
-                              .read(receptionProvider.notifier)
-                              .setSpo2(int.tryParse(val)),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: _tempController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          decoration: InputDecoration(
-                            labelText: formState.vitals.tempIsCelsius
-                                ? 'Temp °C'
-                                : 'Temp °F',
-                            hintText: formState.vitals.tempIsCelsius
-                                ? '37.0'
-                                : '98.6',
-                            suffixIcon: InkWell(
-                              onTap: () {
-                                ref
-                                    .read(receptionProvider.notifier)
-                                    .setTempIsCelsius(
-                                      !formState.vitals.tempIsCelsius,
-                                    );
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 8,
-                                ),
-                                child: Text(
-                                  formState.vitals.tempIsCelsius ? '°C' : '°F',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.primaryBlue,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          onChanged: (val) => ref
-                              .read(receptionProvider.notifier)
-                              .setTemp(double.tryParse(val)),
-                        ),
-                      ),
-                    ],
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: _bpDiaController,
+                    keyboardType: TextInputType.number,
+                    decoration: _minimalInputDecoration('BP Dia', null),
+                    onChanged: (val) => ref
+                        .read(receptionProvider.notifier)
+                        .setBpDia(int.tryParse(val)),
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _weightController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          decoration: InputDecoration(
-                            labelText: formState.isPaediatric
-                                ? 'Wt (kg) * (Mandatory)'
-                                : 'Wt (kg)',
-                            hintText: 'e.g. 15',
-                            prefixIcon: formState.isPaediatric
-                                ? const Icon(
-                                    LucideIcons.alertTriangle,
-                                    size: 16,
-                                    color: AppTheme.slaOverdue,
-                                  )
-                                : null,
-                            enabledBorder:
-                                formState.isPaediatric &&
-                                    (formState.vitals.weight == null ||
-                                        formState.vitals.weight! <= 0)
-                                ? OutlineInputBorder(
-                                    borderSide: const BorderSide(
-                                      color: AppTheme.slaOverdue,
-                                      width: 1.5,
-                                    ),
-                                    borderRadius: BorderRadius.circular(8),
-                                  )
-                                : null,
-                          ),
-                          onChanged: (val) => ref
-                              .read(receptionProvider.notifier)
-                              .setWeight(double.tryParse(val)),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: _rbsController,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            labelText: 'RBS mg/dL',
-                            hintText: '110',
-                          ),
-                          onChanged: (val) => ref
-                              .read(receptionProvider.notifier)
-                              .setRbs(int.tryParse(val)),
-                        ),
-                      ),
-                    ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _pulseController,
+                    keyboardType: TextInputType.number,
+                    decoration: _minimalInputDecoration('Pulse', null),
+                    onChanged: (val) => ref
+                        .read(receptionProvider.notifier)
+                        .setPulse(int.tryParse(val)),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: _weightController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: _minimalInputDecoration(
+                      formState.isPaediatric ? 'Wt (kg) *' : 'Wt (kg)',
+                      null,
+                    ),
+                    onChanged: (val) => ref
+                        .read(receptionProvider.notifier)
+                        .setWeight(double.tryParse(val)),
+                  ),
+                ),
+              ],
             ),
           ],
-          const SizedBox(height: 20),
+          const SizedBox(height: 32),
 
-          // Primary CTA: Issue Token
+          // Primary CTA (Flat and Soft)
           SizedBox(
-            height: 52,
-            child: ElevatedButton.icon(
+            height: 56,
+            child: ElevatedButton(
               onPressed: formState.isSubmitting ? null : _handleRegister,
-              icon: formState.isSubmitting
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: AppTheme
+                    .textPrimary, // Changed to a sleek dark color or use standard primary
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: formState.isSubmitting
                   ? const SizedBox(
-                      width: 20,
                       height: 20,
+                      width: 20,
                       child: CircularProgressIndicator(
                         color: Colors.white,
                         strokeWidth: 2,
                       ),
                     )
-                  : const Icon(LucideIcons.ticket, size: 20),
-              label: Text(
-                formState.isSubmitting
-                    ? 'Issuing Token...'
-                    : 'Issue Token #${formState.nextTokenNumber}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryBlue,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                elevation: 1,
-              ),
+                  : Text(
+                      'Issue Token #${formState.nextTokenNumber}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
             ),
           ),
+          const SizedBox(height: 20),
         ],
       ),
     );

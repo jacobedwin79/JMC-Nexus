@@ -192,6 +192,9 @@ class RealtimeQueueService extends Notifier<SyncState> {
               final rxJson = record['compiled_prescription_json'] as String?;
               final snapshotJson = record['encounter_snapshot_json'] as String?;
               final overrideReason = record['override_reason'] as String?;
+              final consultationFee =
+                  (record['consultation_fee'] as num?)?.toDouble() ?? 0.0;
+              final isRevisit = record['is_revisit'] as bool? ?? false;
 
               // Upsert into local SQLite Drift database
               await _db
@@ -218,6 +221,8 @@ class RealtimeQueueService extends Notifier<SyncState> {
                       compiledPrescriptionJson: Value(rxJson),
                       encounterSnapshotJson: Value(snapshotJson),
                       overrideReason: Value(overrideReason),
+                      consultationFee: Value(consultationFee),
+                      isRevisit: Value(isRevisit),
                       updatedAt: Value(remoteUpdatedAt),
                       version: Value(remoteVersion),
                     ),
@@ -254,6 +259,8 @@ class RealtimeQueueService extends Notifier<SyncState> {
     String? compiledPrescriptionJson,
     String? encounterSnapshotJson,
     String? overrideReason,
+    double consultationFee = 0.0,
+    bool isRevisit = false,
     int version = 1,
     DateTime? deletedAt,
   }) async {
@@ -284,6 +291,8 @@ class RealtimeQueueService extends Notifier<SyncState> {
         'compiled_prescription_json': compiledPrescriptionJson,
         'encounter_snapshot_json': encounterSnapshotJson,
         'override_reason': overrideReason,
+        'consultation_fee': consultationFee,
+        'is_revisit': isRevisit,
         'updated_at': now.toIso8601String(),
         'version': version,
         'deleted_at': deletedAt?.toUtc().toIso8601String(),

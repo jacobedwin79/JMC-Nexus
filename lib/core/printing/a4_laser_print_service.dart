@@ -3,27 +3,33 @@ import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import '../config/clinic_settings.dart';
 import '../../features/encounter/domain/clinical_models.dart';
 import '../../features/encounter/domain/encounter_state.dart';
 
 class A4LaserPrintService {
   static const double letterheadTopMarginMm =
-      45.0; // 45mm blank margin for physical letterheads
+      45.0; // Default blank margin for physical letterheads
   static const double standardMarginMm = 10.0;
 
   /// Generates the crisp vector A4 PDF bytes
-  static Future<Uint8List> buildA4Prescription(EncounterState encounter) async {
+  static Future<Uint8List> buildA4Prescription(
+    EncounterState encounter, [
+    ClinicSettings? settings,
+  ]) async {
+    final s = settings ?? const ClinicSettings();
     final pdf = pw.Document(
       title:
           'Prescription - ${encounter.activePatient?.patientName ?? "Patient"}',
-      author: 'JMC Nexus Health System',
+      author: s.clinicName,
     );
 
     final isLetterhead = encounter.isLetterheadMode;
+    final topMarginMm = isLetterhead
+        ? s.letterheadTopMarginMm
+        : standardMarginMm;
     final pageFormat = PdfPageFormat.a4.copyWith(
-      marginTop: isLetterhead
-          ? letterheadTopMarginMm * PdfPageFormat.mm
-          : standardMarginMm * PdfPageFormat.mm,
+      marginTop: topMarginMm * PdfPageFormat.mm,
       marginBottom: standardMarginMm * PdfPageFormat.mm,
       marginLeft: standardMarginMm * PdfPageFormat.mm,
       marginRight: standardMarginMm * PdfPageFormat.mm,
@@ -36,7 +42,6 @@ class A4LaserPrintService {
         : '';
     final now = DateTime.now();
     final dateFormat = DateFormat('dd MMM yyyy');
-    final timeFormat = DateFormat('h:mm a');
 
     final vitals = patient != null
         ? PatientVitals.fromJson(patient.vitals)
@@ -87,7 +92,7 @@ class A4LaserPrintService {
                         crossAxisAlignment: pw.CrossAxisAlignment.start,
                         children: [
                           pw.Text(
-                            'JMC CLINICAL HEALTHCARE & OPD',
+                            s.clinicName,
                             style: pw.TextStyle(
                               fontSize: 16,
                               fontWeight: pw.FontWeight.bold,
@@ -96,14 +101,14 @@ class A4LaserPrintService {
                           ),
                           pw.SizedBox(height: 2),
                           pw.Text(
-                            'Comprehensive Outpatient & Emergency Clinical Center',
+                            s.clinicSubtitle,
                             style: const pw.TextStyle(
                               fontSize: 9,
                               color: PdfColors.grey700,
                             ),
                           ),
                           pw.Text(
-                            'Phone: +91 98765 43210 | Email: care@jmchealth.org',
+                            s.clinicContact,
                             style: const pw.TextStyle(
                               fontSize: 8,
                               color: PdfColors.grey600,
@@ -115,7 +120,7 @@ class A4LaserPrintService {
                         crossAxisAlignment: pw.CrossAxisAlignment.end,
                         children: [
                           pw.Text(
-                            'Dr. Rajesh Varma, MD',
+                            s.doctorName,
                             style: pw.TextStyle(
                               fontSize: 13,
                               fontWeight: pw.FontWeight.bold,
@@ -123,14 +128,14 @@ class A4LaserPrintService {
                             ),
                           ),
                           pw.Text(
-                            'MBBS, MD (General Medicine)',
+                            s.doctorQualifications,
                             style: const pw.TextStyle(
                               fontSize: 9,
                               color: PdfColors.grey800,
                             ),
                           ),
                           pw.Text(
-                            'Reg. No: KMC-49281',
+                            s.registrationNumber,
                             style: pw.TextStyle(
                               fontSize: 8,
                               fontWeight: pw.FontWeight.bold,
@@ -178,10 +183,6 @@ class A4LaserPrintService {
                     ),
                     pw.Text(
                       'Date: ${dateFormat.format(now)}',
-                      style: const pw.TextStyle(fontSize: 9),
-                    ),
-                    pw.Text(
-                      'Seen: ${timeFormat.format(now)}',
                       style: const pw.TextStyle(fontSize: 9),
                     ),
                   ],
@@ -653,8 +654,11 @@ class A4LaserPrintService {
   }
 
   /// Sends document to system print spooler for Wi-Fi / Bluetooth / Network Laser Printer
-  static Future<void> printA4Prescription(EncounterState encounter) async {
-    final pdfBytes = await buildA4Prescription(encounter);
+  static Future<void> printA4Prescription(
+    EncounterState encounter, [
+    ClinicSettings? settings,
+  ]) async {
+    final pdfBytes = await buildA4Prescription(encounter, settings);
     await Printing.layoutPdf(
       onLayout: (PdfPageFormat format) async => pdfBytes,
       name: 'Prescription_${encounter.activePatient?.tokenNumber ?? "OPD"}',

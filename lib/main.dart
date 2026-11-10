@@ -4,12 +4,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/config/clinic_settings.dart';
 import 'core/database/database_provider.dart';
 import 'core/theme/app_theme.dart';
+import 'features/admin/presentation/admin_panel_screen.dart';
 import 'features/encounter/presentation/doctor_workspace_screen.dart';
 import 'features/reception/presentation/reception_screen.dart';
 
 enum AppRole {
   reception,
   doctor,
+  admin,
 }
 
 class ActiveRoleNotifier extends Notifier<AppRole> {
@@ -70,22 +72,46 @@ class _JmcNexusAppState extends ConsumerState<JmcNexusApp> {
   Widget build(BuildContext context) {
     final activeRole = ref.watch(activeRoleProvider);
 
+    Widget homeWidget;
+    switch (activeRole) {
+      case AppRole.reception:
+        homeWidget = ReceptionScreen(
+          onSwitchToDoctor: () {
+            ref.read(activeRoleProvider.notifier).setRole(AppRole.doctor);
+          },
+          onSwitchToAdmin: () {
+            ref.read(activeRoleProvider.notifier).setRole(AppRole.admin);
+          },
+        );
+        break;
+      case AppRole.doctor:
+        homeWidget = DoctorWorkspaceScreen(
+          onSwitchToReception: () {
+            ref.read(activeRoleProvider.notifier).setRole(AppRole.reception);
+          },
+          onSwitchToAdmin: () {
+            ref.read(activeRoleProvider.notifier).setRole(AppRole.admin);
+          },
+        );
+        break;
+      case AppRole.admin:
+        homeWidget = AdminPanelScreen(
+          onSwitchToReception: () {
+            ref.read(activeRoleProvider.notifier).setRole(AppRole.reception);
+          },
+          onSwitchToDoctor: () {
+            ref.read(activeRoleProvider.notifier).setRole(AppRole.doctor);
+          },
+        );
+        break;
+    }
+
     return MaterialApp(
       title: 'JMC Nexus - Clinical Rx & Queue',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       home: _isInitialized
-          ? (activeRole == AppRole.reception
-              ? ReceptionScreen(
-                  onSwitchToDoctor: () {
-                    ref.read(activeRoleProvider.notifier).setRole(AppRole.doctor);
-                  },
-                )
-              : DoctorWorkspaceScreen(
-                  onSwitchToReception: () {
-                    ref.read(activeRoleProvider.notifier).setRole(AppRole.reception);
-                  },
-                ))
+          ? homeWidget
           : const Scaffold(
               body: Center(
                 child: CircularProgressIndicator(),

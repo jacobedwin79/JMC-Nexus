@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:printing/printing.dart';
+import '../../../core/config/clinic_settings.dart';
 import '../../../core/printing/a4_laser_print_service.dart';
 import '../../../core/printing/medical_certificate_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../catalog_manager/presentation/catalog_manager_screen.dart';
 import '../application/encounter_notifier.dart';
 import '../application/queue_monitor_notifier.dart';
 import '../domain/clinical_models.dart';
@@ -21,8 +23,13 @@ import 'widgets/prescription_section.dart';
 
 class DoctorWorkspaceScreen extends ConsumerStatefulWidget {
   final VoidCallback onSwitchToReception;
+  final VoidCallback? onSwitchToAdmin;
 
-  const DoctorWorkspaceScreen({super.key, required this.onSwitchToReception});
+  const DoctorWorkspaceScreen({
+    super.key,
+    required this.onSwitchToReception,
+    this.onSwitchToAdmin,
+  });
 
   @override
   ConsumerState<DoctorWorkspaceScreen> createState() =>
@@ -214,10 +221,12 @@ class _DoctorWorkspaceScreenState extends ConsumerState<DoctorWorkspaceScreen> {
                   trailing: const Icon(LucideIcons.arrowRight, size: 16),
                   onTap: () async {
                     Navigator.pop(context);
+                    final settings = ref.read(clinicSettingsProvider);
                     final pdfBytes =
                         await MedicalCertificateService.generateSickLeaveCertificate(
                           encounter: encounter,
                           leaveDays: encounter.followUpDays ?? 3,
+                          settings: settings,
                         );
                     await Printing.layoutPdf(
                       onLayout: (_) => pdfBytes,
@@ -252,9 +261,11 @@ class _DoctorWorkspaceScreenState extends ConsumerState<DoctorWorkspaceScreen> {
                   trailing: const Icon(LucideIcons.arrowRight, size: 16),
                   onTap: () async {
                     Navigator.pop(context);
+                    final settings = ref.read(clinicSettingsProvider);
                     final pdfBytes =
                         await MedicalCertificateService.generateFitnessCertificate(
                           encounter: encounter,
+                          settings: settings,
                         );
                     await Printing.layoutPdf(
                       onLayout: (_) => pdfBytes,
@@ -334,6 +345,7 @@ class _DoctorWorkspaceScreenState extends ConsumerState<DoctorWorkspaceScreen> {
                     );
 
                     if (proceed == true) {
+                      final settings = ref.read(clinicSettingsProvider);
                       final pdfBytes =
                           await MedicalCertificateService.generateReferralLetter(
                             encounter: encounter,
@@ -341,6 +353,7 @@ class _DoctorWorkspaceScreenState extends ConsumerState<DoctorWorkspaceScreen> {
                                 .text
                                 .trim(),
                             reasonForReferral: reasonController.text.trim(),
+                            settings: settings,
                           );
                       await Printing.layoutPdf(
                         onLayout: (_) => pdfBytes,
@@ -411,7 +424,8 @@ class _DoctorWorkspaceScreenState extends ConsumerState<DoctorWorkspaceScreen> {
 
     if (triggerPrint) {
       try {
-        await A4LaserPrintService.printA4Prescription(encounter);
+        final settings = ref.read(clinicSettingsProvider);
+        await A4LaserPrintService.printA4Prescription(encounter, settings);
       } catch (e) {
         debugPrint('Print dispatch: $e');
       }
@@ -461,26 +475,61 @@ class _DoctorWorkspaceScreenState extends ConsumerState<DoctorWorkspaceScreen> {
               ),
             ),
             const SizedBox(width: 10),
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'JMC Nexus • Doctor Workspace',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-                ),
-                Text(
-                  'Zero-Keyboard Clinical Decision Canvas',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppTheme.textSecondary,
-                    fontWeight: FontWeight.normal,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    ref.watch(clinicSettingsProvider).clinicName ==
+                            'JMC CLINICAL HEALTHCARE & OPD'
+                        ? 'JMC Nexus • Doctor Workspace'
+                        : '${ref.watch(clinicSettingsProvider).clinicName} • Doctor',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                  const Text(
+                    'Zero-Keyboard Clinical Decision Canvas',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppTheme.textSecondary,
+                      fontWeight: FontWeight.normal,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
         actions: [
+          // Clinic Settings & Catalogs
+          TextButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CatalogManagerScreen()),
+              );
+            },
+            icon: const Icon(LucideIcons.settings, size: 16),
+            label: const Text('Settings'),
+            style: TextButton.styleFrom(foregroundColor: AppTheme.textPrimary),
+          ),
+          const SizedBox(width: 4),
+
+          // Switch to Admin
+          if (widget.onSwitchToAdmin != null) ...[
+            TextButton.icon(
+              onPressed: widget.onSwitchToAdmin,
+              icon: const Icon(LucideIcons.shieldCheck, size: 16),
+              label: const Text('Admin Panel'),
+              style: TextButton.styleFrom(foregroundColor: AppTheme.textPrimary),
+            ),
+            const SizedBox(width: 4),
+          ],
+
           // Switch to Reception
           TextButton.icon(
             onPressed: widget.onSwitchToReception,
@@ -605,44 +654,56 @@ class _DoctorWorkspaceScreenState extends ConsumerState<DoctorWorkspaceScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // Row 1: Toggles & Clinical Summary
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        Wrap(
+                          alignment: WrapAlignment.spaceBetween,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 12,
+                          runSpacing: 4,
                           children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
+                            Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              spacing: 12,
+                              runSpacing: 4,
                               children: [
-                                Checkbox(
-                                  value: encounter.isLetterheadMode,
-                                  onChanged: (_) {
-                                    ref
-                                        .read(encounterProvider.notifier)
-                                        .toggleLetterheadMode();
-                                  },
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Checkbox(
+                                      value: encounter.isLetterheadMode,
+                                      onChanged: (_) {
+                                        ref
+                                            .read(encounterProvider.notifier)
+                                            .toggleLetterheadMode();
+                                      },
+                                    ),
+                                    const Text(
+                                      'Pre-printed Letterhead',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const Text(
-                                  'Pre-printed Letterhead',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-
-                                // Privacy Toggle (print_diagnosis)
-                                Checkbox(
-                                  value: encounter.printDiagnosis,
-                                  onChanged: (val) {
-                                    ref
-                                        .read(encounterProvider.notifier)
-                                        .setPrintDiagnosis(val ?? true);
-                                  },
-                                ),
-                                const Text(
-                                  'Print Diagnosis',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Checkbox(
+                                      value: encounter.printDiagnosis,
+                                      onChanged: (val) {
+                                        ref
+                                            .read(encounterProvider.notifier)
+                                            .setPrintDiagnosis(val ?? true);
+                                      },
+                                    ),
+                                    const Text(
+                                      'Print Diagnosis',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -659,8 +720,11 @@ class _DoctorWorkspaceScreenState extends ConsumerState<DoctorWorkspaceScreen> {
                         const SizedBox(height: 6),
 
                         // Row 2: Action CTAs
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+                        Wrap(
+                          alignment: WrapAlignment.end,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          runSpacing: 6,
                           children: [
                             OutlinedButton.icon(
                               onPressed: () => _showOutputTemplatesDialog(
@@ -682,7 +746,6 @@ class _DoctorWorkspaceScreenState extends ConsumerState<DoctorWorkspaceScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 8),
                             OutlinedButton.icon(
                               onPressed: () {
                                 A4LivePreviewPane.showPreviewDialog(
@@ -703,7 +766,6 @@ class _DoctorWorkspaceScreenState extends ConsumerState<DoctorWorkspaceScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 8),
                             OutlinedButton.icon(
                               onPressed: () {
                                 ref
@@ -722,7 +784,6 @@ class _DoctorWorkspaceScreenState extends ConsumerState<DoctorWorkspaceScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 10),
                             ElevatedButton.icon(
                               onPressed: () =>
                                   _handleCompleteAndAdvance(triggerPrint: true),

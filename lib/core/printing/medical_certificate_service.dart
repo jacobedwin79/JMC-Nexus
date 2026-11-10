@@ -14,10 +14,12 @@ class MedicalCertificateService {
     required int leaveDays,
     DateTime? startDate,
     String? diagnosisOverride,
+    ClinicSettings? settings,
   }) async {
+    final s = settings ?? const ClinicSettings();
     final pdf = pw.Document(
       title: 'Medical Certificate - Sick Leave',
-      author: 'JMC Nexus Health System',
+      author: s.clinicName,
     );
 
     final patient = encounter.activePatient;
@@ -61,7 +63,7 @@ class MedicalCertificateService {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.stretch,
             children: [
-              _buildClinicHeader(),
+              _buildClinicHeader(s),
               pw.SizedBox(height: 20),
               pw.Center(
                 child: pw.Container(
@@ -138,7 +140,7 @@ class MedicalCertificateService {
                 style: const pw.TextStyle(fontSize: 11, lineSpacing: 4),
               ),
               pw.Spacer(),
-              _buildDoctorSignatureBlock(now),
+              _buildDoctorSignatureBlock(now, s),
             ],
           );
         },
@@ -153,10 +155,12 @@ class MedicalCertificateService {
     required EncounterState encounter,
     DateTime? effectiveDate,
     String? purpose,
+    ClinicSettings? settings,
   }) async {
+    final s = settings ?? const ClinicSettings();
     final pdf = pw.Document(
       title: 'Medical Certificate - Physical Fitness',
-      author: 'JMC Nexus Health System',
+      author: s.clinicName,
     );
 
     final patient = encounter.activePatient;
@@ -194,7 +198,7 @@ class MedicalCertificateService {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.stretch,
             children: [
-              _buildClinicHeader(),
+              _buildClinicHeader(s),
               pw.SizedBox(height: 20),
               pw.Center(
                 child: pw.Container(
@@ -295,7 +299,7 @@ class MedicalCertificateService {
                 style: const pw.TextStyle(fontSize: 11, lineSpacing: 4),
               ),
               pw.Spacer(),
-              _buildDoctorSignatureBlock(now),
+              _buildDoctorSignatureBlock(now, s),
             ],
           );
         },
@@ -310,10 +314,12 @@ class MedicalCertificateService {
     required EncounterState encounter,
     required String referredToSpecialistOrHospital,
     required String reasonForReferral,
+    ClinicSettings? settings,
   }) async {
+    final s = settings ?? const ClinicSettings();
     final pdf = pw.Document(
       title: 'Clinical Referral Letter',
-      author: 'JMC Nexus Health System',
+      author: s.clinicName,
     );
 
     final patient = encounter.activePatient;
@@ -348,7 +354,7 @@ class MedicalCertificateService {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.stretch,
             children: [
-              _buildClinicHeader(),
+              _buildClinicHeader(s),
               pw.SizedBox(height: 16),
               pw.Center(
                 child: pw.Container(
@@ -527,7 +533,7 @@ class MedicalCertificateService {
                 ),
               ),
               pw.Spacer(),
-              _buildDoctorSignatureBlock(now),
+              _buildDoctorSignatureBlock(now, s),
             ],
           );
         },
@@ -537,7 +543,8 @@ class MedicalCertificateService {
     return pdf.save();
   }
 
-  static pw.Widget _buildClinicHeader() {
+  static pw.Widget _buildClinicHeader([ClinicSettings? settings]) {
+    final s = settings ?? const ClinicSettings();
     return pw.Container(
       padding: const pw.EdgeInsets.only(bottom: 8),
       decoration: const pw.BoxDecoration(
@@ -552,7 +559,7 @@ class MedicalCertificateService {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Text(
-                'JMC CLINICAL HEALTHCARE & OPD',
+                s.clinicName,
                 style: pw.TextStyle(
                   fontSize: 16,
                   fontWeight: pw.FontWeight.bold,
@@ -561,14 +568,14 @@ class MedicalCertificateService {
               ),
               pw.SizedBox(height: 2),
               pw.Text(
-                'Comprehensive Outpatient & Emergency Clinical Center',
+                s.clinicSubtitle,
                 style: const pw.TextStyle(
                   fontSize: 9,
                   color: PdfColors.grey700,
                 ),
               ),
               pw.Text(
-                'Phone: +91 98765 43210 | Email: care@jmchealth.org',
+                s.clinicContact,
                 style: const pw.TextStyle(
                   fontSize: 8,
                   color: PdfColors.grey600,
@@ -580,7 +587,7 @@ class MedicalCertificateService {
             crossAxisAlignment: pw.CrossAxisAlignment.end,
             children: [
               pw.Text(
-                'Dr. Rajesh Varma, MD',
+                s.doctorName,
                 style: pw.TextStyle(
                   fontSize: 13,
                   fontWeight: pw.FontWeight.bold,
@@ -588,14 +595,14 @@ class MedicalCertificateService {
                 ),
               ),
               pw.Text(
-                'MBBS, MD (General Medicine)',
+                s.doctorQualifications,
                 style: const pw.TextStyle(
                   fontSize: 9,
                   color: PdfColors.grey800,
                 ),
               ),
               pw.Text(
-                'Reg. No: KMC-49281',
+                s.registrationNumber,
                 style: pw.TextStyle(
                   fontSize: 8,
                   fontWeight: pw.FontWeight.bold,
@@ -626,7 +633,11 @@ class MedicalCertificateService {
     );
   }
 
-  static pw.Widget _buildDoctorSignatureBlock(DateTime date) {
+  static pw.Widget _buildDoctorSignatureBlock(
+    DateTime date, [
+    ClinicSettings? settings,
+  ]) {
+    final s = settings ?? const ClinicSettings();
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       crossAxisAlignment: pw.CrossAxisAlignment.end,
@@ -639,7 +650,7 @@ class MedicalCertificateService {
               style: const pw.TextStyle(fontSize: 9),
             ),
             pw.Text(
-              'Place: JMC Clinic, Kerala',
+              'Place: ${s.clinicName}',
               style: const pw.TextStyle(fontSize: 9),
             ),
           ],
@@ -659,14 +670,14 @@ class MedicalCertificateService {
                 crossAxisAlignment: pw.CrossAxisAlignment.end,
                 children: [
                   pw.Text(
-                    'Dr. Rajesh Varma, MD',
+                    s.doctorName,
                     style: pw.TextStyle(
                       fontSize: 10,
                       fontWeight: pw.FontWeight.bold,
                     ),
                   ),
                   pw.Text(
-                    'Reg. No: KMC-49281',
+                    s.registrationNumber,
                     style: const pw.TextStyle(
                       fontSize: 8,
                       color: PdfColors.grey700,

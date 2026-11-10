@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/config/clinic_settings.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../catalog_manager/presentation/catalog_manager_screen.dart';
 import '../../application/encounter_notifier.dart';
 import '../../application/gemini_scribe_notifier.dart';
 import '../../domain/gemini_scribe_models.dart';
@@ -137,23 +138,92 @@ class _GeminiVoiceScribeBarState extends ConsumerState<GeminiVoiceScribeBar>
               ),
               const Spacer(),
               if (!settings.hasGeminiApiKey)
-                const Row(
-                  children: [
-                    Icon(
-                      LucideIcons.alertCircle,
-                      size: 13,
-                      color: AppTheme.slaOverdue,
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const CatalogManagerScreen(),
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(6),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
                     ),
-                    SizedBox(width: 4),
-                    Text(
-                      'API Key needed in Settings',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: AppTheme.slaOverdue,
-                        fontWeight: FontWeight.w600,
+                    decoration: BoxDecoration(
+                      color: AppTheme.slaOverdue.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: AppTheme.slaOverdue.withValues(alpha: 0.3),
                       ),
                     ),
-                  ],
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          LucideIcons.settings,
+                          size: 12,
+                          color: AppTheme.slaOverdue,
+                        ),
+                        SizedBox(width: 4),
+                        Text(
+                          'Configure API Key in Settings',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppTheme.slaOverdue,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const CatalogManagerScreen(),
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(6),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: Colors.grey.shade300,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          LucideIcons.cpu,
+                          size: 12,
+                          color: AppTheme.textSecondary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          settings.geminiModel,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppTheme.textSecondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
             ],
           ),
@@ -356,25 +426,76 @@ class _GeminiVoiceScribeBarState extends ConsumerState<GeminiVoiceScribeBar>
           if (scribeState.errorMessage != null) ...[
             const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
                 color: AppTheme.slaOverdue.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: AppTheme.slaOverdue.withValues(alpha: 0.2),
+                ),
               ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
-                    LucideIcons.alertCircle,
-                    color: AppTheme.slaOverdue,
-                    size: 14,
+                  const Padding(
+                    padding: EdgeInsets.only(top: 2),
+                    child: Icon(
+                      LucideIcons.alertCircle,
+                      color: AppTheme.slaOverdue,
+                      size: 14,
+                    ),
                   ),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       scribeState.errorMessage!,
                       style: const TextStyle(
                         color: AppTheme.slaOverdue,
                         fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CatalogManagerScreen(),
+                        ),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(4),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: AppTheme.slaOverdue.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            LucideIcons.settings,
+                            size: 11,
+                            color: AppTheme.slaOverdue,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'Settings',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.slaOverdue,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

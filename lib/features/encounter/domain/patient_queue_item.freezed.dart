@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PatientQueueItem {
 
- String get id; String? get patientId; int get tokenNumber; String get patientName; int get age; DateTime? get dateOfBirth; String get gender; String? get phone; Map<String, dynamic> get vitals; List<String> get initialComorbIds; List<String> get allergies; String? get lmp; bool get isPregnant; String get status; DateTime get entryTime; DateTime? get consultationStartTime; DateTime? get completionTime; String? get compiledPrescriptionJson; String? get overrideReason;
+ String get id; String? get patientId; int get tokenNumber; String get patientName; int get age; DateTime? get dateOfBirth; String get gender; String? get phone; Map<String, dynamic> get vitals; List<String> get initialComorbIds; List<String> get allergies; String? get lmp; bool get isPregnant; String get status; DateTime get entryTime; DateTime? get consultationStartTime; DateTime? get completionTime; String? get compiledPrescriptionJson; String? get overrideReason; double get consultationFee; bool get isRevisit;
 /// Create a copy of PatientQueueItem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $PatientQueueItemCopyWith<PatientQueueItem> get copyWith => _$PatientQueueItemCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PatientQueueItem&&(identical(other.id, id) || other.id == id)&&(identical(other.patientId, patientId) || other.patientId == patientId)&&(identical(other.tokenNumber, tokenNumber) || other.tokenNumber == tokenNumber)&&(identical(other.patientName, patientName) || other.patientName == patientName)&&(identical(other.age, age) || other.age == age)&&(identical(other.dateOfBirth, dateOfBirth) || other.dateOfBirth == dateOfBirth)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.phone, phone) || other.phone == phone)&&const DeepCollectionEquality().equals(other.vitals, vitals)&&const DeepCollectionEquality().equals(other.initialComorbIds, initialComorbIds)&&const DeepCollectionEquality().equals(other.allergies, allergies)&&(identical(other.lmp, lmp) || other.lmp == lmp)&&(identical(other.isPregnant, isPregnant) || other.isPregnant == isPregnant)&&(identical(other.status, status) || other.status == status)&&(identical(other.entryTime, entryTime) || other.entryTime == entryTime)&&(identical(other.consultationStartTime, consultationStartTime) || other.consultationStartTime == consultationStartTime)&&(identical(other.completionTime, completionTime) || other.completionTime == completionTime)&&(identical(other.compiledPrescriptionJson, compiledPrescriptionJson) || other.compiledPrescriptionJson == compiledPrescriptionJson)&&(identical(other.overrideReason, overrideReason) || other.overrideReason == overrideReason));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PatientQueueItem&&(identical(other.id, id) || other.id == id)&&(identical(other.patientId, patientId) || other.patientId == patientId)&&(identical(other.tokenNumber, tokenNumber) || other.tokenNumber == tokenNumber)&&(identical(other.patientName, patientName) || other.patientName == patientName)&&(identical(other.age, age) || other.age == age)&&(identical(other.dateOfBirth, dateOfBirth) || other.dateOfBirth == dateOfBirth)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.phone, phone) || other.phone == phone)&&const DeepCollectionEquality().equals(other.vitals, vitals)&&const DeepCollectionEquality().equals(other.initialComorbIds, initialComorbIds)&&const DeepCollectionEquality().equals(other.allergies, allergies)&&(identical(other.lmp, lmp) || other.lmp == lmp)&&(identical(other.isPregnant, isPregnant) || other.isPregnant == isPregnant)&&(identical(other.status, status) || other.status == status)&&(identical(other.entryTime, entryTime) || other.entryTime == entryTime)&&(identical(other.consultationStartTime, consultationStartTime) || other.consultationStartTime == consultationStartTime)&&(identical(other.completionTime, completionTime) || other.completionTime == completionTime)&&(identical(other.compiledPrescriptionJson, compiledPrescriptionJson) || other.compiledPrescriptionJson == compiledPrescriptionJson)&&(identical(other.overrideReason, overrideReason) || other.overrideReason == overrideReason)&&(identical(other.consultationFee, consultationFee) || other.consultationFee == consultationFee)&&(identical(other.isRevisit, isRevisit) || other.isRevisit == isRevisit));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,patientId,tokenNumber,patientName,age,dateOfBirth,gender,phone,const DeepCollectionEquality().hash(vitals),const DeepCollectionEquality().hash(initialComorbIds),const DeepCollectionEquality().hash(allergies),lmp,isPregnant,status,entryTime,consultationStartTime,completionTime,compiledPrescriptionJson,overrideReason]);
+int get hashCode => Object.hashAll([runtimeType,id,patientId,tokenNumber,patientName,age,dateOfBirth,gender,phone,const DeepCollectionEquality().hash(vitals),const DeepCollectionEquality().hash(initialComorbIds),const DeepCollectionEquality().hash(allergies),lmp,isPregnant,status,entryTime,consultationStartTime,completionTime,compiledPrescriptionJson,overrideReason,consultationFee,isRevisit]);
 
 @override
 String toString() {
-  return 'PatientQueueItem(id: $id, patientId: $patientId, tokenNumber: $tokenNumber, patientName: $patientName, age: $age, dateOfBirth: $dateOfBirth, gender: $gender, phone: $phone, vitals: $vitals, initialComorbIds: $initialComorbIds, allergies: $allergies, lmp: $lmp, isPregnant: $isPregnant, status: $status, entryTime: $entryTime, consultationStartTime: $consultationStartTime, completionTime: $completionTime, compiledPrescriptionJson: $compiledPrescriptionJson, overrideReason: $overrideReason)';
+  return 'PatientQueueItem(id: $id, patientId: $patientId, tokenNumber: $tokenNumber, patientName: $patientName, age: $age, dateOfBirth: $dateOfBirth, gender: $gender, phone: $phone, vitals: $vitals, initialComorbIds: $initialComorbIds, allergies: $allergies, lmp: $lmp, isPregnant: $isPregnant, status: $status, entryTime: $entryTime, consultationStartTime: $consultationStartTime, completionTime: $completionTime, compiledPrescriptionJson: $compiledPrescriptionJson, overrideReason: $overrideReason, consultationFee: $consultationFee, isRevisit: $isRevisit)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $PatientQueueItemCopyWith<$Res>  {
   factory $PatientQueueItemCopyWith(PatientQueueItem value, $Res Function(PatientQueueItem) _then) = _$PatientQueueItemCopyWithImpl;
 @useResult
 $Res call({
- String id, String? patientId, int tokenNumber, String patientName, int age, DateTime? dateOfBirth, String gender, String? phone, Map<String, dynamic> vitals, List<String> initialComorbIds, List<String> allergies, String? lmp, bool isPregnant, String status, DateTime entryTime, DateTime? consultationStartTime, DateTime? completionTime, String? compiledPrescriptionJson, String? overrideReason
+ String id, String? patientId, int tokenNumber, String patientName, int age, DateTime? dateOfBirth, String gender, String? phone, Map<String, dynamic> vitals, List<String> initialComorbIds, List<String> allergies, String? lmp, bool isPregnant, String status, DateTime entryTime, DateTime? consultationStartTime, DateTime? completionTime, String? compiledPrescriptionJson, String? overrideReason, double consultationFee, bool isRevisit
 });
 
 
@@ -65,7 +65,7 @@ class _$PatientQueueItemCopyWithImpl<$Res>
 
 /// Create a copy of PatientQueueItem
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? patientId = freezed,Object? tokenNumber = null,Object? patientName = null,Object? age = null,Object? dateOfBirth = freezed,Object? gender = null,Object? phone = freezed,Object? vitals = null,Object? initialComorbIds = null,Object? allergies = null,Object? lmp = freezed,Object? isPregnant = null,Object? status = null,Object? entryTime = null,Object? consultationStartTime = freezed,Object? completionTime = freezed,Object? compiledPrescriptionJson = freezed,Object? overrideReason = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? patientId = freezed,Object? tokenNumber = null,Object? patientName = null,Object? age = null,Object? dateOfBirth = freezed,Object? gender = null,Object? phone = freezed,Object? vitals = null,Object? initialComorbIds = null,Object? allergies = null,Object? lmp = freezed,Object? isPregnant = null,Object? status = null,Object? entryTime = null,Object? consultationStartTime = freezed,Object? completionTime = freezed,Object? compiledPrescriptionJson = freezed,Object? overrideReason = freezed,Object? consultationFee = null,Object? isRevisit = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,patientId: freezed == patientId ? _self.patientId : patientId // ignore: cast_nullable_to_non_nullable
@@ -86,7 +86,9 @@ as DateTime,consultationStartTime: freezed == consultationStartTime ? _self.cons
 as DateTime?,completionTime: freezed == completionTime ? _self.completionTime : completionTime // ignore: cast_nullable_to_non_nullable
 as DateTime?,compiledPrescriptionJson: freezed == compiledPrescriptionJson ? _self.compiledPrescriptionJson : compiledPrescriptionJson // ignore: cast_nullable_to_non_nullable
 as String?,overrideReason: freezed == overrideReason ? _self.overrideReason : overrideReason // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,consultationFee: null == consultationFee ? _self.consultationFee : consultationFee // ignore: cast_nullable_to_non_nullable
+as double,isRevisit: null == isRevisit ? _self.isRevisit : isRevisit // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -171,10 +173,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? patientId,  int tokenNumber,  String patientName,  int age,  DateTime? dateOfBirth,  String gender,  String? phone,  Map<String, dynamic> vitals,  List<String> initialComorbIds,  List<String> allergies,  String? lmp,  bool isPregnant,  String status,  DateTime entryTime,  DateTime? consultationStartTime,  DateTime? completionTime,  String? compiledPrescriptionJson,  String? overrideReason)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? patientId,  int tokenNumber,  String patientName,  int age,  DateTime? dateOfBirth,  String gender,  String? phone,  Map<String, dynamic> vitals,  List<String> initialComorbIds,  List<String> allergies,  String? lmp,  bool isPregnant,  String status,  DateTime entryTime,  DateTime? consultationStartTime,  DateTime? completionTime,  String? compiledPrescriptionJson,  String? overrideReason,  double consultationFee,  bool isRevisit)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PatientQueueItem() when $default != null:
-return $default(_that.id,_that.patientId,_that.tokenNumber,_that.patientName,_that.age,_that.dateOfBirth,_that.gender,_that.phone,_that.vitals,_that.initialComorbIds,_that.allergies,_that.lmp,_that.isPregnant,_that.status,_that.entryTime,_that.consultationStartTime,_that.completionTime,_that.compiledPrescriptionJson,_that.overrideReason);case _:
+return $default(_that.id,_that.patientId,_that.tokenNumber,_that.patientName,_that.age,_that.dateOfBirth,_that.gender,_that.phone,_that.vitals,_that.initialComorbIds,_that.allergies,_that.lmp,_that.isPregnant,_that.status,_that.entryTime,_that.consultationStartTime,_that.completionTime,_that.compiledPrescriptionJson,_that.overrideReason,_that.consultationFee,_that.isRevisit);case _:
   return orElse();
 
 }
@@ -192,10 +194,10 @@ return $default(_that.id,_that.patientId,_that.tokenNumber,_that.patientName,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? patientId,  int tokenNumber,  String patientName,  int age,  DateTime? dateOfBirth,  String gender,  String? phone,  Map<String, dynamic> vitals,  List<String> initialComorbIds,  List<String> allergies,  String? lmp,  bool isPregnant,  String status,  DateTime entryTime,  DateTime? consultationStartTime,  DateTime? completionTime,  String? compiledPrescriptionJson,  String? overrideReason)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? patientId,  int tokenNumber,  String patientName,  int age,  DateTime? dateOfBirth,  String gender,  String? phone,  Map<String, dynamic> vitals,  List<String> initialComorbIds,  List<String> allergies,  String? lmp,  bool isPregnant,  String status,  DateTime entryTime,  DateTime? consultationStartTime,  DateTime? completionTime,  String? compiledPrescriptionJson,  String? overrideReason,  double consultationFee,  bool isRevisit)  $default,) {final _that = this;
 switch (_that) {
 case _PatientQueueItem():
-return $default(_that.id,_that.patientId,_that.tokenNumber,_that.patientName,_that.age,_that.dateOfBirth,_that.gender,_that.phone,_that.vitals,_that.initialComorbIds,_that.allergies,_that.lmp,_that.isPregnant,_that.status,_that.entryTime,_that.consultationStartTime,_that.completionTime,_that.compiledPrescriptionJson,_that.overrideReason);case _:
+return $default(_that.id,_that.patientId,_that.tokenNumber,_that.patientName,_that.age,_that.dateOfBirth,_that.gender,_that.phone,_that.vitals,_that.initialComorbIds,_that.allergies,_that.lmp,_that.isPregnant,_that.status,_that.entryTime,_that.consultationStartTime,_that.completionTime,_that.compiledPrescriptionJson,_that.overrideReason,_that.consultationFee,_that.isRevisit);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -212,10 +214,10 @@ return $default(_that.id,_that.patientId,_that.tokenNumber,_that.patientName,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? patientId,  int tokenNumber,  String patientName,  int age,  DateTime? dateOfBirth,  String gender,  String? phone,  Map<String, dynamic> vitals,  List<String> initialComorbIds,  List<String> allergies,  String? lmp,  bool isPregnant,  String status,  DateTime entryTime,  DateTime? consultationStartTime,  DateTime? completionTime,  String? compiledPrescriptionJson,  String? overrideReason)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? patientId,  int tokenNumber,  String patientName,  int age,  DateTime? dateOfBirth,  String gender,  String? phone,  Map<String, dynamic> vitals,  List<String> initialComorbIds,  List<String> allergies,  String? lmp,  bool isPregnant,  String status,  DateTime entryTime,  DateTime? consultationStartTime,  DateTime? completionTime,  String? compiledPrescriptionJson,  String? overrideReason,  double consultationFee,  bool isRevisit)?  $default,) {final _that = this;
 switch (_that) {
 case _PatientQueueItem() when $default != null:
-return $default(_that.id,_that.patientId,_that.tokenNumber,_that.patientName,_that.age,_that.dateOfBirth,_that.gender,_that.phone,_that.vitals,_that.initialComorbIds,_that.allergies,_that.lmp,_that.isPregnant,_that.status,_that.entryTime,_that.consultationStartTime,_that.completionTime,_that.compiledPrescriptionJson,_that.overrideReason);case _:
+return $default(_that.id,_that.patientId,_that.tokenNumber,_that.patientName,_that.age,_that.dateOfBirth,_that.gender,_that.phone,_that.vitals,_that.initialComorbIds,_that.allergies,_that.lmp,_that.isPregnant,_that.status,_that.entryTime,_that.consultationStartTime,_that.completionTime,_that.compiledPrescriptionJson,_that.overrideReason,_that.consultationFee,_that.isRevisit);case _:
   return null;
 
 }
@@ -227,7 +229,7 @@ return $default(_that.id,_that.patientId,_that.tokenNumber,_that.patientName,_th
 @JsonSerializable()
 
 class _PatientQueueItem extends PatientQueueItem {
-  const _PatientQueueItem({required this.id, this.patientId, required this.tokenNumber, required this.patientName, required this.age, this.dateOfBirth, required this.gender, this.phone, final  Map<String, dynamic> vitals = const {}, final  List<String> initialComorbIds = const [], final  List<String> allergies = const [], this.lmp, this.isPregnant = false, this.status = 'WAITING', required this.entryTime, this.consultationStartTime, this.completionTime, this.compiledPrescriptionJson, this.overrideReason}): _vitals = vitals,_initialComorbIds = initialComorbIds,_allergies = allergies,super._();
+  const _PatientQueueItem({required this.id, this.patientId, required this.tokenNumber, required this.patientName, required this.age, this.dateOfBirth, required this.gender, this.phone, final  Map<String, dynamic> vitals = const {}, final  List<String> initialComorbIds = const [], final  List<String> allergies = const [], this.lmp, this.isPregnant = false, this.status = 'WAITING', required this.entryTime, this.consultationStartTime, this.completionTime, this.compiledPrescriptionJson, this.overrideReason, this.consultationFee = 0.0, this.isRevisit = false}): _vitals = vitals,_initialComorbIds = initialComorbIds,_allergies = allergies,super._();
   factory _PatientQueueItem.fromJson(Map<String, dynamic> json) => _$PatientQueueItemFromJson(json);
 
 @override final  String id;
@@ -267,6 +269,8 @@ class _PatientQueueItem extends PatientQueueItem {
 @override final  DateTime? completionTime;
 @override final  String? compiledPrescriptionJson;
 @override final  String? overrideReason;
+@override@JsonKey() final  double consultationFee;
+@override@JsonKey() final  bool isRevisit;
 
 /// Create a copy of PatientQueueItem
 /// with the given fields replaced by the non-null parameter values.
@@ -281,16 +285,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PatientQueueItem&&(identical(other.id, id) || other.id == id)&&(identical(other.patientId, patientId) || other.patientId == patientId)&&(identical(other.tokenNumber, tokenNumber) || other.tokenNumber == tokenNumber)&&(identical(other.patientName, patientName) || other.patientName == patientName)&&(identical(other.age, age) || other.age == age)&&(identical(other.dateOfBirth, dateOfBirth) || other.dateOfBirth == dateOfBirth)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.phone, phone) || other.phone == phone)&&const DeepCollectionEquality().equals(other._vitals, _vitals)&&const DeepCollectionEquality().equals(other._initialComorbIds, _initialComorbIds)&&const DeepCollectionEquality().equals(other._allergies, _allergies)&&(identical(other.lmp, lmp) || other.lmp == lmp)&&(identical(other.isPregnant, isPregnant) || other.isPregnant == isPregnant)&&(identical(other.status, status) || other.status == status)&&(identical(other.entryTime, entryTime) || other.entryTime == entryTime)&&(identical(other.consultationStartTime, consultationStartTime) || other.consultationStartTime == consultationStartTime)&&(identical(other.completionTime, completionTime) || other.completionTime == completionTime)&&(identical(other.compiledPrescriptionJson, compiledPrescriptionJson) || other.compiledPrescriptionJson == compiledPrescriptionJson)&&(identical(other.overrideReason, overrideReason) || other.overrideReason == overrideReason));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PatientQueueItem&&(identical(other.id, id) || other.id == id)&&(identical(other.patientId, patientId) || other.patientId == patientId)&&(identical(other.tokenNumber, tokenNumber) || other.tokenNumber == tokenNumber)&&(identical(other.patientName, patientName) || other.patientName == patientName)&&(identical(other.age, age) || other.age == age)&&(identical(other.dateOfBirth, dateOfBirth) || other.dateOfBirth == dateOfBirth)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.phone, phone) || other.phone == phone)&&const DeepCollectionEquality().equals(other._vitals, _vitals)&&const DeepCollectionEquality().equals(other._initialComorbIds, _initialComorbIds)&&const DeepCollectionEquality().equals(other._allergies, _allergies)&&(identical(other.lmp, lmp) || other.lmp == lmp)&&(identical(other.isPregnant, isPregnant) || other.isPregnant == isPregnant)&&(identical(other.status, status) || other.status == status)&&(identical(other.entryTime, entryTime) || other.entryTime == entryTime)&&(identical(other.consultationStartTime, consultationStartTime) || other.consultationStartTime == consultationStartTime)&&(identical(other.completionTime, completionTime) || other.completionTime == completionTime)&&(identical(other.compiledPrescriptionJson, compiledPrescriptionJson) || other.compiledPrescriptionJson == compiledPrescriptionJson)&&(identical(other.overrideReason, overrideReason) || other.overrideReason == overrideReason)&&(identical(other.consultationFee, consultationFee) || other.consultationFee == consultationFee)&&(identical(other.isRevisit, isRevisit) || other.isRevisit == isRevisit));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,patientId,tokenNumber,patientName,age,dateOfBirth,gender,phone,const DeepCollectionEquality().hash(_vitals),const DeepCollectionEquality().hash(_initialComorbIds),const DeepCollectionEquality().hash(_allergies),lmp,isPregnant,status,entryTime,consultationStartTime,completionTime,compiledPrescriptionJson,overrideReason]);
+int get hashCode => Object.hashAll([runtimeType,id,patientId,tokenNumber,patientName,age,dateOfBirth,gender,phone,const DeepCollectionEquality().hash(_vitals),const DeepCollectionEquality().hash(_initialComorbIds),const DeepCollectionEquality().hash(_allergies),lmp,isPregnant,status,entryTime,consultationStartTime,completionTime,compiledPrescriptionJson,overrideReason,consultationFee,isRevisit]);
 
 @override
 String toString() {
-  return 'PatientQueueItem(id: $id, patientId: $patientId, tokenNumber: $tokenNumber, patientName: $patientName, age: $age, dateOfBirth: $dateOfBirth, gender: $gender, phone: $phone, vitals: $vitals, initialComorbIds: $initialComorbIds, allergies: $allergies, lmp: $lmp, isPregnant: $isPregnant, status: $status, entryTime: $entryTime, consultationStartTime: $consultationStartTime, completionTime: $completionTime, compiledPrescriptionJson: $compiledPrescriptionJson, overrideReason: $overrideReason)';
+  return 'PatientQueueItem(id: $id, patientId: $patientId, tokenNumber: $tokenNumber, patientName: $patientName, age: $age, dateOfBirth: $dateOfBirth, gender: $gender, phone: $phone, vitals: $vitals, initialComorbIds: $initialComorbIds, allergies: $allergies, lmp: $lmp, isPregnant: $isPregnant, status: $status, entryTime: $entryTime, consultationStartTime: $consultationStartTime, completionTime: $completionTime, compiledPrescriptionJson: $compiledPrescriptionJson, overrideReason: $overrideReason, consultationFee: $consultationFee, isRevisit: $isRevisit)';
 }
 
 
@@ -301,7 +305,7 @@ abstract mixin class _$PatientQueueItemCopyWith<$Res> implements $PatientQueueIt
   factory _$PatientQueueItemCopyWith(_PatientQueueItem value, $Res Function(_PatientQueueItem) _then) = __$PatientQueueItemCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String? patientId, int tokenNumber, String patientName, int age, DateTime? dateOfBirth, String gender, String? phone, Map<String, dynamic> vitals, List<String> initialComorbIds, List<String> allergies, String? lmp, bool isPregnant, String status, DateTime entryTime, DateTime? consultationStartTime, DateTime? completionTime, String? compiledPrescriptionJson, String? overrideReason
+ String id, String? patientId, int tokenNumber, String patientName, int age, DateTime? dateOfBirth, String gender, String? phone, Map<String, dynamic> vitals, List<String> initialComorbIds, List<String> allergies, String? lmp, bool isPregnant, String status, DateTime entryTime, DateTime? consultationStartTime, DateTime? completionTime, String? compiledPrescriptionJson, String? overrideReason, double consultationFee, bool isRevisit
 });
 
 
@@ -318,7 +322,7 @@ class __$PatientQueueItemCopyWithImpl<$Res>
 
 /// Create a copy of PatientQueueItem
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? patientId = freezed,Object? tokenNumber = null,Object? patientName = null,Object? age = null,Object? dateOfBirth = freezed,Object? gender = null,Object? phone = freezed,Object? vitals = null,Object? initialComorbIds = null,Object? allergies = null,Object? lmp = freezed,Object? isPregnant = null,Object? status = null,Object? entryTime = null,Object? consultationStartTime = freezed,Object? completionTime = freezed,Object? compiledPrescriptionJson = freezed,Object? overrideReason = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? patientId = freezed,Object? tokenNumber = null,Object? patientName = null,Object? age = null,Object? dateOfBirth = freezed,Object? gender = null,Object? phone = freezed,Object? vitals = null,Object? initialComorbIds = null,Object? allergies = null,Object? lmp = freezed,Object? isPregnant = null,Object? status = null,Object? entryTime = null,Object? consultationStartTime = freezed,Object? completionTime = freezed,Object? compiledPrescriptionJson = freezed,Object? overrideReason = freezed,Object? consultationFee = null,Object? isRevisit = null,}) {
   return _then(_PatientQueueItem(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,patientId: freezed == patientId ? _self.patientId : patientId // ignore: cast_nullable_to_non_nullable
@@ -339,7 +343,9 @@ as DateTime,consultationStartTime: freezed == consultationStartTime ? _self.cons
 as DateTime?,completionTime: freezed == completionTime ? _self.completionTime : completionTime // ignore: cast_nullable_to_non_nullable
 as DateTime?,compiledPrescriptionJson: freezed == compiledPrescriptionJson ? _self.compiledPrescriptionJson : compiledPrescriptionJson // ignore: cast_nullable_to_non_nullable
 as String?,overrideReason: freezed == overrideReason ? _self.overrideReason : overrideReason // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,consultationFee: null == consultationFee ? _self.consultationFee : consultationFee // ignore: cast_nullable_to_non_nullable
+as double,isRevisit: null == isRevisit ? _self.isRevisit : isRevisit // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

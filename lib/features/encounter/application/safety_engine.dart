@@ -274,20 +274,26 @@ class SafetyEngine {
 
   static bool _isStrictlyCritical(String comorbidityId, String drugClassUpper) {
     // High-risk clinical contraindications
-    if (comorbidityId == 'comorb_ckd' && drugClassUpper.contains('NSAID'))
+    if (comorbidityId == 'comorb_ckd' && drugClassUpper.contains('NSAID')) {
       return true;
-    if (comorbidityId == 'comorb_ckd' && drugClassUpper.contains('METFORMIN'))
+    }
+    if (comorbidityId == 'comorb_ckd' && drugClassUpper.contains('METFORMIN')) {
       return true;
+    }
     if (comorbidityId == 'comorb_pregnant' &&
-        drugClassUpper.contains('FLUOROQUINOLONES'))
+        drugClassUpper.contains('FLUOROQUINOLONES')) {
       return true;
-    if (comorbidityId == 'comorb_pregnant' && drugClassUpper.contains('NSAID'))
+    }
+    if (comorbidityId == 'comorb_pregnant' && drugClassUpper.contains('NSAID')) {
       return true;
-    if (comorbidityId == 'comorb_pud' && drugClassUpper.contains('NSAID'))
+    }
+    if (comorbidityId == 'comorb_pud' && drugClassUpper.contains('NSAID')) {
       return true;
+    }
     if (comorbidityId == 'comorb_asthma' &&
-        drugClassUpper.contains('BETA BLOCKER'))
+        drugClassUpper.contains('BETA BLOCKER')) {
       return true;
+    }
     return false;
   }
 }
