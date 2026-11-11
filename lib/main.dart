@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/config/clinic_settings.dart';
 import 'core/database/database_provider.dart';
+import 'core/sync/supabase_drug_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/admin/presentation/admin_panel_screen.dart';
 import 'features/encounter/presentation/doctor_workspace_screen.dart';
@@ -57,6 +58,15 @@ class _JmcNexusAppState extends ConsumerState<JmcNexusApp> {
     try {
       final db = ref.read(appDatabaseProvider);
       await db.ensureSeeded();
+
+      // Ensure clinical catalogs and drugs are synced from Supabase (nexus & public schemas)
+      final drugs = await db.getAllDrugs();
+      if (drugs.isEmpty) {
+        ref.read(supabaseCatalogSyncProvider.notifier).syncAllCatalogs().catchError((e) {
+          debugPrint('Initial catalog sync from Supabase notice: $e');
+          return SupabaseCatalogSyncSummary(syncTime: DateTime.now());
+        });
+      }
     } catch (e) {
       debugPrint('Database initialization notice: $e');
     } finally {

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
@@ -627,6 +628,430 @@ class AppDatabase extends _$AppDatabase {
         .get();
   }
 
+  /// Removes legacy seeded mock drugs (identified by 'drug_' prefix).
+  Future<int> clearLegacyMockDrugs() async {
+    return (delete(drugsTable)..where((t) => t.id.like('drug_%'))).go();
+  }
+
+  /// Bulk syncs drugs from Supabase public.drugmaster (Read-Only Master Formulary).
+  Future<int> syncDrugsFromSupabase(List<Map<String, dynamic>> remoteDrugs) async {
+    return transaction(() async {
+      // 1. Clean out any legacy mock drugs
+      await clearLegacyMockDrugs();
+
+      // 2. Map and insert/replace remote drugs
+      for (final row in remoteDrugs) {
+        final id = (row['id'] as String?)?.trim();
+        if (id == null || id.isEmpty) continue;
+
+        final name = (row['name'] as String?)?.trim() ?? 'Unknown Drug';
+        final content = (row['content'] as String?)?.trim() ?? name;
+        final category = (row['category'] as String?)?.trim() ?? '';
+
+        final drugClass = _mapDrugCategory(category, content, name);
+        final defaultDose = _mapDefaultDose(name);
+        final defaultRoute = _mapDefaultRoute(name, category);
+        final defaultFrequency = _mapDefaultFrequency(name);
+        final defaultDuration = _mapDefaultDuration(name);
+        final defaultInstructions = _mapDefaultInstructions(name, category);
+        final version = (row['version'] as int?) ?? 1;
+
+        await into(drugsTable).insert(
+          DrugsTableCompanion(
+            id: Value(id),
+            brandName: Value(name),
+            genericName: Value(content),
+            drugClass: Value(drugClass),
+            defaultDose: Value(defaultDose),
+            defaultRoute: Value(defaultRoute),
+            defaultFrequency: Value(defaultFrequency),
+            defaultDuration: Value(defaultDuration),
+            defaultInstructions: Value(defaultInstructions),
+            updatedAt: Value(DateTime.now()),
+            version: Value(version),
+            deletedAt: const Value(null),
+          ),
+          mode: InsertMode.insertOrReplace,
+        );
+      }
+      return remoteDrugs.length;
+    });
+  }
+
+  /// Bulk syncs Presenting Complaints from Supabase (nexus.presenting_complaints).
+  Future<int> syncPresentingComplaintsFromSupabase(
+    List<Map<String, dynamic>> remoteRows,
+  ) async {
+    return transaction(() async {
+      for (final row in remoteRows) {
+        final id = (row['id'] as String?)?.trim();
+        if (id == null || id.isEmpty) continue;
+        final name = (row['name'] as String?)?.trim() ?? '';
+        final category = (row['category'] as String?)?.trim() ?? 'General';
+        final displayOrder = (row['display_order'] as int?) ?? 0;
+        final version = (row['version'] as int?) ?? 1;
+
+        await into(presentingComplaintsTable).insert(
+          PresentingComplaintsTableCompanion(
+            id: Value(id),
+            name: Value(name),
+            category: Value(category),
+            displayOrder: Value(displayOrder),
+            updatedAt: Value(DateTime.now()),
+            version: Value(version),
+            deletedAt: const Value(null),
+          ),
+          mode: InsertMode.insertOrReplace,
+        );
+      }
+      return remoteRows.length;
+    });
+  }
+
+  /// Bulk syncs Complaint Sub-Questions from Supabase (nexus.complaint_sub_questions).
+  Future<int> syncComplaintSubQuestionsFromSupabase(
+    List<Map<String, dynamic>> remoteRows,
+  ) async {
+    return transaction(() async {
+      for (final row in remoteRows) {
+        final id = (row['id'] as String?)?.trim();
+        final complaintId = (row['complaint_id'] as String?)?.trim();
+        if (id == null || id.isEmpty || complaintId == null || complaintId.isEmpty) continue;
+
+        final questionLabel = (row['question_label'] as String?)?.trim() ?? '';
+        final rawOptions = row['options_json'];
+        final optionsJson = rawOptions is String ? rawOptions : jsonEncode(rawOptions ?? []);
+        final sentenceTemplate = (row['sentence_template'] as String?)?.trim() ?? '';
+        final isMultiSelect = (row['is_multi_select'] as bool?) ?? false;
+        final sequenceOrder = (row['sequence_order'] as int?) ?? 0;
+        final version = (row['version'] as int?) ?? 1;
+
+        await into(complaintSubQuestionsTable).insert(
+          ComplaintSubQuestionsTableCompanion(
+            id: Value(id),
+            complaintId: Value(complaintId),
+            questionLabel: Value(questionLabel),
+            optionsJson: Value(optionsJson),
+            sentenceTemplate: Value(sentenceTemplate),
+            isMultiSelect: Value(isMultiSelect),
+            sequenceOrder: Value(sequenceOrder),
+            updatedAt: Value(DateTime.now()),
+            version: Value(version),
+            deletedAt: const Value(null),
+          ),
+          mode: InsertMode.insertOrReplace,
+        );
+      }
+      return remoteRows.length;
+    });
+  }
+
+  /// Bulk syncs Examination Systems from Supabase (nexus.examination_systems).
+  Future<int> syncExaminationSystemsFromSupabase(
+    List<Map<String, dynamic>> remoteRows,
+  ) async {
+    return transaction(() async {
+      for (final row in remoteRows) {
+        final id = (row['id'] as String?)?.trim();
+        if (id == null || id.isEmpty) continue;
+        final systemName = (row['system_name'] as String?)?.trim() ?? '';
+        final defaultNormalText = (row['default_normal_text'] as String?)?.trim() ?? '';
+        final rawFindings = row['abnormal_findings_json'];
+        final abnormalFindingsJson =
+            rawFindings is String ? rawFindings : jsonEncode(rawFindings ?? []);
+        final version = (row['version'] as int?) ?? 1;
+
+        await into(examinationSystemsTable).insert(
+          ExaminationSystemsTableCompanion(
+            id: Value(id),
+            systemName: Value(systemName),
+            defaultNormalText: Value(defaultNormalText),
+            abnormalFindingsJson: Value(abnormalFindingsJson),
+            updatedAt: Value(DateTime.now()),
+            version: Value(version),
+            deletedAt: const Value(null),
+          ),
+          mode: InsertMode.insertOrReplace,
+        );
+      }
+      return remoteRows.length;
+    });
+  }
+
+  /// Bulk syncs Diagnoses from Supabase (nexus.diagnoses).
+  Future<int> syncDiagnosesFromSupabase(
+    List<Map<String, dynamic>> remoteRows,
+  ) async {
+    return transaction(() async {
+      for (final row in remoteRows) {
+        final id = (row['id'] as String?)?.trim();
+        if (id == null || id.isEmpty) continue;
+        final name = (row['name'] as String?)?.trim() ?? '';
+        final icd10Code = (row['icd10_code'] as String?)?.trim();
+        final rawLinked = row['linked_complaint_ids'];
+        final linkedComplaintIds =
+            rawLinked is String ? rawLinked : jsonEncode(rawLinked ?? []);
+        final version = (row['version'] as int?) ?? 1;
+
+        await into(diagnosesTable).insert(
+          DiagnosesTableCompanion(
+            id: Value(id),
+            name: Value(name),
+            icd10Code: Value(icd10Code),
+            linkedComplaintIds: Value(linkedComplaintIds),
+            updatedAt: Value(DateTime.now()),
+            version: Value(version),
+            deletedAt: const Value(null),
+          ),
+          mode: InsertMode.insertOrReplace,
+        );
+      }
+      return remoteRows.length;
+    });
+  }
+
+  /// Bulk syncs Prescription Protocols from Supabase (nexus.prescription_protocols).
+  Future<int> syncPrescriptionProtocolsFromSupabase(
+    List<Map<String, dynamic>> remoteRows,
+  ) async {
+    return transaction(() async {
+      for (final row in remoteRows) {
+        final id = (row['id'] as String?)?.trim();
+        final diagnosisId = (row['diagnosis_id'] as String?)?.trim();
+        if (id == null || id.isEmpty || diagnosisId == null || diagnosisId.isEmpty) continue;
+
+        final rawItems = row['protocol_items_json'];
+        final protocolItemsJson =
+            rawItems is String ? rawItems : jsonEncode(rawItems ?? []);
+        final generalAdvice = (row['general_advice'] as String?)?.trim() ?? '';
+        final version = (row['version'] as int?) ?? 1;
+
+        await into(prescriptionProtocolsTable).insert(
+          PrescriptionProtocolsTableCompanion(
+            id: Value(id),
+            diagnosisId: Value(diagnosisId),
+            protocolItemsJson: Value(protocolItemsJson),
+            generalAdvice: Value(generalAdvice),
+            updatedAt: Value(DateTime.now()),
+            version: Value(version),
+            deletedAt: const Value(null),
+          ),
+          mode: InsertMode.insertOrReplace,
+        );
+      }
+      return remoteRows.length;
+    });
+  }
+
+  /// Bulk syncs Comorbidities from Supabase (nexus.comorbidities).
+  Future<int> syncComorbiditiesFromSupabase(
+    List<Map<String, dynamic>> remoteRows,
+  ) async {
+    return transaction(() async {
+      for (final row in remoteRows) {
+        final id = (row['id'] as String?)?.trim();
+        if (id == null || id.isEmpty) continue;
+        final name = (row['name'] as String?)?.trim() ?? '';
+        final rawContra = row['contraindicated_drug_classes'];
+        final contraJson =
+            rawContra is String ? rawContra : jsonEncode(rawContra ?? []);
+        final version = (row['version'] as int?) ?? 1;
+
+        await into(comorbiditiesTable).insert(
+          ComorbiditiesTableCompanion(
+            id: Value(id),
+            name: Value(name),
+            contraindicatedDrugClasses: Value(contraJson),
+            updatedAt: Value(DateTime.now()),
+            version: Value(version),
+            deletedAt: const Value(null),
+          ),
+          mode: InsertMode.insertOrReplace,
+        );
+      }
+      return remoteRows.length;
+    });
+  }
+
+  static String _mapDrugCategory(String? category, String? content, String name) {
+    final cat = (category ?? '').toUpperCase();
+    final cont = (content ?? '').toUpperCase();
+
+    final classes = <String>[];
+
+    if (cont.contains('OFLOXACIN') ||
+        cont.contains('CIPROFLOXACIN') ||
+        cont.contains('LEVOFLOXACIN') ||
+        cont.contains('NORFLOXACIN')) {
+      classes.add('Fluoroquinolones');
+    }
+
+    if (cont.contains('METFORMIN')) {
+      classes.add('Metformin');
+    }
+
+    if (cont.contains('IBUPROFEN') ||
+        cont.contains('DICLOFENAC') ||
+        cont.contains('ACECLOFENAC') ||
+        cont.contains('MEFENAMIC') ||
+        cont.contains('PIROXICAM') ||
+        cont.contains('NIMESULIDE')) {
+      classes.add('NSAID');
+    }
+
+    if (cont.contains('PARACETAMOL')) {
+      classes.add('Antipyretic');
+      classes.add('Analgesic');
+    }
+
+    if (cont.contains('PREDNISOLONE') ||
+        cont.contains('DEXAMETHASONE') ||
+        cont.contains('DEFLAZACORT') ||
+        cont.contains('BETAMETHASONE')) {
+      classes.add('Steroid');
+    }
+
+    if (cont.contains('AMLODIPINE') ||
+        cont.contains('TELMISARTAN') ||
+        cont.contains('LOSARTAN') ||
+        cont.contains('ENALAPRIL') ||
+        cont.contains('RAMIPRIL')) {
+      classes.add('ACE Inhibitors');
+      classes.add('Antihypertensive');
+    }
+
+    if (cont.contains('ATENOLOL') ||
+        cont.contains('METOPROLOL') ||
+        cont.contains('PROPRANOLOL') ||
+        cont.contains('BISOPROLOL')) {
+      classes.add('Beta Blockers');
+    }
+
+    if (cat.contains('ANTIBIOTIC') ||
+        cont.contains('AMOXICILLIN') ||
+        cont.contains('AZITHROMYCIN') ||
+        cont.contains('CEFIXIME') ||
+        cont.contains('CEFPODOXIME')) {
+      if (!classes.contains('Antibiotic')) classes.add('Antibiotic');
+    }
+
+    if (cat.contains('GIT') ||
+        cont.contains('PANTOPRAZOLE') ||
+        cont.contains('RABEPRAZOLE') ||
+        cont.contains('OMEPRAZOLE') ||
+        cont.contains('DOMPERIDONE')) {
+      classes.add('Antacid');
+    }
+
+    if (cat.contains('ANTICOLD') ||
+        cat.contains('COUGH') ||
+        cont.contains('CETIRIZINE') ||
+        cont.contains('LEVOCETIRIZINE') ||
+        cont.contains('PHENYLEPHRINE') ||
+        cont.contains('CHLORPHENIRAMINE')) {
+      classes.add('Antihistamine');
+      classes.add('Antitussive');
+    }
+
+    if (cat.contains('CARDIAC')) {
+      if (!classes.contains('Antihypertensive')) classes.add('Antihypertensive');
+    }
+
+    if (cat.contains('DIABETIC')) {
+      if (!classes.contains('Antidiabetic')) classes.add('Antidiabetic');
+    }
+
+    if (cat.contains('INJECTABLE')) {
+      classes.add('Injectable');
+    }
+
+    if (classes.isNotEmpty) {
+      return classes.toSet().join(' / ');
+    }
+
+    if (category != null && category.trim().isNotEmpty) {
+      var cleaned = category.replaceFirst(RegExp(r'^\(\d+\)\s*'), '').trim();
+      if (cleaned.length > 25) {
+        cleaned = cleaned.substring(0, 25);
+      }
+      return cleaned;
+    }
+
+    return 'General';
+  }
+
+  static String _mapDefaultDose(String name) {
+    final upper = name.toUpperCase();
+    if (upper.contains('SYP') || upper.contains('SYRUP') || upper.contains('SUSP')) {
+      return '5 ml';
+    }
+    if (upper.contains('DROPS') || upper.contains('DROP')) {
+      return '5 drops';
+    }
+    if (upper.contains('INJ')) {
+      return '1 vial';
+    }
+    if (upper.contains('GEL') || upper.contains('OINT') || upper.contains('CREAM')) {
+      return 'Apply locally';
+    }
+    if (upper.contains('CAP')) {
+      return '1 cap';
+    }
+    return '1 tab';
+  }
+
+  static String _mapDefaultRoute(String name, String? category) {
+    final upper = name.toUpperCase();
+    final cat = (category ?? '').toUpperCase();
+    if (upper.contains('INJ') || cat.contains('INJECTABLE')) {
+      return 'IV/IM';
+    }
+    if (upper.contains('GEL') || upper.contains('OINT') || upper.contains('CREAM') || upper.contains('LOTION')) {
+      return 'Topical';
+    }
+    if (upper.contains('EYE') || upper.contains('EAR')) {
+      return 'Local';
+    }
+    return 'PO';
+  }
+
+  static String _mapDefaultFrequency(String name) {
+    final upper = name.toUpperCase();
+    if (upper.contains('RABE') || upper.contains('PANT') || upper.contains('OMEP')) {
+      return 'OD Morning';
+    }
+    if (upper.contains('SYP') || upper.contains('SYRUP') || upper.contains('SUSP') || upper.contains('DROPS')) {
+      return 'TID';
+    }
+    return 'BD';
+  }
+
+  static String _mapDefaultDuration(String name) {
+    final upper = name.toUpperCase();
+    if (upper.contains('AZIROM') || upper.contains('AZITH')) {
+      return '3 days';
+    }
+    return '5 days';
+  }
+
+  static String _mapDefaultInstructions(String name, String? category) {
+    final upper = name.toUpperCase();
+    final cat = (category ?? '').toUpperCase();
+    if (upper.contains('RABE') || upper.contains('PANT') || upper.contains('OMEP')) {
+      return 'Before breakfast (empty stomach)';
+    }
+    if (upper.contains('GEL') || upper.contains('OINT') || upper.contains('CREAM')) {
+      return 'Apply gently to affected area';
+    }
+    if (upper.contains('EYE') || upper.contains('EAR')) {
+      return 'Instill in affected area';
+    }
+    if (upper.contains('INJ') || cat.contains('INJECTABLE')) {
+      return 'Administer under medical supervision';
+    }
+    return 'After food';
+  }
+
   Future<PrescriptionProtocolEntry?> getProtocolForDiagnosis(
     String diagnosisId,
   ) {
@@ -634,6 +1059,98 @@ class AppDatabase extends _$AppDatabase {
           (t) => t.diagnosisId.equals(diagnosisId) & t.deletedAt.isNull(),
         ))
         .getSingleOrNull();
+  }
+
+  Future<List<PrescriptionProtocolEntry>> getAllProtocols() {
+    return (select(prescriptionProtocolsTable)
+          ..where((t) => t.deletedAt.isNull()))
+        .get();
+  }
+
+  // --- ADMIN CATALOG EDIT & INSERT OPERATIONS ---
+
+  Future<void> insertOrUpdateComplaint(
+    PresentingComplaintsTableCompanion entry,
+  ) {
+    return into(presentingComplaintsTable).insert(
+      entry,
+      mode: InsertMode.insertOrReplace,
+    );
+  }
+
+  Future<bool> softDeleteComplaint(String id) async {
+    final updated = await (update(presentingComplaintsTable)
+          ..where((t) => t.id.equals(id)))
+        .write(
+      PresentingComplaintsTableCompanion(
+        deletedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+    return updated > 0;
+  }
+
+  Future<void> insertOrUpdateComorbidity(
+    ComorbiditiesTableCompanion entry,
+  ) {
+    return into(comorbiditiesTable).insert(
+      entry,
+      mode: InsertMode.insertOrReplace,
+    );
+  }
+
+  Future<bool> softDeleteComorbidity(String id) async {
+    final updated = await (update(comorbiditiesTable)
+          ..where((t) => t.id.equals(id)))
+        .write(
+      ComorbiditiesTableCompanion(
+        deletedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+    return updated > 0;
+  }
+
+  Future<void> insertOrUpdateDiagnosis(
+    DiagnosesTableCompanion entry,
+  ) {
+    return into(diagnosesTable).insert(
+      entry,
+      mode: InsertMode.insertOrReplace,
+    );
+  }
+
+  Future<bool> softDeleteDiagnosis(String id) async {
+    final updated = await (update(diagnosesTable)
+          ..where((t) => t.id.equals(id)))
+        .write(
+      DiagnosesTableCompanion(
+        deletedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+    return updated > 0;
+  }
+
+  Future<void> insertOrUpdateProtocol(
+    PrescriptionProtocolsTableCompanion entry,
+  ) {
+    return into(prescriptionProtocolsTable).insert(
+      entry,
+      mode: InsertMode.insertOrReplace,
+    );
+  }
+
+  Future<bool> softDeleteProtocol(String id) async {
+    final updated = await (update(prescriptionProtocolsTable)
+          ..where((t) => t.id.equals(id)))
+        .write(
+      PrescriptionProtocolsTableCompanion(
+        deletedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+    return updated > 0;
   }
 
   // --- CATALOG EDIT & SOFT-DELETE OPERATIONS ---
@@ -776,5 +1293,7 @@ class AppDatabase extends _$AppDatabase {
     if (total == 0) {
       await DatabaseSeeder.seedAll(this);
     }
+    // Always purge any legacy mock drugs that may still be in the database
+    await clearLegacyMockDrugs();
   }
 }

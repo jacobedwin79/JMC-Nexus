@@ -1,6 +1,38 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Default Gemini model used for AI clinical scribing.
+///
+/// Google has shut down the older 1.5 / 2.0 model families. As of late 2026,
+/// `gemini-3.8-flash` is the model Google explicitly recommends as the
+/// replacement for `gemini-2.0-flash`; it supports text/audio input plus
+/// structured JSON output.
+const kDefaultGeminiModel = 'gemini-3.8-flash';
+
+/// Model IDs that Google has shut down or retired. Any persisted selection
+/// pointing at one of these is migrated to [kDefaultGeminiModel] on load.
+const kRetiredGeminiModels = <String>{
+  'gemini-2.0-flash',
+  'gemini-2.0-flash-exp',
+  'gemini-2.0-flash-lite',
+  'gemini-1.5-flash',
+  'gemini-1.5-flash-8b',
+  'gemini-1.5-flash-001',
+  'gemini-1.5-flash-002',
+  'gemini-1.5-pro',
+  'gemini-1.5-pro-001',
+  'gemini-1.5-pro-002',
+};
+
+/// Returns a currently-valid Gemini model for a persisted selection.
+String resolveGeminiModel(String? saved) {
+  final model = (saved ?? '').trim();
+  if (model.isEmpty || kRetiredGeminiModels.contains(model)) {
+    return kDefaultGeminiModel;
+  }
+  return model;
+}
+
 class ClinicSettings {
   final String clinicName;
   final String clinicSubtitle;
@@ -27,10 +59,11 @@ class ClinicSettings {
     this.letterheadTopMarginMm = 45.0,
     this.consultationFee = 200.0,
     this.revisitFee = 150.0,
-    this.supabaseUrl = '',
-    this.supabaseAnonKey = '',
+    this.supabaseUrl = 'https://oxvsejnyhsjudrscsadg.supabase.co',
+    this.supabaseAnonKey =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94dnNlam55aHNqdWRyc2NzYWRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5NjgzMzUsImV4cCI6MjA3NDU0NDMzNX0.7-kBKCUoOJmjCak4fY56ZNBnmhgzywokEpjQJndy1Wo',
     this.geminiApiKey = '',
-    this.geminiModel = 'gemini-2.0-flash',
+    this.geminiModel = kDefaultGeminiModel,
   });
 
   bool get hasSupabaseCredentials =>
@@ -99,7 +132,14 @@ class ClinicSettingsNotifier extends Notifier<ClinicSettings> {
     return const ClinicSettings();
   }
 
+  static const _kDefaultSupabaseUrl = 'https://oxvsejnyhsjudrscsadg.supabase.co';
+  static const _kDefaultSupabaseAnonKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94dnNlam55aHNqdWRyc2NzYWRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5NjgzMzUsImV4cCI6MjA3NDU0NDMzNX0.7-kBKCUoOJmjCak4fY56ZNBnmhgzywokEpjQJndy1Wo';
+
   ClinicSettings _fromPrefs(SharedPreferences prefs) {
+    final savedSupabaseUrl = prefs.getString(_kSupabaseUrl);
+    final savedSupabaseKey = prefs.getString(_kSupabaseKey);
+
     return ClinicSettings(
       clinicName:
           prefs.getString(_kClinicName) ?? 'JMC CLINICAL HEALTHCARE & OPD',
@@ -116,10 +156,14 @@ class ClinicSettingsNotifier extends Notifier<ClinicSettings> {
       letterheadTopMarginMm: prefs.getDouble(_kLetterheadMargin) ?? 45.0,
       consultationFee: prefs.getDouble(_kConsultationFee) ?? 200.0,
       revisitFee: prefs.getDouble(_kRevisitFee) ?? 150.0,
-      supabaseUrl: prefs.getString(_kSupabaseUrl) ?? '',
-      supabaseAnonKey: prefs.getString(_kSupabaseKey) ?? '',
+      supabaseUrl: (savedSupabaseUrl != null && savedSupabaseUrl.trim().isNotEmpty)
+          ? savedSupabaseUrl
+          : _kDefaultSupabaseUrl,
+      supabaseAnonKey: (savedSupabaseKey != null && savedSupabaseKey.trim().isNotEmpty)
+          ? savedSupabaseKey
+          : _kDefaultSupabaseAnonKey,
       geminiApiKey: prefs.getString(_kGeminiKey) ?? '',
-      geminiModel: prefs.getString(_kGeminiModel) ?? 'gemini-2.0-flash',
+      geminiModel: resolveGeminiModel(prefs.getString(_kGeminiModel)),
     );
   }
 

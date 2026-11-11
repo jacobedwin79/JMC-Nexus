@@ -118,15 +118,15 @@ void main() {
         await tester.pump(const Duration(milliseconds: 300));
 
         // Scroll to view the populated prescription section
-        final electralFinder = find.text('Electral Sachet').last;
-        await tester.ensureVisible(electralFinder);
+        final drugFinder = find.text('ONDAR-MD Tab. [DPCO]').last;
+        await tester.ensureVisible(drugFinder);
         await tester.pump();
 
-        // Verify prescription section populated with medications
-        expect(find.text('Electral Sachet'), findsWidgets);
-        expect(find.text('Tab. Emeset 4mg'), findsWidgets);
-        expect(find.text('Tab. Oflox-OZ'), findsWidgets);
-        expect(find.text('Tab. Meftal-Spas'), findsWidgets);
+        // Verify prescription section populated with medications from Supabase Master Formulary
+        expect(find.text('ONDAR-MD Tab. [DPCO]'), findsWidgets);
+        expect(find.text('ROMBIFLOX-200 Tab.'), findsWidgets);
+        expect(find.text('ACHO Tab.'), findsWidgets);
+        expect(find.text('ANTICA Tab.'), findsWidgets);
 
         // 5. Test Safety Engine: Scroll to "CKD" comorbidity chip in PatientHeaderBar
         final ckdChip = find.text('CKD');

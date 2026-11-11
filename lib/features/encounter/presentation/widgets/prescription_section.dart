@@ -140,10 +140,10 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
     }
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: AppTheme.borderLight),
       ),
       child: Column(
@@ -157,13 +157,13 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                 children: [
                   const Icon(
                     LucideIcons.pill,
-                    size: 18,
+                    size: 16,
                     color: AppTheme.primaryBlue,
                   ),
                   const SizedBox(width: 8),
                   const Text(
                     'Prescription Builder (Rx)',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(width: 8),
                   Container(
@@ -410,19 +410,25 @@ class _PrescriptionSectionState extends ConsumerState<PrescriptionSection> {
                           Expanded(
                             child: Row(
                               children: [
-                                Text(
-                                  rx.brandName,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w800,
+                                Flexible(
+                                  child: Text(
+                                    rx.brandName,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                Text(
-                                  '(${rx.genericName})',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: AppTheme.textSecondary,
+                                Flexible(
+                                  child: Text(
+                                    '(${rx.genericName})',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppTheme.textSecondary,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                                 const SizedBox(width: 8),

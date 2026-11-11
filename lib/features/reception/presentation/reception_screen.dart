@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/config/clinic_settings.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../catalog_manager/presentation/catalog_manager_screen.dart';
 import '../../encounter/application/queue_monitor_notifier.dart';
 import 'widgets/quick_reg_form.dart';
 import 'widgets/reception_queue_list.dart';
@@ -109,19 +108,6 @@ class ReceptionScreen extends ConsumerWidget {
                 ),
               ],
             ),
-          ),
-          const SizedBox(width: 12),
-
-          // Clinic Settings & Catalogs
-          IconButton(
-            tooltip: 'Clinic Settings & Catalogs',
-            icon: const Icon(LucideIcons.settings, size: 18),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const CatalogManagerScreen()),
-              );
-            },
           ),
           const SizedBox(width: 8),
 

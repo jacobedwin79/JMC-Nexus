@@ -40,10 +40,10 @@ class _DiagnosisSectionState extends ConsumerState<DiagnosisSection> {
     final query = _searchQuery.trim().toLowerCase();
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: AppTheme.borderLight),
       ),
       child: Column(
@@ -57,13 +57,13 @@ class _DiagnosisSectionState extends ConsumerState<DiagnosisSection> {
                 children: [
                   Icon(
                     LucideIcons.stethoscope,
-                    size: 18,
+                    size: 16,
                     color: AppTheme.primaryBlue,
                   ),
                   SizedBox(width: 8),
                   Text(
                     'Clinical Diagnosis & Protocol Loading',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                   ),
                 ],
               ),

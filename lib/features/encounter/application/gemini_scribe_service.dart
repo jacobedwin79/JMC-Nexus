@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import '../../../core/config/clinic_settings.dart';
 import '../domain/clinical_models.dart';
 import '../domain/encounter_state.dart';
 import '../domain/gemini_scribe_models.dart';
@@ -11,7 +12,7 @@ class GeminiScribeService {
 
   GeminiScribeService({
     required this.apiKey,
-    this.modelName = 'gemini-1.5-flash',
+    this.modelName = kDefaultGeminiModel,
   });
 
   /// Processes either multimodal audio bytes OR text dictation into an incremental EMR update
@@ -161,12 +162,13 @@ Return strictly a JSON object matching this schema:
     contentParts.add(TextPart(promptText));
 
     final candidateModels = {
-      if (modelName.trim().isNotEmpty) modelName,
-      'gemini-2.0-flash',
-      'gemini-1.5-flash-8b',
-      'gemini-1.5-flash',
-      'gemini-2.0-flash-exp',
-      'gemini-1.5-pro',
+      if (modelName.trim().isNotEmpty &&
+          !kRetiredGeminiModels.contains(modelName.trim()))
+        modelName.trim(),
+      kDefaultGeminiModel,
+      'gemini-3.5-flash-lite',
+      'gemini-3.1-flash-lite',
+      'gemini-2.5-flash-lite',
     }.toList();
 
     GenerateContentResponse? response;
@@ -215,7 +217,11 @@ Return strictly a JSON object matching this schema:
         response.text == null ||
         response.text!.trim().isEmpty) {
       throw StateError(
-        'Gemini failed on candidate models. Last error: $lastError',
+        'Gemini could not generate a response with any available model '
+        '(${candidateModels.join(", ")}). This usually means the API key is '
+        'invalid, the Generative Language API is not enabled for the key\'s '
+        'project, or the models are unavailable in your region. '
+        'Last error: $lastError',
       );
     }
 

@@ -186,20 +186,20 @@ class PatientHeaderBar extends ConsumerWidget {
 
     if (patient == null) {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: Colors.amber.shade50,
           border: Border.all(color: Colors.amber.shade200),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
         ),
         child: const Row(
           children: [
-            Icon(LucideIcons.arrowLeftCircle, color: Colors.amber, size: 24),
-            SizedBox(width: 12),
+            Icon(LucideIcons.arrowLeftCircle, color: Colors.amber, size: 20),
+            SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Select a patient from the waiting queue on the left to start consultation.',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                'Select a patient from the queue to begin consultation.',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
               ),
             ),
           ],
@@ -212,57 +212,50 @@ class PatientHeaderBar extends ConsumerWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: AppTheme.borderLight),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Top Row: Token Badge, Name/Demographics, Vitals
+          // ── Main patient row ────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.all(14.0),
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Token Badge
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: AppTheme.primaryBlue,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       const Text(
                         'TOKEN',
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 8,
                           fontWeight: FontWeight.w700,
                           color: Colors.white70,
+                          letterSpacing: 0.5,
                         ),
                       ),
                       Text(
                         '#${patient.tokenNumber}',
                         style: const TextStyle(
-                          fontSize: 22,
+                          fontSize: 20,
                           fontWeight: FontWeight.w900,
                           color: Colors.white,
+                          height: 1.1,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
 
                 // Name & Demographics
                 Expanded(
@@ -275,109 +268,56 @@ class PatientHeaderBar extends ConsumerWidget {
                             child: Text(
                               patient.patientName,
                               style: const TextStyle(
-                                fontSize: 18,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w800,
                                 color: AppTheme.textPrimary,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 6),
                           if (patient.calculatedAge < 12)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: Colors.blue.shade300),
-                              ),
-                              child: const Text(
-                                'Paediatric',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                ),
-                              ),
-                            )
+                            _AgeTag('Paediatric', Colors.blue)
                           else if (patient.calculatedAge >= 65)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.purple.shade50,
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                  color: Colors.purple.shade300,
-                                ),
-                              ),
-                              child: const Text(
-                                'Geriatric',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.purple,
-                                ),
-                              ),
-                            ),
-                          const SizedBox(width: 8),
+                            _AgeTag('Geriatric', Colors.purple),
+                          const SizedBox(width: 6),
                           WaitTimerBadge(
                             entryTime: patient.entryTime,
                             compact: true,
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
-                      Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        spacing: 8,
-                        runSpacing: 4,
+                      const SizedBox(height: 2),
+                      Row(
                         children: [
                           Text(
-                            '${patient.patientId != null && patient.patientId!.trim().isNotEmpty ? "MRN: ${patient.patientId} • " : ""}${patient.dynamicAgeDisplay} • ${patient.gender == "M" ? "Male" : (patient.gender == "F" ? "Female" : "Other")}${patient.phone != null ? " • ${patient.phone}" : ""}',
+                            '${patient.patientId != null && patient.patientId!.trim().isNotEmpty ? "MRN: ${patient.patientId}  •  " : ""}${patient.dynamicAgeDisplay}  •  ${patient.gender == "M" ? "Male" : (patient.gender == "F" ? "Female" : "Other")}${patient.phone != null ? "  •  ${patient.phone}" : ""}',
                             style: const TextStyle(
-                              fontSize: 13,
+                              fontSize: 12,
                               color: AppTheme.textSecondary,
-                              fontWeight: FontWeight.w500,
                             ),
                           ),
                           if (patient.patientId != null &&
-                              patient.patientId!.trim().isNotEmpty)
+                              patient.patientId!.trim().isNotEmpty) ...[
+                            const SizedBox(width: 8),
                             InkWell(
-                              onTap: () => _showVisitHistorySheet(
-                                context,
-                                ref,
-                                patient.patientId!,
-                              ),
+                              onTap: () => _showVisitHistorySheet(context, ref, patient.patientId!),
+                              borderRadius: BorderRadius.circular(5),
                               child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.primaryBlue.withValues(
-                                    alpha: 0.1,
-                                  ),
-                                  borderRadius: BorderRadius.circular(6),
+                                  color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(5),
                                 ),
                                 child: const Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(
-                                      LucideIcons.history,
-                                      size: 12,
-                                      color: AppTheme.primaryBlue,
-                                    ),
-                                    SizedBox(width: 4),
+                                    Icon(LucideIcons.history, size: 11, color: AppTheme.primaryBlue),
+                                    SizedBox(width: 3),
                                     Text(
                                       'Past Rx',
                                       style: TextStyle(
-                                        fontSize: 11,
+                                        fontSize: 10,
                                         fontWeight: FontWeight.w700,
                                         color: AppTheme.primaryBlue,
                                       ),
@@ -386,219 +326,147 @@ class PatientHeaderBar extends ConsumerWidget {
                                 ),
                               ),
                             ),
+                          ],
                         ],
                       ),
                     ],
                   ),
                 ),
 
-                // Vitals Strip (Evaluated against Age)
-                if (vitals.hasAnyVitals) ...[
+                // Vitals Strip
+                if (vitals.hasAnyVitals)
                   Row(
                     children: [
                       if (vitals.bpSys != null)
-                        _buildVitalCard(
-                          'BP',
-                          vitals.bpDisplay,
-                          vitals.isHypertensiveForAge(patient.age),
-                        ),
+                        _buildVitalCard('BP', vitals.bpDisplay, vitals.isHypertensiveForAge(patient.age)),
                       if (vitals.pulse != null)
-                        _buildVitalCard(
-                          'Pulse',
-                          vitals.pulseDisplay,
-                          vitals.isTachycardicForAge(patient.age) ||
-                              vitals.isBradycardicForAge(patient.age),
-                        ),
+                        _buildVitalCard('Pulse', vitals.pulseDisplay,
+                            vitals.isTachycardicForAge(patient.age) || vitals.isBradycardicForAge(patient.age)),
                       if (vitals.spo2 != null)
-                        _buildVitalCard(
-                          'SpO2',
-                          vitals.spo2Display,
-                          vitals.isHypoxemic,
-                        ),
+                        _buildVitalCard('SpO2', vitals.spo2Display, vitals.isHypoxemic),
                       if (vitals.temp != null)
-                        _buildVitalCard(
-                          'Temp',
-                          vitals.tempDisplay,
-                          vitals.isFebrile,
-                        ),
+                        _buildVitalCard('Temp', vitals.tempDisplay, vitals.isFebrile),
                       if (vitals.rbs != null)
-                        _buildVitalCard(
-                          'RBS',
-                          vitals.rbsDisplay,
-                          vitals.isHypoglycemic || vitals.isHyperglycemic,
-                        ),
+                        _buildVitalCard('RBS', vitals.rbsDisplay,
+                            vitals.isHypoglycemic || vitals.isHyperglycemic),
                       if (vitals.weight != null)
-                        _buildVitalCard('Weight', vitals.weightDisplay, false),
+                        _buildVitalCard('Wt', vitals.weightDisplay, false),
                     ],
                   ),
-                ],
               ],
             ),
           ),
 
-          // Allergies & Pregnancy Alert Strip
+          // ── Allergies + Comorbidities row (single compact row) ──────
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 14.0,
-              vertical: 6.0,
-            ),
-            color: encounter.allergies.isNotEmpty
-                ? AppTheme.emergencyRed.withValues(alpha: 0.1)
-                : Colors.grey.shade50,
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
             child: Row(
               children: [
+                // Allergy indicator
                 Icon(
                   LucideIcons.shieldAlert,
-                  size: 15,
+                  size: 13,
                   color: encounter.allergies.isNotEmpty
                       ? AppTheme.emergencyRed
-                      : Colors.grey.shade600,
+                      : Colors.grey.shade400,
                 ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    encounter.allergies.isNotEmpty
-                        ? 'ALLERGIES: ${encounter.allergies.join(", ")}'
-                        : 'ALLERGIES: No Known Drug Allergies (NKDA)',
-                    style: TextStyle(
-                      fontSize: 12,
+                const SizedBox(width: 4),
+                if (encounter.allergies.isNotEmpty)
+                  Text(
+                    encounter.allergies.join(', '),
+                    style: const TextStyle(
+                      fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: encounter.allergies.isNotEmpty
-                          ? AppTheme.emergencyRed
-                          : Colors.grey.shade700,
+                      color: AppTheme.emergencyRed,
                     ),
-                    overflow: TextOverflow.ellipsis,
+                  )
+                else
+                  Text(
+                    'NKDA',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey.shade500,
+                    ),
                   ),
-                ),
+
                 if (encounter.isPregnant || encounter.lmp != null) ...[
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                     decoration: BoxDecoration(
                       color: Colors.purple.shade100,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      'Pregnant ${encounter.lmp != null ? "• LMP: ${encounter.lmp}" : ""}',
+                      'Pregnant${encounter.lmp != null ? " • LMP: ${encounter.lmp}" : ""}',
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 10,
                         fontWeight: FontWeight.bold,
                         color: Colors.purple.shade800,
                       ),
                     ),
                   ),
                 ],
-              ],
-            ),
-          ),
 
-          const Divider(height: 1, color: AppTheme.borderLight),
-
-          // Comorbidities Selector Strip
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 14.0,
-              vertical: 10.0,
-            ),
-            child: Row(
-              children: [
-                const Row(
-                  children: [
-                    Icon(
-                      LucideIcons.heartPulse,
-                      size: 16,
-                      color: AppTheme.primaryAccent,
-                    ),
-                    SizedBox(width: 6),
-                    Text(
-                      'Comorbidities:',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
                 const SizedBox(width: 10),
+                const Icon(LucideIcons.heartPulse, size: 13, color: AppTheme.primaryAccent),
+                const SizedBox(width: 4),
+
+                // Comorbidities horizontal scroll
                 Expanded(
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: comorbiditiesAsync.when(
                       loading: () => const SizedBox(
-                        width: 16,
-                        height: 16,
+                        width: 14,
+                        height: 14,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       ),
-                      error: (err, _) => Text(
-                        'Could not load comorbidities',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppTheme.slaOverdue,
-                        ),
-                      ),
-                      data: (comorbidities) {
-                        return Row(
-                          children: [
-                            ...comorbidities.map((c) {
-                              final isSelected = encounter
-                                  .selectedComorbidityIds
-                                  .contains(c.id);
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 6.0),
-                                child: ClinicalChip(
-                                  label: comorbidityDisplayLabel(c),
-                                  isSelected: isSelected,
-                                  onTap: () => ref
-                                      .read(encounterProvider.notifier)
-                                      .toggleComorbidity(c.id),
-                                  activeColor: AppTheme.primaryAccent,
-                                ),
-                              );
-                            }),
-                            InkWell(
-                              onTap: () =>
-                                  _showAddCustomComorbidityDialog(context, ref),
-                              borderRadius: BorderRadius.circular(20),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 5,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: AppTheme.primaryAccent,
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: const [
-                                    Icon(
-                                      LucideIcons.plus,
-                                      size: 12,
+                      error: (_, __) => const SizedBox.shrink(),
+                      data: (comorbidities) => Row(
+                        children: [
+                          ...comorbidities.map((c) {
+                            final isSelected = encounter.selectedComorbidityIds.contains(c.id);
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 5),
+                              child: ClinicalChip(
+                                label: comorbidityDisplayLabel(c),
+                                isSelected: isSelected,
+                                onTap: () => ref
+                                    .read(encounterProvider.notifier)
+                                    .toggleComorbidity(c.id),
+                                activeColor: AppTheme.primaryAccent,
+                              ),
+                            );
+                          }),
+                          InkWell(
+                            onTap: () => _showAddCustomComorbidityDialog(context, ref),
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: AppTheme.primaryAccent),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  Icon(LucideIcons.plus, size: 11, color: AppTheme.primaryAccent),
+                                  SizedBox(width: 3),
+                                  Text(
+                                    'Add',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
                                       color: AppTheme.primaryAccent,
                                     ),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      'Custom',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppTheme.primaryAccent,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        );
-                      },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -606,15 +474,14 @@ class PatientHeaderBar extends ConsumerWidget {
             ),
           ),
 
-          // High-Visibility Safety Alert Banner if any alerts exist
-          if (encounter.safetyAlerts.isNotEmpty) ...[
+          // ── Safety Alerts ────────────────────────────────────────────
+          if (encounter.safetyAlerts.isNotEmpty)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.fromLTRB(12, 6, 12, 8),
               decoration: BoxDecoration(
-                color: AppTheme.slaOverdue.withValues(alpha: 0.12),
-                border: const Border(
-                  top: BorderSide(color: AppTheme.slaOverdue, width: 1.5),
-                ),
+                color: AppTheme.slaOverdue.withValues(alpha: 0.08),
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(10)),
+                border: const Border(top: BorderSide(color: AppTheme.slaOverdue, width: 1.5)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -624,19 +491,15 @@ class PatientHeaderBar extends ConsumerWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(
-                          LucideIcons.alertOctagon,
-                          color: AppTheme.slaOverdue,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
+                        const Icon(LucideIcons.alertOctagon, color: AppTheme.slaOverdue, size: 14),
+                        const SizedBox(width: 6),
                         Expanded(
                           child: Text(
-                            '${alert.message} [Drug: ${alert.drugName}]',
+                            '${alert.message} [${alert.drugName}]',
                             style: const TextStyle(
                               color: AppTheme.slaOverdue,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
                             ),
                           ),
                         ),
@@ -646,7 +509,6 @@ class PatientHeaderBar extends ConsumerWidget {
                 }).toList(),
               ),
             ),
-          ],
         ],
       ),
     );
@@ -654,13 +516,13 @@ class PatientHeaderBar extends ConsumerWidget {
 
   Widget _buildVitalCard(String label, String value, bool isAlert) {
     return Container(
-      margin: const EdgeInsets.only(left: 6),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      margin: const EdgeInsets.only(left: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
         color: isAlert
             ? AppTheme.slaOverdue.withValues(alpha: 0.1)
             : AppTheme.surfaceBackground,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(7),
         border: Border.all(
           color: isAlert ? AppTheme.slaOverdue : AppTheme.borderLight,
         ),
@@ -671,7 +533,7 @@ class PatientHeaderBar extends ConsumerWidget {
           Text(
             label,
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 9,
               fontWeight: FontWeight.w600,
               color: isAlert ? AppTheme.slaOverdue : AppTheme.textSecondary,
             ),
@@ -679,12 +541,39 @@ class PatientHeaderBar extends ConsumerWidget {
           Text(
             value,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.w800,
               color: isAlert ? AppTheme.slaOverdue : AppTheme.textPrimary,
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Small tag widget for Paediatric / Geriatric labels
+class _AgeTag extends StatelessWidget {
+  final String label;
+  final MaterialColor color;
+  const _AgeTag(this.label, this.color);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+      decoration: BoxDecoration(
+        color: color.shade50,
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(color: color.shade300),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 9,
+          fontWeight: FontWeight.bold,
+          color: color.shade700,
+        ),
       ),
     );
   }

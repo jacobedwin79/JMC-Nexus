@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/database/database_mappers.dart';
 import '../../../core/database/database_provider.dart';
+import '../../../core/sync/supabase_drug_service.dart';
 import '../domain/clinical_models.dart';
 
 /// Short, compact labels for built-in comorbidities shown in chip strips.
@@ -61,7 +63,18 @@ final diagnosesCatalogProvider = FutureProvider<List<DiagnosisModel>>((
 
 final drugsCatalogProvider = FutureProvider<List<DrugModel>>((ref) async {
   final db = ref.watch(appDatabaseProvider);
-  final drugs = await db.getAllDrugs();
+  var drugs = await db.getAllDrugs();
+
+  // If local drugs are empty, automatically sync from Supabase public.drugmaster
+  if (drugs.isEmpty) {
+    try {
+      await ref.read(supabaseDrugSyncProvider.notifier).syncFromSupabase();
+      drugs = await db.getAllDrugs();
+    } catch (e) {
+      debugPrint('Auto-sync drugs from Supabase: $e');
+    }
+  }
+
   return drugs.map((d) => d.toDomain()).toList();
 });
 

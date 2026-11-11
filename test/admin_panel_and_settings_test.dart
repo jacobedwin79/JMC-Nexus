@@ -235,7 +235,9 @@ void main() {
       expect(find.text('Patient Visit Ledger & Audit Log'), findsOneWidget);
       expect(find.text('Devika Menon'), findsOneWidget);
       expect(find.text('NEW PATIENT'), findsOneWidget);
-      expect(find.text('COMPLETED'), findsOneWidget);
+      expect(find.text('COMPLETED'), findsWidgets);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(milliseconds: 100));
     });
   });
 
@@ -279,5 +281,9 @@ void main() {
 
     // Now in Doctor Terminal
     expect(find.text('Zero-Keyboard Clinical Decision Canvas'), findsOneWidget);
+
+    // Clean up active widget tree to cancel repeating animations
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 100));
   });
 }

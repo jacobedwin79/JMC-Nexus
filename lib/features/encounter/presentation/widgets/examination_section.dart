@@ -68,10 +68,10 @@ class ExaminationSection extends ConsumerWidget {
     final examStates = encounter.examStates;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: AppTheme.borderLight),
       ),
       child: Column(
@@ -85,13 +85,13 @@ class ExaminationSection extends ConsumerWidget {
                 children: [
                   Icon(
                     LucideIcons.activity,
-                    size: 18,
+                    size: 16,
                     color: AppTheme.primaryBlue,
                   ),
                   SizedBox(width: 8),
                   Text(
                     'Systemic Examination (Default-Normal)',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                   ),
                 ],
               ),

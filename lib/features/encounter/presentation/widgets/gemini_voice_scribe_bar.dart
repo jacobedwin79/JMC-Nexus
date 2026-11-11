@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/config/clinic_settings.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../main.dart';
 import '../../../catalog_manager/presentation/catalog_manager_screen.dart';
 import '../../application/encounter_notifier.dart';
 import '../../application/gemini_scribe_notifier.dart';
@@ -21,6 +22,27 @@ class _GeminiVoiceScribeBarState extends ConsumerState<GeminiVoiceScribeBar>
   final _textController = TextEditingController();
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+
+  void _openSettingsOrNotify() {
+    final role = ref.read(activeRoleProvider);
+    if (role == AppRole.admin) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const CatalogManagerScreen(),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Clinic settings and API keys can only be configured by an Administrator.',
+          ),
+          backgroundColor: AppTheme.textPrimary,
+        ),
+      );
+    }
+  }
 
   @override
   void initState() {
@@ -68,11 +90,11 @@ class _GeminiVoiceScribeBarState extends ConsumerState<GeminiVoiceScribeBar>
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: scribeState.isRecording
               ? Colors.redAccent
@@ -86,8 +108,8 @@ class _GeminiVoiceScribeBarState extends ConsumerState<GeminiVoiceScribeBar>
             color: scribeState.isRecording
                 ? Colors.redAccent.withValues(alpha: 0.08)
                 : Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -139,14 +161,7 @@ class _GeminiVoiceScribeBarState extends ConsumerState<GeminiVoiceScribeBar>
               const Spacer(),
               if (!settings.hasGeminiApiKey)
                 InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const CatalogManagerScreen(),
-                      ),
-                    );
-                  },
+                  onTap: _openSettingsOrNotify,
                   borderRadius: BorderRadius.circular(6),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -183,14 +198,7 @@ class _GeminiVoiceScribeBarState extends ConsumerState<GeminiVoiceScribeBar>
                 )
               else
                 InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const CatalogManagerScreen(),
-                      ),
-                    );
-                  },
+                  onTap: _openSettingsOrNotify,
                   borderRadius: BorderRadius.circular(6),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -457,14 +465,7 @@ class _GeminiVoiceScribeBarState extends ConsumerState<GeminiVoiceScribeBar>
                   ),
                   const SizedBox(width: 8),
                   InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const CatalogManagerScreen(),
-                        ),
-                      );
-                    },
+                    onTap: _openSettingsOrNotify,
                     borderRadius: BorderRadius.circular(4),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
